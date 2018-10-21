@@ -3,6 +3,7 @@ import sqlite3
 import smtplib
 import time
 import datetime
+import dailyUpdate as dU
 
 login_conn = sqlite3.connect('users.db')
 login_cur  = login_conn.cursor()
