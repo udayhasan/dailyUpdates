@@ -117,14 +117,14 @@ def login(name, password):
 			error_msg = "Invalid login name or password!"
 
 def create_status_table():
-	status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, times TEXT, months TEXT, name TEXT, task_list TEXT, progress_status TEXT, meeting_status TEXT, remarks TEXT)")
+	status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
 
-def update_status(ids, dates, times, months,  name, task_list, progress_status, meeting_status, remarks):
+def update_status(ids, dates, times, weeks, months,  name, task_list, progress_status, meeting_status, remarks):
 	if(ids == '' and name == ''):
 		error_msg = "Insufficient inputs!"
 	else:
 		try:
-			status_cur.execute("INSERT INTO status(ids, dates, times, months, name, task_list, progress_status, meeting_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, times, months, name, task_list, progress_status, meeting_status, remarks))
+			status_cur.execute("INSERT INTO status(ids, dates, up_time, months, years, name, team, task_list, progress_status, meeting_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks))
 			status_conn.commit()
 			time.sleep(0.02)
 			print("%s, You have successfully updated your daily status!" %(name))

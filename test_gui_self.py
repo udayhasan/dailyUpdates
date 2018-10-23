@@ -514,6 +514,8 @@ class delete_user_page(Frame):
 				time.sleep(0.02)
 				self.login_conn.close()
 				print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
+				self.screen = 6
+				self.quit()
 			except Exception:
 				self.error_msg = "Invalid search name!"
 
@@ -605,6 +607,121 @@ class forgot_pass_page(Frame):
 	def leave(self):
 		quit()
 
+class update_status_page(Frame):
+	screen = 8
+	status_conn = None
+	status_cur  = None
+	name 		= None
+
+	error_msg  = " "
+
+	def __init__(self,master, name):
+		super(update_status_page,self).__init__(master)
+		self.status_conn = sqlite3.connect('status.db')
+		self.status_cur  = self.status_conn.cursor()
+		self.name 		 = name
+		self.grid()
+		self.define_widgets()
+
+	def define_widgets(self):
+		update_status_label=Label(self,text="Update Status")
+		update_status_label.grid(row=0,column=1,columnspan=2,sticky=W)
+
+		#Team
+		team_label=Label(self,text="Team Name:")
+		team_label.grid(row=1,column=0,sticky=E)
+
+		self.team=StringVar()
+		team_entry=Entry(self,textvariable=self.team)
+		team_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		team_entry.focus_set()
+
+		#Task List
+		task_list_label=Label(self,text="Task List:")
+		task_list_label.grid(row=2,column=0,sticky=E)
+
+		self.task_list=StringVar()
+		task_list_entry=Entry(self,textvariable=self.task_list)
+		task_list_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+
+		#Progress Status
+		progress_status_label=Label(self,text="Progress Status:")
+		progress_status_label.grid(row=3,column=0,sticky=E)
+
+		self.progress_status=StringVar()
+		progress_status_entry=Entry(self,textvariable=self.progress_status)
+		progress_status_entry.grid(row=3,column=1,columnspan=3,sticky=W)
+
+		#Meeting Status
+		meeting_status_label=Label(self,text="Meeting Status:")
+		meeting_status_label.grid(row=4,column=0,sticky=E)
+
+		self.meeting_status=StringVar()
+		meeting_status_entry=Entry(self,textvariable=self.meeting_status)
+		meeting_status_entry.grid(row=4,column=1,columnspan=3,sticky=W)
+
+		#Project Status
+		project_status_label=Label(self,text="Project Status:")
+		project_status_label.grid(row=5,column=0,sticky=E)
+
+		self.project_status=StringVar()
+		project_status_entry=Entry(self,textvariable=self.project_status)
+		project_status_entry.grid(row=5,column=1,columnspan=3,sticky=W)
+
+		#Remarks
+		remarks_label=Label(self,text="Remarks:")
+		remarks_label.grid(row=6,column=0,sticky=E)
+
+		self.remarks=StringVar()
+		remarks_entry=Entry(self,textvariable=self.remarks)
+		remarks_entry.grid(row=6,column=1,columnspan=3,sticky=W)
+
+		update_status_btn=Button(self,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
+		update_status_btn.grid(row=7,column=1,sticky=W)
+
+		back=Button(self,text="< Prev", command=self.go_prev)
+		back.grid(row=7,column=0,sticky=W)
+
+		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.grid(row=7,column=2,sticky=W)
+
+	def create_status_table(self):
+		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
+	
+	def update_status(self):
+		if(self.task_list.get() == '' and self.team.get() == ''):
+			self.error_msg = "Insufficient inputs!"
+		else:
+			try:
+				self.create_status_table()
+
+				ids 	= str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
+				dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
+				up_time = datetime.datetime.now().strftime("%H:%M:%S")
+				weeks 	= datetime.datetime.now().strftime("%U")
+				months 	= datetime.datetime.now().strftime("%b")
+				years 	= datetime.datetime.now().strftime("%Y")
+
+				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
+				self.status_conn.commit()
+				time.sleep(0.02)
+				self.status_conn.close()
+				print("%s, You have successfully updated your daily status!" %(self.name))
+				self.screen = 8
+				self.quit()
+			except Exception as e:
+				print(e)
+				self.error_msg = "Invalid inputs!"
+		print(self.error_msg)
+	
+	
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()	
+
 
 
 root=Tk()
@@ -623,7 +740,6 @@ while True:
 
     if screen==0:
         name=window.login_name.get()
-        password=window.login_pass.get()
         admin=window.admin
 
     screen=window.screen
@@ -658,3 +774,5 @@ while True:
     	window=delete_user_page(root)
     elif screen==7:
     	window=forgot_pass_page(root)
+    elif screen==8:
+    	window=update_status_page(root, name)
