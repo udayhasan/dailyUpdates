@@ -71,15 +71,19 @@ class login_page(Frame):
         login_pass_entry=Entry(self,textvariable=self.login_pass,show="*")
         login_pass_entry.grid(row=3,column=1,columnspan=3,sticky=W)
 
+        forgot_id_label=Label(self,text="Forgot User ID?", fg = "blue", underline=True)
+        forgot_id_label.bind('<Button-1>',self.forgot_id)
+        forgot_id_label.grid(row=4,column=1,sticky=W)
+
         forgot_pass_label=Label(self,text="Forgot Password?", fg = "blue", underline=True)
         forgot_pass_label.bind('<Button-1>',self.forgot_password)
-        forgot_pass_label.grid(row=4,column=1,sticky=E)
+        forgot_pass_label.grid(row=5,column=1,sticky=E)
 
         login_btn=Button(self,text="Login", bg="DeepSkyBlue4", fg = "white", command=self.login_action)
-        login_btn.grid(row=5,column=2,sticky=W)
+        login_btn.grid(row=6,column=2,sticky=W)
 
         exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-        exit.grid(row=5,column=1,sticky=W)
+        exit.grid(row=6,column=1,sticky=W)
 
     def login_action(self):
     	self.create_user_table()
@@ -90,6 +94,10 @@ class login_page(Frame):
 
     	print(self.screen)
 
+    	self.quit()
+
+    def forgot_id(self,event):
+    	self.screen = 12
     	self.quit()
 
     def forgot_password(self,event):
@@ -116,10 +124,10 @@ class user_dashboard(Frame):
 		dash_board_label.grid(row=0,column=0,columnspan=2,sticky=W)
 
 		log_out=Button(self,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white")
-		log_out.grid(row=5,column=1,sticky=W)
+		log_out.grid(row=6,column=1,sticky=W)
 
 		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=5,column=2,sticky=W)
+		exit.grid(row=6,column=2,sticky=W)
 
 		edit_name_btn=Button(self,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
 		edit_name_btn.grid(row=1,column=1,sticky=W)
@@ -145,6 +153,9 @@ class user_dashboard(Frame):
 
 			export_report_btn=Button(self,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
 			export_report_btn.grid(row=4,column=2,sticky=W)
+
+			backup_btn=Button(self,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="yellow")
+			backup_btn.grid(row=5,column=1,sticky=W)
 
 	def set_logout(self):
 		self.screen = 0
@@ -216,14 +227,28 @@ class add_user_page(Frame):
 			error_msg = "Invalid input!"
 		else:
 			try:
-				self.login_cur.execute("INSERT INTO users(name, email, password) VALUES (?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get()))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				self.login_conn.close()
-				print("New User named %s is added to the database" %(self.add_name.get()))
-				self.screen = 2
-			except Exception:
+				self.login_cur.execute("SELECT name, email FROM users")
+				user_details = self.login_cur.fetchall()
+				user_names  = [user_details[i][0] for i in range(len(user_details))]
+				user_emails = [user_details[i][1] for i in range(len(user_details))]
+
+				print(user_names, user_emails)
+
+				if((self.add_name.get() not in user_names) and (self.add_email.get() not in user_emails)):
+					self.login_cur.execute("INSERT INTO users(name, email, password) VALUES (?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get()))
+					self.login_conn.commit()
+					time.sleep(0.02)
+					self.login_conn.close()
+					print("New User named %s is added to the database" %(self.add_name.get()))
+					self.screen = 2
+					self.quit()
+				else:
+					self.error_msg = "You cannot add this User Name/Email, already exists!"
+					self.screen = 2
+					self.quit()
+			except Exception as e:
 				error_msg = "Invalid input"
+				print(e)
 
 	def go_prev(self):
 		self.screen = 1
@@ -472,7 +497,7 @@ class delete_user_page(Frame):
 		delete_user_btn.grid(row=1,column=2,sticky=W)
 
 		refresh_user_btn=Button(self,text="Refresh",command=self.refresh_user)
-		refresh_user_btn.grid(row=2,column=3,sticky=W)
+		refresh_user_btn.grid(row=2,column=2,sticky=W)
 
 		back=Button(self,text="< Prev", command=self.go_prev)
 		back.grid(row=2,column=0,sticky=W)
@@ -577,6 +602,7 @@ class forgot_pass_page(Frame):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
 
 	def forgot_pass_send(self):
+		self.create_user_table()
 		if(self.forgot_pass_name.get() == '' or self.forgot_pass_email.get() == ''):
 			self.error_msg = "Invalid input!"
 		else:
@@ -722,6 +748,290 @@ class update_status_page(Frame):
 	def leave(self):
 		quit()	
 
+class edit_status_page(Frame):
+	screen = 9
+	status_conn = None
+	status_cur  = None
+	name 		= None
+
+	error_msg  = " "
+
+	def __init__(self,master, name):
+		super(edit_status_page,self).__init__(master)
+		self.status_conn = sqlite3.connect('status.db')
+		self.status_cur  = self.status_conn.cursor()
+		self.name 		 = name
+		self.grid()
+		self.define_widgets()
+
+	def create_status_table(self):
+		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
+
+	def define_widgets(self):
+		edit_status_label=Label(self,text="Update Status")
+		edit_status_label.grid(row=0,column=1,columnspan=2,sticky=W)
+
+		#ID
+		status_id_label=Label(self,text="Status ID:")
+		status_id_label.grid(row=1,column=0,sticky=E)
+
+		self.status_id=StringVar()
+		status_entry=Entry(self,textvariable=self.status_id)
+		status_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		status_entry.focus_set()
+
+		edit_status_btn=Button(self,text="Edit Status", bg="DeepSkyBlue4", fg = "white", command=self.edit_status_window)
+		edit_status_btn.grid(row=1,column=5,sticky=W)
+
+		delete_status_btn=Button(self,text="Delete Status", bg="DeepSkyBlue4", fg = "white", command=self.delete_status_window)
+		delete_status_btn.grid(row=1,column=4,sticky=W)
+
+		back=Button(self,text="< Prev", command=self.go_prev)
+		back.grid(row=2,column=0,sticky=W)
+
+		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.grid(row=2,column=2,sticky=W)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Status ID")
+		temp.grid(row=4, column=0, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Date")
+		temp.grid(row=4, column=1, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Time")
+		temp.grid(row=4, column=2, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Team")
+		temp.grid(row=4, column=3, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Task List")
+		temp.grid(row=4, column=4, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Progress Status")
+		temp.grid(row=4, column=5, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Meeting Status")
+		temp.grid(row=4, column=6, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Project Status")
+		temp.grid(row=4, column=7, sticky=NSEW)
+
+		temp = Label(self,relief=RIDGE, bg="light blue", text="Remarks")
+		temp.grid(row=4, column=8, sticky=NSEW)
+
+		self.create_status_table()
+		self.status_cur.execute("SELECT ids, dates, up_time, team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE name = ?", (self.name,))
+		data = self.status_cur.fetchall()
+
+		for i in range(len(data)):
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][0])
+			temp.grid(row=5+i, column=0, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][1])
+			temp.grid(row=5+i, column=1, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][2])
+			temp.grid(row=5+i, column=2, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][3])
+			temp.grid(row=5+i, column=3, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][4])
+			temp.grid(row=5+i, column=4, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][5])
+			temp.grid(row=5+i, column=5, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][6])
+			temp.grid(row=5+i, column=6, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][7])
+			temp.grid(row=5+i, column=7, sticky=NSEW)
+	
+			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp.configure(text=data[i][8])
+			temp.grid(row=5+i, column=8, sticky=NSEW)
+
+	def delete_status_window(self, id):
+		self.create_status_table()
+		if(self.status_id.get() == ''):
+			self.error_msg = "Invalid Status ID!"
+		else:
+			try:
+				self.status_cur.execute("DELETE FROM status WHERE ids = ?", (self.status_id.get(),))
+				self.status_conn.commit()
+				time.sleep(0.02)
+				print("Status corresponding to ID %s has been deleted successfully!" %(self.status_id.get()))
+				self.screen = 9
+				self.quit()
+			except Exception:
+				self.error_msg = "Invalid search name!"
+
+	def edit_status_window(self):
+		#Team
+		team_label=Label(self,text="Team Name:")
+		team_label.grid(row=1,column=0,sticky=E)
+
+		self.team=StringVar()
+		team_entry=Entry(self,textvariable=self.team)
+		team_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		team_entry.focus_set()
+
+		#Task List
+		task_list_label=Label(self,text="Task List:")
+		task_list_label.grid(row=2,column=0,sticky=E)
+
+		self.task_list=StringVar()
+		task_list_entry=Entry(self,textvariable=self.task_list)
+		task_list_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+
+		#Progress Status
+		progress_status_label=Label(self,text="Progress Status:")
+		progress_status_label.grid(row=3,column=0,sticky=E)
+
+		self.progress_status=StringVar()
+		progress_status_entry=Entry(self,textvariable=self.progress_status)
+		progress_status_entry.grid(row=3,column=1,columnspan=3,sticky=W)
+
+		#Meeting Status
+		meeting_status_label=Label(self,text="Meeting Status:")
+		meeting_status_label.grid(row=4,column=0,sticky=E)
+
+		self.meeting_status=StringVar()
+		meeting_status_entry=Entry(self,textvariable=self.meeting_status)
+		meeting_status_entry.grid(row=4,column=1,columnspan=3,sticky=W)
+
+		#Project Status
+		project_status_label=Label(self,text="Project Status:")
+		project_status_label.grid(row=5,column=0,sticky=E)
+
+		self.project_status=StringVar()
+		project_status_entry=Entry(self,textvariable=self.project_status)
+		project_status_entry.grid(row=5,column=1,columnspan=3,sticky=W)
+
+		#Remarks
+		remarks_label=Label(self,text="Remarks:")
+		remarks_label.grid(row=6,column=0,sticky=E)
+
+		self.remarks=StringVar()
+		remarks_entry=Entry(self,textvariable=self.remarks)
+		remarks_entry.grid(row=6,column=1,columnspan=3,sticky=W)
+
+		update_status_btn=Button(self,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
+		update_status_btn.grid(row=7,column=1,sticky=W)
+
+	def update_status(self):
+		if(self.task_list.get() == '' and self.team.get() == ''):
+			self.error_msg = "Insufficient inputs!"
+		else:
+			try:
+				self.create_status_table()
+
+				ids 	= str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
+				dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
+				up_time = datetime.datetime.now().strftime("%H:%M:%S")
+				weeks 	= datetime.datetime.now().strftime("%U")
+				months 	= datetime.datetime.now().strftime("%b")
+				years 	= datetime.datetime.now().strftime("%Y")
+
+				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
+				self.status_conn.commit()
+				time.sleep(0.02)
+				self.status_conn.close()
+				print("%s, You have successfully updated your daily status!" %(self.name))
+				self.screen = 8
+				self.quit()
+			except Exception as e:
+				print(e)
+				self.error_msg = "Invalid inputs!"
+		print(self.error_msg)
+	
+	
+	def go_prev(self):
+		self.status_conn.close()
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		self.status_conn.close()
+		quit()	
+
+class forgot_id_page(Frame):
+	screen = 12
+	login_conn = None
+	login_cur  = None
+	forgot_id_name_label = None
+
+	error_msg  = " "
+
+	def __init__(self,master):
+		super(forgot_id_page,self).__init__(master)
+		self.login_conn = sqlite3.connect('users.db')
+		self.login_cur  = self.login_conn.cursor()
+		self.grid()
+		self.define_widgets()
+
+	def define_widgets(self):
+		forgot_user_id=Label(self,text="Forgot User ID?")
+		forgot_user_id.grid(row=0,column=1,columnspan=2,sticky=W)
+
+		forgot_id_email=Label(self,text="Email:")
+		forgot_id_email.grid(row=1,column=0,sticky=E)
+
+		self.forgot_id_email=StringVar()
+		forgot_id_email_entry=Entry(self,textvariable=self.forgot_id_email)
+		forgot_id_email_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		forgot_id_email_entry.focus_set()
+
+		forgot_id_btn=Button(self,text="Find User Name", bg="DeepSkyBlue4", fg = "white", command=self.pre_forgot_id_find)
+		forgot_id_btn.grid(row=2,column=1,sticky=W)
+
+		back=Button(self,text="< Prev", command=self.go_prev)
+		back.grid(row=2,column=0,sticky=W)
+
+		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.grid(row=2,column=2,sticky=W)
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+
+	def pre_forgot_id_find(self):
+		self.forgot_id_name_label=Label(self, relief=RIDGE, fg="RED", text="<User ID>", state=DISABLED)
+		self.forgot_id_name_label.grid(row=3,column=1,sticky=W)
+		self.forgot_id_find()
+
+	def forgot_id_find(self):
+		self.create_user_table()
+		if(self.forgot_id_email.get() == ''):
+			self.error_msg = "Invalid input!"
+			self.screen = 12
+			self.quit()
+		else:
+			try:
+				self.login_cur.execute("SELECT name FROM users WHERE email = ?", (self.forgot_id_email.get(),))
+				id_name = self.login_cur.fetchall()
+				self.forgot_id_name_label.configure(text="Your ID is: "+str(id_name[0][0]), state=ACTIVE)
+			except Exception as e:
+				self.error_msg = "No such email address!"
+				print(e)
+
+	def go_prev(self):
+		self.login_conn.close()
+		self.screen = 0
+		self.quit()
+
+	def leave(self):
+		self.login_conn.close()
+		quit()
+
 
 
 root=Tk()
@@ -776,3 +1086,7 @@ while True:
     	window=forgot_pass_page(root)
     elif screen==8:
     	window=update_status_page(root, name)
+    elif screen==9:
+    	window=edit_status_page(root, name)
+    elif screen==12:
+    	window=forgot_id_page(root)
