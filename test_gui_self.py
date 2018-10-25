@@ -860,7 +860,7 @@ class edit_status_page(Frame):
 			temp.configure(text=data[i][8])
 			temp.grid(row=5+i, column=8, sticky=NSEW)
 
-	def delete_status_window(self, id):
+	def delete_status_window(self):
 		self.create_status_table()
 		if(self.status_id.get() == ''):
 			self.error_msg = "Invalid Status ID!"
@@ -876,57 +876,73 @@ class edit_status_page(Frame):
 				self.error_msg = "Invalid search name!"
 
 	def edit_status_window(self):
-		#Team
-		team_label=Label(self,text="Team Name:")
-		team_label.grid(row=1,column=0,sticky=E)
+		if(self.status_id.get() == ''):
+			self.error_msg = "Invalid ID!"
+		else:
+			try:
+				self.create_status_table()
+				self.status_cur.execute("SELECT team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE ids = ?", (self.status_id.get(),))
+				data = self.status_cur.fetchall()
+				
+				#Team
+				team_label=Label(self,text="Team Name:")
+				team_label.grid(row=1,column=10,sticky=E)
 
-		self.team=StringVar()
-		team_entry=Entry(self,textvariable=self.team)
-		team_entry.grid(row=1,column=1,columnspan=3,sticky=W)
-		team_entry.focus_set()
+				self.team=StringVar()
+				team_entry=Entry(self,textvariable=self.team)
+				team_entry.insert(0, data[0][0])
+				team_entry.grid(row=1,column=11,columnspan=3,sticky=W)
+				team_entry.focus_set()
 
-		#Task List
-		task_list_label=Label(self,text="Task List:")
-		task_list_label.grid(row=2,column=0,sticky=E)
+				#Task List
+				task_list_label=Label(self,text="Task List:")
+				task_list_label.grid(row=2,column=10,sticky=E)
 
-		self.task_list=StringVar()
-		task_list_entry=Entry(self,textvariable=self.task_list)
-		task_list_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+				self.task_list=StringVar()
+				task_list_entry=Entry(self,textvariable=self.task_list)
+				task_list_entry.insert(0, data[0][1])
+				task_list_entry.grid(row=2,column=11,columnspan=3,sticky=W)
 
-		#Progress Status
-		progress_status_label=Label(self,text="Progress Status:")
-		progress_status_label.grid(row=3,column=0,sticky=E)
+				#Progress Status
+				progress_status_label=Label(self,text="Progress Status:")
+				progress_status_label.grid(row=3,column=10,sticky=E)
 
-		self.progress_status=StringVar()
-		progress_status_entry=Entry(self,textvariable=self.progress_status)
-		progress_status_entry.grid(row=3,column=1,columnspan=3,sticky=W)
+				self.progress_status=StringVar()
+				progress_status_entry=Entry(self,textvariable=self.progress_status)
+				progress_status_entry.insert(0, data[0][2])
+				progress_status_entry.grid(row=3,column=11,columnspan=3,sticky=W)
 
-		#Meeting Status
-		meeting_status_label=Label(self,text="Meeting Status:")
-		meeting_status_label.grid(row=4,column=0,sticky=E)
+				#Meeting Status
+				meeting_status_label=Label(self,text="Meeting Status:")
+				meeting_status_label.grid(row=4,column=10,sticky=E)
 
-		self.meeting_status=StringVar()
-		meeting_status_entry=Entry(self,textvariable=self.meeting_status)
-		meeting_status_entry.grid(row=4,column=1,columnspan=3,sticky=W)
+				self.meeting_status=StringVar()
+				meeting_status_entry=Entry(self,textvariable=self.meeting_status)
+				meeting_status_entry.insert(0, data[0][3])
+				meeting_status_entry.grid(row=4,column=11,columnspan=3,sticky=W)
 
-		#Project Status
-		project_status_label=Label(self,text="Project Status:")
-		project_status_label.grid(row=5,column=0,sticky=E)
+				#Project Status
+				project_status_label=Label(self,text="Project Status:")
+				project_status_label.grid(row=5,column=10,sticky=E)
 
-		self.project_status=StringVar()
-		project_status_entry=Entry(self,textvariable=self.project_status)
-		project_status_entry.grid(row=5,column=1,columnspan=3,sticky=W)
+				self.project_status=StringVar()
+				project_status_entry=Entry(self,textvariable=self.project_status)
+				project_status_entry.insert(0, data[0][4])
+				project_status_entry.grid(row=5,column=11,columnspan=3,sticky=W)
 
-		#Remarks
-		remarks_label=Label(self,text="Remarks:")
-		remarks_label.grid(row=6,column=0,sticky=E)
+				#Remarks
+				remarks_label=Label(self,text="Remarks:")
+				remarks_label.grid(row=6,column=10,sticky=E)
 
-		self.remarks=StringVar()
-		remarks_entry=Entry(self,textvariable=self.remarks)
-		remarks_entry.grid(row=6,column=1,columnspan=3,sticky=W)
+				self.remarks=StringVar()
+				remarks_entry=Entry(self,textvariable=self.remarks)
+				remarks_entry.insert(0, data[0][5])
+				remarks_entry.grid(row=6,column=11,columnspan=3,sticky=W)
 
-		update_status_btn=Button(self,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
-		update_status_btn.grid(row=7,column=1,sticky=W)
+				update_status_btn=Button(self,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
+				update_status_btn.grid(row=7,column=11,sticky=W)
+			except Exception:
+				self.error_msg = "No such ID found!"
 
 	def update_status(self):
 		if(self.task_list.get() == '' and self.team.get() == ''):
@@ -935,19 +951,17 @@ class edit_status_page(Frame):
 			try:
 				self.create_status_table()
 
-				ids 	= str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
 				dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
 				up_time = datetime.datetime.now().strftime("%H:%M:%S")
 				weeks 	= datetime.datetime.now().strftime("%U")
 				months 	= datetime.datetime.now().strftime("%b")
 				years 	= datetime.datetime.now().strftime("%Y")
 
-				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
+				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.status_id.get(), dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
 				self.status_conn.commit()
 				time.sleep(0.02)
-				self.status_conn.close()
 				print("%s, You have successfully updated your daily status!" %(self.name))
-				self.screen = 8
+				self.screen = 9
 				self.quit()
 			except Exception as e:
 				print(e)
@@ -1036,7 +1050,7 @@ class forgot_id_page(Frame):
 
 root=Tk()
 root.title("NSL - Employee daily status update software")
-root.geometry("800x500")
+root.geometry("1000x600")
 
 window=login_page(root)
 screen=window.screen
