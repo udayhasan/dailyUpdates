@@ -489,9 +489,8 @@ class delete_user_page(Frame):
 		delete_user_name_label.grid(row=1,column=0,sticky=E)
 
 		self.delete_user_name=StringVar()
-		delete_user_name_entry=Entry(self,textvariable=self.delete_user_name)
-		delete_user_name_entry.grid(row=1,column=1,columnspan=3,sticky=W)
-		delete_user_name_entry.focus_set()
+		self.delete_user_name_entry=Entry(self,textvariable=self.delete_user_name)
+		self.delete_user_name_entry.grid(row=1,column=1,columnspan=3,sticky=W)
 
 		delete_user_btn=Button(self,text="Delete User", bg="DeepSkyBlue4", fg = "white", command=self.delete_user)
 		delete_user_btn.grid(row=1,column=2,sticky=W)
@@ -517,13 +516,22 @@ class delete_user_page(Frame):
 		self.login_cur.execute("SELECT name, email FROM users")
 		data = self.login_cur.fetchall()
 
+		self.temp_user_name_btn = []
+		self.names = []
+
 		for i in range(len(data)):
-			temp = Label(self,relief=RIDGE, bg="white")
-			temp.configure(text="%s" %(data[i][0]))
-			temp.grid(row=6+i, column=0, sticky=NSEW)
+			self.temp_user_name_btn.append(None)
+
+		for i in range(len(data)):
+			self.temp_user_name_btn[i] = Button(self, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
+			self.temp_user_name_btn[i].grid(row=6+i, column=0, sticky=NSEW)
+
 			temp = Label(self,relief=RIDGE, text=data[i][1], bg="white")
-			temp.configure(text="%s" %(data[i][1]))
 			temp.grid(row=6+i, column=1, sticky=NSEW)
+
+	def copy_name_to_field(self, id):
+		print(self.temp_user_name_btn[id]['text'])
+		self.delete_user_name.set(self.temp_user_name_btn[id]['text'])
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
@@ -532,6 +540,8 @@ class delete_user_page(Frame):
 		self.create_user_table()
 		if(self.delete_user_name.get() == ''):
 			self.error_msg = "Invalid input!"
+		elif(self.delete_user_name.get() == 'admin'):
+			self.error_msg = "You cannot delete admin"
 		else:
 			try:
 				self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
@@ -823,10 +833,15 @@ class edit_status_page(Frame):
 		self.status_cur.execute("SELECT ids, dates, up_time, team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE name = ?", (self.name,))
 		data = self.status_cur.fetchall()
 
+		self.temp_user_name_btn = []
+		self.names = []
+
 		for i in range(len(data)):
-			temp = Label(self,relief=RIDGE, bg="light blue")
-			temp.configure(text=data[i][0])
-			temp.grid(row=5+i, column=0, sticky=NSEW)
+			self.temp_user_name_btn.append(None)
+
+		for i in range(len(data)):
+			self.temp_user_name_btn[i] = Button(self, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
+			self.temp_user_name_btn[i].grid(row=5+i, column=0, sticky=NSEW)
 	
 			temp = Label(self,relief=RIDGE, bg="light blue")
 			temp.configure(text=data[i][1])
@@ -859,6 +874,11 @@ class edit_status_page(Frame):
 			temp = Label(self,relief=RIDGE, bg="light blue")
 			temp.configure(text=data[i][8])
 			temp.grid(row=5+i, column=8, sticky=NSEW)
+
+
+	def copy_name_to_field(self, id):
+		print(self.temp_user_name_btn[id]['text'])
+		self.status_id.set(self.temp_user_name_btn[id]['text'])
 
 	def delete_status_window(self):
 		self.create_status_table()
@@ -957,7 +977,7 @@ class edit_status_page(Frame):
 				months 	= datetime.datetime.now().strftime("%b")
 				years 	= datetime.datetime.now().strftime("%Y")
 
-				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (self.status_id.get(), dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
+				self.status_cur.execute("UPDATE status SET dates=?, up_time=?, weeks=?, months=?, years=?, team=?, task_list=?, progress_status=?, meeting_status=?, project_status=?, remarks=? WHERE ids=? and name=?", (dates, up_time, weeks, months, years, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get(), self.status_id.get(), self.name))
 				self.status_conn.commit()
 				time.sleep(0.02)
 				print("%s, You have successfully updated your daily status!" %(self.name))
