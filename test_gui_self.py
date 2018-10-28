@@ -135,48 +135,58 @@ class user_dashboard(Frame):
 
 	def __init__(self,master,admin):
 		super(user_dashboard,self).__init__(master)
-		self.grid()
+		self.pack()
 		self.admin = admin
 		self.define_widgets()
 
 	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Dashboard::")
+		dash_board_label.config(width=200, font=("Courier", 44))
+		dash_board_label.pack(pady=10)
 
-		dash_board_label=Label(self,text="::Dashboard::")
-		dash_board_label.grid(row=0,column=0,columnspan=2,sticky=W)
+		#for line2:
+		frame2 = Frame(self)
+		frame2.pack(side=LEFT)
 
-		log_out=Button(self,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white")
-		log_out.grid(row=6,column=1,sticky=W)
+		log_out=Button(frame2,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white")
+		log_out.pack(side=LEFT)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=6,column=2,sticky=W)
+		exit=Button(frame2,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.pack(side=LEFT)
 
-		edit_name_btn=Button(self,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
-		edit_name_btn.grid(row=1,column=1,sticky=W)
+		edit_name_btn=Button(frame2,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
+		edit_name_btn.pack(side=LEFT)
 
-		edit_email_btn=Button(self,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=4, bd=4, bg="gold2")
-		edit_email_btn.grid(row=1,column=2,sticky=W)
+		edit_email_btn=Button(frame2,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=4, bd=4, bg="gold2")
+		edit_email_btn.pack(side=LEFT)
 
-		edit_pass_btn=Button(self,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
-		edit_pass_btn.grid(row=2,column=1,sticky=W)
+		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
+		edit_pass_btn.pack(side=LEFT)
 
-		update_status_btn=Button(self,text="Update Status",command=lambda: self.set_value(8), width = 16, height=4, bd=4, bg="cyan3")
-		update_status_btn.grid(row=2,column=2,sticky=W)
+		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=4, bd=4, bg="cyan3")
+		update_status_btn.pack(side=LEFT)
 
-		edit_status_btn=Button(self,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=4, bd=4, bg="PaleGreen2")
-		edit_status_btn.grid(row=3,column=1,sticky=W)
+		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=4, bd=4, bg="PaleGreen2")
+		edit_status_btn.pack(side=LEFT)
 
 		if(self.admin == 1):
-			add_user_btn=Button(self,text="Add User",command=lambda: self.set_value(2), width = 16, height=4, bd=4, bg="medium orchid")
-			add_user_btn.grid(row=3,column=2,sticky=W)
+			#for line3:
+			frame3 = Frame(self)
+			frame3.pack(side=LEFT)
+			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=4, bd=4, bg="medium orchid")
+			add_user_btn.pack(side=LEFT)
 
-			delete_user_btn=Button(self,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
-			delete_user_btn.grid(row=4,column=1,sticky=W)
+			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
+			delete_user_btn.pack(side=LEFT)
 
-			export_report_btn=Button(self,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
-			export_report_btn.grid(row=4,column=2,sticky=W)
+			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
+			export_report_btn.pack(side=LEFT)
 
-			backup_btn=Button(self,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="yellow")
-			backup_btn.grid(row=5,column=1,sticky=W)
+			backup_btn=Button(frame3,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="yellow")
+			backup_btn.pack(side=LEFT)
 
 	def set_logout(self):
 		self.screen = 0
