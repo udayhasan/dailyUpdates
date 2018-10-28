@@ -7,105 +7,126 @@ from tkinter import *
 
 class login_page(Frame):
 
-    screen	   = 0
+	screen     = 0
 
-    login_conn = None
-    login_cur  = None
+	login_conn = None
+	login_cur  = None
 
-    error_msg  = " "
-    admin	   = None
+	error_msg  = " "
+	admin      = None
 
-    def __init__(self,master):
-    	super(login_page,self).__init__(master)
-    	self.login_conn = sqlite3.connect('users.db')
-    	self.login_cur  = self.login_conn.cursor()
-    	self.grid()
-    	self.define_widgets()
+	def __init__(self,master):
+		super(login_page,self).__init__(master)
+		self.login_conn = sqlite3.connect('users.db')
+		self.login_cur  = self.login_conn.cursor()
+		self.pack()
+		self.define_widgets()
 
-    def create_user_table(self):
-    	self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
 
-    def login(self, name, password):
-    	#print(name, password)
-    	if(name == ''):
-    		self.error_msg = "Name field cannot be empty!"
-    	elif(password == ''):
-    		self.error_msg = "Password field cannot be empty! "
-    	else:
-    		try:
-    			success = 0
-    			admin   = 0
-    			self.login_cur.execute("SELECT password FROM users WHERE name = ?", (name,))
-    			check = self.login_cur.fetchall()
-    			self.login_conn.close()
-    			if(password == check[0][0]):
-    				success = 1
-    				self.screen = 1
-    				if(name == 'admin'): admin = 1
-    				else: admin = 0
-    			else:
-    				self.screen = 0
-    				self.error_msg = "Incorrect Password!"
-    			return success, admin
-    		except Exception:
-    			self.error_msg = "Invalid login name or password!"
-    			return success, admin
+	def login(self, name, password):
+		#print(name, password)
+		if(name == ''):
+			self.error_msg = "Name field cannot be empty!"
+		elif(password == ''):
+			self.error_msg = "Password field cannot be empty! "
+		else:
+			try:
+				success = 0
+				admin   = 0
+				self.login_cur.execute("SELECT password FROM users WHERE name = ?", (name,))
+				check = self.login_cur.fetchall()
+				self.login_conn.close()
+				if(password == check[0][0]):
+					success = 1
+					self.screen = 1
+					if(name == 'admin'): admin = 1
+					else: admin = 0
+				else:
+					self.screen = 0
+					self.error_msg = "Incorrect Password!"
+				return success, admin
+			except Exception:
+				self.error_msg = "Invalid login name or password!"
+				return success, admin
 
-    def define_widgets(self):
+	def define_widgets(self):
+		#for line1:
+		frame1=Frame(self)
+		frame1.pack()
 
-        login_page_label=Label(self,text="Login Page")
-        login_page_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		login_page_label=Label(frame1,text="Login Page")
+		login_page_label.pack(pady=10)
 
-        login_name_label=Label(self,text="User ID:")
-        login_name_label.grid(row=2,column=0,sticky=E)
+		#for line2:
+		frame2=Frame(self)
+		frame2.pack()
 
-        self.login_name=StringVar()
-        login_name_entry=Entry(self,textvariable=self.login_name)
-        login_name_entry.grid(row=2,column=1,columnspan=3,sticky=W)
-        login_name_entry.focus_set()
+		login_name_label=Label(frame2,text="User ID:", anchor=W)
+		login_name_label.config(width=10, height=1)
+		login_name_label.pack(side=LEFT)
 
-        login_pass_label=Label(self,text="Password:")
-        login_pass_label.grid(row=3,column=0,sticky=E)
+		self.login_name=StringVar()
+		login_name_entry=Entry(frame2,textvariable=self.login_name)
+		login_name_entry.config(width=30)
+		login_name_entry.pack(side=LEFT)
+		login_name_entry.focus_set()
 
-        self.login_pass=StringVar()
-        login_pass_entry=Entry(self,textvariable=self.login_pass,show="*")
-        login_pass_entry.grid(row=3,column=1,columnspan=3,sticky=W)
+		#for line3:
+		frame3=Frame(self)
+		frame3.pack()
+		login_pass_label=Label(frame3,text="Password:", anchor=W)
+		login_pass_label.config(width=10, height=1)
+		login_pass_label.pack(side=LEFT)
 
-        forgot_id_label=Label(self,text="Forgot User ID?", fg = "blue", underline=True)
-        forgot_id_label.bind('<Button-1>',self.forgot_id)
-        forgot_id_label.grid(row=4,column=1,sticky=W)
+		self.login_pass=StringVar()
+		login_pass_entry=Entry(frame3,textvariable=self.login_pass,show="*")
+		login_pass_entry.config(width=30)
+		login_pass_entry.pack(side=LEFT)
 
-        forgot_pass_label=Label(self,text="Forgot Password?", fg = "blue", underline=True)
-        forgot_pass_label.bind('<Button-1>',self.forgot_password)
-        forgot_pass_label.grid(row=5,column=1,sticky=E)
+		#for line4:
+		frame4=Frame(self)
+		frame4.pack()
 
-        login_btn=Button(self,text="Login", bg="DeepSkyBlue4", fg = "white", command=self.login_action)
-        login_btn.grid(row=6,column=2,sticky=W)
+		forgot_id_label=Label(frame4,text="Forgot User ID?", fg = "blue", underline=True)
+		forgot_id_label.bind('<Button-1>',self.forgot_id)
+		forgot_id_label.pack(side=TOP, pady=5)
 
-        exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-        exit.grid(row=6,column=1,sticky=W)
+		forgot_pass_label=Label(frame4,text="Forgot Password?", fg = "blue", underline=True)
+		forgot_pass_label.bind('<Button-1>',self.forgot_password)
+		forgot_pass_label.pack(side=BOTTOM, pady=5)
 
-    def login_action(self):
-    	self.create_user_table()
-    	success, self.admin = self.login(self.login_name.get(), self.login_pass.get())
-    	
-    	if(success ==1): self.screen = 1
-    	else: self.screen = 0
+		#forline5:
+		frame5=Frame(self)
+		frame5.pack()
+		login_btn=Button(frame5,text="Login", bg="DeepSkyBlue4", fg = "white", command=self.login_action)
+		login_btn.pack(side=LEFT, pady=5)
 
-    	print(self.screen)
+		exit=Button(frame5,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.pack(side=LEFT, pady=5)
 
-    	self.quit()
+	def login_action(self):
+		self.create_user_table()
+		success, self.admin = self.login(self.login_name.get(), self.login_pass.get())
+		
+		if(success ==1): self.screen = 1
+		else: self.screen = 0
 
-    def forgot_id(self,event):
-    	self.screen = 12
-    	self.quit()
+		print(self.screen)
 
-    def forgot_password(self,event):
-    	self.screen = 7
-    	self.quit()
+		self.quit()
 
-    def leave(self):
-        quit()
+	def forgot_id(self,event):
+		self.screen = 12
+		self.quit()
+
+	def forgot_password(self,event):
+		self.screen = 7
+		self.quit()
+
+	def leave(self):
+		quit()
 
 class user_dashboard(Frame):
 
@@ -478,50 +499,60 @@ class delete_user_page(Frame):
 		super(delete_user_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.grid()
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
 		delete_user_label=Label(self,text="Delete User")
-		delete_user_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		delete_user_label.pack(fill=X, padx=10, pady=10)
 
-		delete_user_name_label=Label(self,text="User Name:")
-		delete_user_name_label.grid(row=1,column=0,sticky=E)
+		#frame for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		delete_user_name_label=Label(frame1,text="User Name:")
+		delete_user_name_label.pack(side=LEFT)
 
 		self.delete_user_name=StringVar()
-		self.delete_user_name_entry=Entry(self,textvariable=self.delete_user_name)
-		self.delete_user_name_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		self.delete_user_name_entry=Entry(frame1,textvariable=self.delete_user_name)
+		self.delete_user_name_entry.pack(side=LEFT)
 
-		delete_user_btn=Button(self,text="Delete User", bg="DeepSkyBlue4", fg = "white", command=self.delete_user)
-		delete_user_btn.grid(row=1,column=2,sticky=W)
+		delete_user_btn=Button(frame1,text="Delete User", bg="DeepSkyBlue4", fg = "white", command=self.delete_user)
+		delete_user_btn.pack(side=LEFT)
 
-		refresh_user_btn=Button(self,text="Refresh",command=self.refresh_user)
-		refresh_user_btn.grid(row=2,column=2,sticky=W)
+		#frame for line3:
+		frame3 = Frame(self)
+		frame3.config(width=100, height=2)
+		frame3.pack(fill=X)
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=2,column=0,sticky=W)
+		temp = Label(frame3,relief=RIDGE, text="Current Users", bg="light blue")
+		temp.config(width=23, height=2)
+		temp.pack(side=LEFT)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=2,column=1,sticky=W)
+		temp = Label(frame3,relief=RIDGE, text="Email", bg="light blue")
+		temp.config(width=80, height=2)
+		temp.pack(side=LEFT, padx=5, pady=5)
 
+		#scrolling part start
 		scroll_frame = Frame(self)
+		scroll_frame.pack()
+
+		#scroll canvas
 		scroll_canvas = Canvas(scroll_frame)
-		lists = Frame(scroll_canvas)
 
 		list_scrollbar = Scrollbar(scroll_frame, orient="vertical", command=scroll_canvas.yview)
+
 		scroll_canvas.configure(yscrollcommand=list_scrollbar.set)
+		scroll_canvas.configure(width = 850, height = 100)
 
-		list_scrollbar.grid(row=5)
+		list_scrollbar.pack(side=RIGHT, fill=Y, padx=10)
+		scroll_canvas.pack(fill=BOTH)
+
+		lists = Frame(scroll_canvas)
+		lists.config(width=123, height=5)
+		lists.pack(side=LEFT, fill=X)
+
 		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
-		lists.grid(row=5)
 
-		temp = Label(lists,relief=RIDGE, bg="light blue")
-		temp.configure(text="Current Users")
-		temp.grid(row=5, column=0, sticky=NSEW)
-
-		temp = Label(lists,relief=RIDGE, bg="light blue")
-		temp.configure(text="Email")
-		temp.grid(row=5, column=1, sticky=NSEW)
 
 		self.create_user_table()
 		self.login_cur.execute("SELECT name, email FROM users")
@@ -534,11 +565,27 @@ class delete_user_page(Frame):
 			self.temp_user_name_btn.append(None)
 
 		for i in range(len(data)):
-			self.temp_user_name_btn[i] = Button(lists, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
-			self.temp_user_name_btn[i].grid(row=6+i, column=0, sticky=NSEW)
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=X)
+			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
+			self.temp_user_name_btn[i].config(width = 20, height = 1)
+			self.temp_user_name_btn[i].pack(side=LEFT)
 
-			temp = Label(lists,relief=RIDGE, text=data[i][1], bg="white")
-			temp.grid(row=6+i, column=1, sticky=NSEW)
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
+			temp.config(width = 80, height = 2)
+			temp.pack(side=LEFT, padx=5)
+
+		#frame for line2:
+		frame2 = Frame(self)
+		frame2.pack(pady=10)
+		refresh_user_btn=Button(frame2,text="Refresh",command=self.refresh_user)
+		refresh_user_btn.pack(side=LEFT)
+
+		back=Button(frame2,text="< Prev", command=self.go_prev)
+		back.pack(side=LEFT)
+
+		exit=Button(frame2,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.pack(side=LEFT)
 
 	def copy_name_to_field(self, id):
 		print(self.temp_user_name_btn[id]['text'])
@@ -631,9 +678,9 @@ class forgot_pass_page(Frame):
 				self.login_cur.execute("SELECT password FROM users WHERE name = ? and email = ?", (self.forgot_pass_name.get(), self.forgot_pass_email.get()))
 				password = self.login_cur.fetchall()
 	
-				me  	= "noreply.nslstatus@gmail.com"
-				you 	= self.forgot_pass_email.get()
-				body 	= "Dear "+name+",\nYour lost password is :"+str(password[0][0])+"\nN.B: You don't need to reply this message.\nThanks.\n"+time.asctime(time.localtime(time.time()))
+				me      = "noreply.nslstatus@gmail.com"
+				you     = self.forgot_pass_email.get()
+				body    = "Dear "+name+",\nYour lost password is :"+str(password[0][0])+"\nN.B: You don't need to reply this message.\nThanks.\n"+time.asctime(time.localtime(time.time()))
 	
 				server  = smtplib.SMTP("smtp.gmail.com", 25)
 				server.ehlo()
@@ -658,8 +705,8 @@ class update_status_page(Frame):
 	screen = 8
 	status_conn = None
 	status_cur  = None
-	name 		= None
-	db_name 	= "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
+	name        = None
+	db_name     = "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
 
 	error_msg  = " "
 
@@ -667,7 +714,7 @@ class update_status_page(Frame):
 		super(update_status_page,self).__init__(master)
 		self.status_conn = sqlite3.connect(self.db_name)
 		self.status_cur  = self.status_conn.cursor()
-		self.name 		 = name
+		self.name        = name
 		self.grid()
 		self.define_widgets()
 
@@ -743,12 +790,12 @@ class update_status_page(Frame):
 			try:
 				self.create_status_table()
 
-				ids 	= str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
-				dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
+				ids     = str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
+				dates   = datetime.datetime.now().strftime("%d-%b-%Y")
 				up_time = datetime.datetime.now().strftime("%H:%M:%S")
-				weeks 	= datetime.datetime.now().strftime("%U")
-				months 	= datetime.datetime.now().strftime("%b")
-				years 	= datetime.datetime.now().strftime("%Y")
+				weeks   = datetime.datetime.now().strftime("%U")
+				months  = datetime.datetime.now().strftime("%b")
+				years   = datetime.datetime.now().strftime("%Y")
 
 				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
 				self.status_conn.commit()
@@ -768,14 +815,14 @@ class update_status_page(Frame):
 		self.quit()
 
 	def leave(self):
-		quit()	
+		quit()  
 
 class edit_status_page(Frame):
 	screen = 9
 	status_conn = None
 	status_cur  = None
-	name 		= None
-	db_name 	= "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
+	name        = None
+	db_name     = "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
 
 	error_msg  = " "
 
@@ -783,7 +830,7 @@ class edit_status_page(Frame):
 		super(edit_status_page,self).__init__(master)
 		self.status_conn = sqlite3.connect(self.db_name)
 		self.status_cur  = self.status_conn.cursor()
-		self.name 		 = name
+		self.name        = name
 		self.grid()
 		self.define_widgets()
 
@@ -984,11 +1031,11 @@ class edit_status_page(Frame):
 			try:
 				self.create_status_table()
 
-				dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
+				dates   = datetime.datetime.now().strftime("%d-%b-%Y")
 				up_time = datetime.datetime.now().strftime("%H:%M:%S")
-				weeks 	= datetime.datetime.now().strftime("%U")
-				months 	= datetime.datetime.now().strftime("%b")
-				years 	= datetime.datetime.now().strftime("%Y")
+				weeks   = datetime.datetime.now().strftime("%U")
+				months  = datetime.datetime.now().strftime("%b")
+				years   = datetime.datetime.now().strftime("%Y")
 
 				self.status_cur.execute("UPDATE status SET dates=?, up_time=?, weeks=?, months=?, years=?, team=?, task_list=?, progress_status=?, meeting_status=?, project_status=?, remarks=? WHERE ids=? and name=?", (dates, up_time, weeks, months, years, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get(), self.status_id.get(), self.name))
 				self.status_conn.commit()
@@ -1009,7 +1056,7 @@ class edit_status_page(Frame):
 
 	def leave(self):
 		self.status_conn.close()
-		quit()	
+		quit()  
 
 class forgot_id_page(Frame):
 	screen = 12
@@ -1092,47 +1139,47 @@ name=None
 admin=None
 
 while True:
-    root.mainloop()
+	root.mainloop()
 
-    if screen==0:
-        name=window.login_name.get()
-        admin=window.admin
+	if screen==0:
+		name=window.login_name.get()
+		admin=window.admin
 
-    screen=window.screen
-    #print(screen)
-    
+	screen=window.screen
+	#print(screen)
+	
 
-    if screen<0:
-        print("write data")
-        break
-        
-    #
-    # this has to be in a try: as when you click X (window close) rather
-    # than exit i get a double destruction problem 
-    try:
-        window.destroy()
-    except TclError:
-        quit()
+	if screen<0:
+		print("write data")
+		break
+		
+	#
+	# this has to be in a try: as when you click X (window close) rather
+	# than exit i get a double destruction problem 
+	try:
+		window.destroy()
+	except TclError:
+		quit()
 
-    if screen==0:
-        window=login_page(root)
-    elif screen==1:
-    	window=user_dashboard(root, admin)
-    elif screen==2:
-    	window=add_user_page(root)
-    elif screen==3:
-    	window=edit_user_name_page(root)
-    elif screen==4:
-    	window=edit_user_email_page(root)
-    elif screen==5:
-    	window=edit_user_pass_page(root)
-    elif screen==6:
-    	window=delete_user_page(root)
-    elif screen==7:
-    	window=forgot_pass_page(root)
-    elif screen==8:
-    	window=update_status_page(root, name)
-    elif screen==9:
-    	window=edit_status_page(root, name)
-    elif screen==12:
-    	window=forgot_id_page(root)
+	if screen==0:
+		window=login_page(root)
+	elif screen==1:
+		window=user_dashboard(root, admin)
+	elif screen==2:
+		window=add_user_page(root)
+	elif screen==3:
+		window=edit_user_name_page(root)
+	elif screen==4:
+		window=edit_user_email_page(root)
+	elif screen==5:
+		window=edit_user_pass_page(root)
+	elif screen==6:
+		window=delete_user_page(root)
+	elif screen==7:
+		window=forgot_pass_page(root)
+	elif screen==8:
+		window=update_status_page(root, name)
+	elif screen==9:
+		window=edit_status_page(root, name)
+	elif screen==12:
+		window=forgot_id_page(root)
