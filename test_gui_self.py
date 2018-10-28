@@ -504,11 +504,22 @@ class delete_user_page(Frame):
 		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
 		exit.grid(row=2,column=1,sticky=W)
 
-		temp = Label(self,relief=RIDGE, bg="light blue")
+		scroll_frame = Frame(self)
+		scroll_canvas = Canvas(scroll_frame)
+		lists = Frame(scroll_canvas)
+
+		list_scrollbar = Scrollbar(scroll_frame, orient="vertical", command=scroll_canvas.yview)
+		scroll_canvas.configure(yscrollcommand=list_scrollbar.set)
+
+		list_scrollbar.grid(row=5)
+		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
+		lists.grid(row=5)
+
+		temp = Label(lists,relief=RIDGE, bg="light blue")
 		temp.configure(text="Current Users")
 		temp.grid(row=5, column=0, sticky=NSEW)
 
-		temp = Label(self,relief=RIDGE, bg="light blue")
+		temp = Label(lists,relief=RIDGE, bg="light blue")
 		temp.configure(text="Email")
 		temp.grid(row=5, column=1, sticky=NSEW)
 
@@ -523,10 +534,10 @@ class delete_user_page(Frame):
 			self.temp_user_name_btn.append(None)
 
 		for i in range(len(data)):
-			self.temp_user_name_btn[i] = Button(self, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
+			self.temp_user_name_btn[i] = Button(lists, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
 			self.temp_user_name_btn[i].grid(row=6+i, column=0, sticky=NSEW)
 
-			temp = Label(self,relief=RIDGE, text=data[i][1], bg="white")
+			temp = Label(lists,relief=RIDGE, text=data[i][1], bg="white")
 			temp.grid(row=6+i, column=1, sticky=NSEW)
 
 	def copy_name_to_field(self, id):
@@ -648,12 +659,13 @@ class update_status_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name 		= None
+	db_name 	= "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
 
 	error_msg  = " "
 
 	def __init__(self,master, name):
 		super(update_status_page,self).__init__(master)
-		self.status_conn = sqlite3.connect('status.db')
+		self.status_conn = sqlite3.connect(self.db_name)
 		self.status_cur  = self.status_conn.cursor()
 		self.name 		 = name
 		self.grid()
@@ -763,12 +775,13 @@ class edit_status_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name 		= None
+	db_name 	= "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
 
 	error_msg  = " "
 
 	def __init__(self,master, name):
 		super(edit_status_page,self).__init__(master)
-		self.status_conn = sqlite3.connect('status.db')
+		self.status_conn = sqlite3.connect(self.db_name)
 		self.status_cur  = self.status_conn.cursor()
 		self.name 		 = name
 		self.grid()
@@ -1076,7 +1089,6 @@ window=login_page(root)
 screen=window.screen
 
 name=None
-password=None
 admin=None
 
 while True:
