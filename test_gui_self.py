@@ -341,7 +341,7 @@ class edit_user_name_page(Frame):
 
 		frame2 = Frame(self)
 		frame2.pack()
-		edit_name_cur_label=Label(frame2,text="Current User Name:", width=13, anchor=W)
+		edit_name_cur_label=Label(frame2,text="Current User Name:", width=20, anchor=W)
 		edit_name_cur_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_name_cur=StringVar()
@@ -352,23 +352,23 @@ class edit_user_name_page(Frame):
 
 		frame3 = Frame(self)
 		frame3.pack()
-		edit_name_new_label=Label(frame3,text="New User Name:", width=13, anchor=W)
+		edit_name_new_label=Label(frame3,text="New User Name:", width=20, anchor=W)
 		edit_name_new_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_name_new=StringVar()
-		edit_name_new_entry=Entry(frame3,textvariable=self.edit_name_new)
+		edit_name_new_entry=Entry(frame3,textvariable=self.edit_name_new, width=40)
 		edit_name_new_entry.pack(side=LEFT, padx=2, pady=2)
 		edit_name_new_entry.focus_set()
 
 		frame4 = Frame(self)
 		frame4.pack()
-		edit_name_btn=Button(frame4,text="Add User", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_name)
+		edit_name_btn=Button(frame4,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_name, width=10)
 		edit_name_btn.pack(side=LEFT, padx=2, pady=2)
 
-		back=Button(frame4,text="< Prev", command=self.go_prev)
+		back=Button(frame4,text="< Prev", command=self.go_prev, width=10)
 		back.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
 		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
@@ -387,6 +387,8 @@ class edit_user_name_page(Frame):
 				time.sleep(0.02)
 				self.login_conn.close()
 				print("User name %s is replaced by %s" %(self.edit_name_cur.get(), self.edit_name_new.get()))
+				self.screen = 3
+				self.quit()
 			except Exception:
 				self.error_msg = "Invalid search name or replacing name!"
 
@@ -408,37 +410,52 @@ class edit_user_email_page(Frame):
 		super(edit_user_email_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.grid()
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
-		edit_email_label=Label(self,text="Edit User Email")
-		edit_email_label.grid(row=0,column=1,columnspan=2,sticky=W)
 
-		edit_name_cur_label=Label(self,text="User Name:")
-		edit_name_cur_label.grid(row=1,column=0,sticky=E)
+		frame1 = Frame(self)
+		frame1.pack()
+		edit_email_label=Label(frame1,text="::Edit Email Address::")
+		edit_email_label.config(width=200, font=("Courier", 25))
+		edit_email_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frame2 = Frame(self)
+		frame2.pack()
+
+		edit_name_cur_label=Label(frame2,text="User Name:", width=20, anchor=W)
+		edit_name_cur_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_name_cur=StringVar()
-		edit_name_cur_entry=Entry(self,textvariable=self.edit_name_cur)
-		edit_name_cur_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		edit_name_cur_entry=Entry(frame2,textvariable=self.edit_name_cur, width=40)
+		edit_name_cur_entry.pack(side=LEFT, padx=2, pady=2)
 		edit_name_cur_entry.focus_set()
 
-		edit_email_new_label=Label(self,text="New User Email:")
-		edit_email_new_label.grid(row=2,column=0,sticky=E)
+		frame3 = Frame(self)
+		frame3.pack()
+
+		edit_email_new_label=Label(frame3,text="New User Email:", width=20, anchor=W)
+		edit_email_new_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_email_new=StringVar()
-		edit_email_new_entry=Entry(self,textvariable=self.edit_email_new)
-		edit_email_new_entry.grid(row=2,column=1,columnspan=3,sticky=W)
-		edit_email_new_entry.focus_set()
+		edit_email_new_entry=Entry(frame3,textvariable=self.edit_email_new, width=40)
+		edit_email_new_entry.pack(side=LEFT, padx=2, pady=2)
 
-		edit_email_btn=Button(self,text="Add User", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_email)
-		edit_email_btn.grid(row=3,column=2,sticky=W)
+		frame4 = Frame(self)
+		frame4.pack()
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=3,column=0,sticky=W)
+		edit_email_btn=Button(frame4,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_email, width=10)
+		edit_email_btn.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=3,column=1,sticky=W)
+		back=Button(frame4,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
@@ -454,6 +471,8 @@ class edit_user_email_page(Frame):
 				time.sleep(0.02)
 				self.login_conn.close()
 				print("User email of %s is replaced by %s" %(self.edit_name_cur.get(), self.edit_email_new.get()))
+				self.screen = 4
+				self.quit()
 			except Exception:
 				self.error_msg = "Invalid search name or replacing name!"
 
@@ -471,66 +490,84 @@ class edit_user_pass_page(Frame):
 
 	error_msg  = " "
 
-	def __init__(self,master):
+	def __init__(self,master, name):
 		super(edit_user_pass_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.grid()
+		self.name = name
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
-		edit_pass_label=Label(self,text="Edit User Password")
-		edit_pass_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		frame1 = Frame(self)
+		frame1.pack()
+		edit_pass_label=Label(frame1,text="::Edit User Password::")
+		edit_pass_label.config(width=200, font=("Courier", 25))
+		edit_pass_label.pack(pady=5)
 
-		edit_name_cur_label=Label(self,text="User Name:")
-		edit_name_cur_label.grid(row=1,column=0,sticky=E)
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
 
-		self.edit_name_cur=StringVar()
-		edit_name_cur_entry=Entry(self,textvariable=self.edit_name_cur)
-		edit_name_cur_entry.grid(row=1,column=1,columnspan=3,sticky=W)
-		edit_name_cur_entry.focus_set()
+		frame3 = Frame(self)
+		frame3.pack()
 
-		edit_pass_cur_label=Label(self,text="Current Password:")
-		edit_pass_cur_label.grid(row=2,column=0,sticky=E)
+		edit_pass_cur_label=Label(frame3,text="Current Password:", width=20, anchor=W)
+		edit_pass_cur_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_pass_cur=StringVar()
-		edit_pass_cur_entry=Entry(self,textvariable=self.edit_pass_cur)
-		edit_pass_cur_entry.grid(row=2,column=1,columnspan=3,sticky=W)
-		edit_pass_cur_entry.focus_set()
+		edit_pass_cur_entry=Entry(frame3,textvariable=self.edit_pass_cur, width=40, show="*")
+		edit_pass_cur_entry.pack(side=LEFT, padx=2, pady=2)
 
-		edit_pass_new_label=Label(self,text="New Password:")
-		edit_pass_new_label.grid(row=3,column=0,sticky=E)
+		frame4 = Frame(self)
+		frame4.pack()
+
+		edit_pass_new_label=Label(frame4,text="New Password:", width=20, anchor=W)
+		edit_pass_new_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_pass_new=StringVar()
-		edit_pass_new_entry=Entry(self,textvariable=self.edit_pass_new)
-		edit_pass_new_entry.grid(row=3,column=1,columnspan=3,sticky=W)
-		edit_pass_new_entry.focus_set()
+		edit_pass_new_entry=Entry(frame4,textvariable=self.edit_pass_new, width=40, show="*")
+		edit_pass_new_entry.pack(side=LEFT, padx=2, pady=2)
 
-		edit_pass_btn=Button(self,text="Change Password", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_password)
-		edit_pass_btn.grid(row=4,column=2,sticky=W)
+		frame2 = Frame(self)
+		frame2.pack()
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=4,column=0,sticky=W)
+		edit_pass_confirm_label=Label(frame2,text="Confirm Password:", width=20, anchor=W)
+		edit_pass_confirm_label.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=4,column=1,sticky=W)
+		self.edit_pass_confirm=StringVar()
+		edit_pass_confirm_entry=Entry(frame2,textvariable=self.edit_pass_confirm, width=40, show="*")
+		edit_pass_confirm_entry.pack(side=LEFT, padx=2, pady=2)
+
+		frame5 = Frame(self)
+		frame5.pack()
+
+		edit_pass_btn=Button(frame5,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_password, width=10)
+		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
+
+		back=Button(frame5,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame5,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
 
 	def edit_user_password(self):
 		self.create_user_table()
-		if(self.edit_name_cur.get() == '' or self.edit_pass_cur.get() == '' or self.edit_pass_new.get() == ''):
+		if(self.edit_pass_confirm.get() == '' or self.edit_pass_cur.get() == '' or self.edit_pass_new.get() == ''):
 			self.error_msg = "Invalid input!"
-		else:
+		elif(self.edit_pass_confirm.get() == self.edit_pass_new.get()):
 			try:
-				self.login_cur.execute("UPDATE users SET password = ? WHERE name = ? and password = ?", (self.edit_pass_new.get(), self.edit_name_cur.get(), self.edit_pass_cur.get()))
+				self.login_cur.execute("UPDATE users SET password = ? WHERE name = ? and password = ?", (self.edit_pass_new.get(), self.name, self.edit_pass_cur.get()))
 				self.login_conn.commit()
 				time.sleep(0.02)
 				self.login_conn.close()
 				print("Password for %s is changed successfully!" %(name))
 			except Exception:
 				self.error_msg = "Invalid search name or previous password or new password!"
+		else:
+			self.error_msg = "Your password is not confirmed correctly!"
 
 
 	def go_prev(self):
@@ -589,43 +626,39 @@ class delete_user_page(Frame):
 		scroll_frame.pack()
 
 		#scroll canvas
-		scroll_canvas = Canvas(scroll_frame)
-
-		list_scrollbar = Scrollbar(scroll_frame, orient="vertical", command=scroll_canvas.yview)
-
-		scroll_canvas.configure(yscrollcommand=list_scrollbar.set)
-		scroll_canvas.configure(width = 850, height = 100)
-
-		list_scrollbar.pack(side=RIGHT, fill=Y, padx=10)
-		scroll_canvas.pack(fill=BOTH)
+		list_scrollbar = Scrollbar(scroll_frame)
+		scroll_canvas = Canvas(scroll_frame, height=200, width=850)
+		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
+		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
+		
+		list_scrollbar.config(command=scroll_canvas.yview)
+		scroll_canvas.config(yscrollcommand=list_scrollbar.set)
+		#scroll_canvas.config(scrollregion=scroll_canvas.bbox("all"))
 
 		lists = Frame(scroll_canvas)
-		lists.config(width=123, height=5)
-		lists.pack(side=LEFT, fill=X)
+		lists.pack(fill=X)
 
 		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
-
 
 		self.create_user_table()
 		self.login_cur.execute("SELECT name, email FROM users")
 		data = self.login_cur.fetchall()
 
 		self.temp_user_name_btn = []
-		self.names = []
 
 		for i in range(len(data)):
 			self.temp_user_name_btn.append(None)
 
 		for i in range(len(data)):
 			frame_temp = Frame(lists)
-			frame_temp.pack(fill=X)
+			frame_temp.pack(fill=BOTH)
 			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
 			self.temp_user_name_btn[i].config(width = 20, height = 1)
 			self.temp_user_name_btn[i].pack(side=LEFT)
 
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
 			temp.config(width = 80, height = 2)
-			temp.pack(side=LEFT, padx=5)
+			temp.pack(side=LEFT, padx=5, fill=X)
 
 		#frame for line2:
 		frame2 = Frame(self)
@@ -686,37 +719,51 @@ class forgot_pass_page(Frame):
 		super(forgot_pass_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.grid()
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
-		forgot_user_password=Label(self,text="Forgot Password?")
-		forgot_user_password.grid(row=0,column=1,columnspan=2,sticky=W)
+		frame1 = Frame(self)
+		frame1.pack()
+		forgot_user_password=Label(frame1,text="Forgot Password?")
+		forgot_user_password.config(width=200, font=("Courier", 25))
+		forgot_user_password.pack(pady=5)
 
-		forgot_pass_name=Label(self,text="User Name:")
-		forgot_pass_name.grid(row=1,column=0,sticky=E)
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frame2 = Frame(self)
+		frame2.pack()
+
+		forgot_pass_name=Label(frame2,text="User Name:", width=20, anchor=W)
+		forgot_pass_name.pack(side=LEFT, padx=2, pady=2)
 
 		self.forgot_pass_name=StringVar()
-		forgot_pass_name_entry=Entry(self,textvariable=self.forgot_pass_name)
-		forgot_pass_name_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		forgot_pass_name_entry=Entry(frame2,textvariable=self.forgot_pass_name, width=40)
+		forgot_pass_name_entry.pack(side=LEFT, padx=2, pady=2)
 		forgot_pass_name_entry.focus_set()
 
-		forgot_pass_email=Label(self,text="Email:")
-		forgot_pass_email.grid(row=2,column=0,sticky=E)
+		frame3 = Frame(self)
+		frame3.pack()
+
+		forgot_pass_email=Label(frame3,text="Email:", width=20, anchor=W)
+		forgot_pass_email.pack(side=LEFT, padx=2, pady=2)
 
 		self.forgot_pass_email=StringVar()
-		forgot_pass_email_entry=Entry(self,textvariable=self.forgot_pass_email)
-		forgot_pass_email_entry.grid(row=2,column=1,columnspan=3,sticky=W)
-		forgot_pass_email_entry.focus_set()
+		forgot_pass_email_entry=Entry(frame3,textvariable=self.forgot_pass_email, width=40)
+		forgot_pass_email_entry.pack(side=LEFT, padx=2, pady=2)
 
-		forgot_pass_btn=Button(self,text="Send Password", bg="DeepSkyBlue4", fg = "white", command=self.forgot_pass_send)
-		forgot_pass_btn.grid(row=3,column=1,sticky=W)
+		frame4 = Frame(self)
+		frame4.pack()
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=3,column=0,sticky=W)
+		forgot_pass_btn=Button(frame4,text="Send Password", bg="DeepSkyBlue4", fg = "white", command=self.forgot_pass_send, width=10)
+		forgot_pass_btn.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=3,column=2,sticky=W)
+		back=Button(frame4,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
@@ -742,6 +789,8 @@ class forgot_pass_page(Frame):
 				server.quit()
 				self.login_conn.close()
 				print("Mail sent successfully!")
+				self.screen = 7
+				self.quit()
 	
 			except Exception:
 				self.error_msg = "Invalid search name or email!"
@@ -767,76 +816,117 @@ class update_status_page(Frame):
 		self.status_conn = sqlite3.connect(self.db_name)
 		self.status_cur  = self.status_conn.cursor()
 		self.name        = name
-		self.grid()
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
-		update_status_label=Label(self,text="Update Status")
-		update_status_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		frame1 = Frame(self)
+		frame1.pack()
+		update_status_label=Label(frame1,text="::Update Status::")
+		update_status_label.config(width=200, font=("Courier", 25))
+		update_status_label.pack(pady=5)
 
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frame2 = Frame(self)
+		frame2.pack()
 		#Team
-		team_label=Label(self,text="Team Name:")
-		team_label.grid(row=1,column=0,sticky=E)
+		team_label=Label(frame2,text="Team Name:", width=20, anchor=W)
+		team_label.pack(side=LEFT, pady=5)
 
 		self.team=StringVar()
-		team_entry=Entry(self,textvariable=self.team)
-		team_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		team_entry=Entry(frame2,textvariable=self.team, width=40)
+		team_entry.pack(side=LEFT, padx=2, pady=5)
 		team_entry.focus_set()
 
 		#Task List
-		task_list_label=Label(self,text="Task List:")
-		task_list_label.grid(row=2,column=0,sticky=E)
+		frame3 = Frame(self)
+		frame3.pack()
+		
+		task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
+		task_list_label.pack(side=LEFT, padx=2, pady=5)
 
-		self.task_list=StringVar()
-		task_list_entry=Entry(self,textvariable=self.task_list)
-		task_list_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+		task_scroll = Scrollbar(frame3)
+		self.task_text = Text(frame3, height=4, width=38)
+		task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.task_text.pack(side=LEFT, fill=Y)
+		task_scroll.config(command=self.task_text.yview)
+		self.task_text.config(yscrollcommand=task_scroll.set)
 
 		#Progress Status
-		progress_status_label=Label(self,text="Progress Status:")
-		progress_status_label.grid(row=3,column=0,sticky=E)
+		frame4 = Frame(self)
+		frame4.pack()
 
-		self.progress_status=StringVar()
-		progress_status_entry=Entry(self,textvariable=self.progress_status)
-		progress_status_entry.grid(row=3,column=1,columnspan=3,sticky=W)
+		progress_status_label=Label(frame4,text="Progress:", width=20, anchor=W)
+		progress_status_label.pack(side=LEFT, padx=2, pady=5)
+
+		progress_scroll = Scrollbar(frame4)
+		self.progress_text = Text(frame4, height=4, width=38)
+		progress_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.progress_text.pack(side=LEFT, fill=Y)
+		progress_scroll.config(command=self.progress_text.yview)
+		self.progress_text.config(yscrollcommand=progress_scroll.set)
 
 		#Meeting Status
-		meeting_status_label=Label(self,text="Meeting Status:")
-		meeting_status_label.grid(row=4,column=0,sticky=E)
+		frame5 = Frame(self)
+		frame5.pack()
 
-		self.meeting_status=StringVar()
-		meeting_status_entry=Entry(self,textvariable=self.meeting_status)
-		meeting_status_entry.grid(row=4,column=1,columnspan=3,sticky=W)
+		meeting_status_label=Label(frame5,text="Meeting Status:", width=20, anchor=W)
+		meeting_status_label.pack(side=LEFT, padx=2, pady=5)
+
+		meeting_scroll = Scrollbar(frame5)
+		self.meeting_text = Text(frame5, height=4, width=38)
+		meeting_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.meeting_text.pack(side=LEFT, fill=Y)
+		meeting_scroll.config(command=self.meeting_text.yview)
+		self.meeting_text.config(yscrollcommand=meeting_scroll.set)
 
 		#Project Status
-		project_status_label=Label(self,text="Project Status:")
-		project_status_label.grid(row=5,column=0,sticky=E)
+		frame6 = Frame(self)
+		frame6.pack()
 
-		self.project_status=StringVar()
-		project_status_entry=Entry(self,textvariable=self.project_status)
-		project_status_entry.grid(row=5,column=1,columnspan=3,sticky=W)
+		project_status_label=Label(frame6,text="Project Status:", width=20, anchor=W)
+		project_status_label.pack(side=LEFT, padx=2, pady=5)
+
+		project_scroll = Scrollbar(frame6)
+		self.project_text = Text(frame6, height=3, width=38)
+		project_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.project_text.pack(side=LEFT, fill=Y)
+		project_scroll.config(command=self.project_text.yview)
+		self.project_text.config(yscrollcommand=project_scroll.set)
 
 		#Remarks
-		remarks_label=Label(self,text="Remarks:")
-		remarks_label.grid(row=6,column=0,sticky=E)
+		frame7 = Frame(self)
+		frame7.pack()
 
-		self.remarks=StringVar()
-		remarks_entry=Entry(self,textvariable=self.remarks)
-		remarks_entry.grid(row=6,column=1,columnspan=3,sticky=W)
+		remarks_status_label=Label(frame7,text="Remarks:", width=20, anchor=W)
+		remarks_status_label.pack(side=LEFT, padx=2, pady=5)
 
-		update_status_btn=Button(self,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
-		update_status_btn.grid(row=7,column=1,sticky=W)
+		remarks_scroll = Scrollbar(frame7)
+		self.remarks_text = Text(frame7, height=2, width=38)
+		remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.remarks_text.pack(side=LEFT, fill=Y)
+		remarks_scroll.config(command=self.remarks_text.yview)
+		self.remarks_text.config(yscrollcommand=remarks_scroll.set)
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=7,column=0,sticky=W)
+		frameLast = Frame(self)
+		frameLast.pack()
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=7,column=2,sticky=W)
+		update_status_btn=Button(frameLast,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status, width=10)
+		update_status_btn.pack(side=LEFT, padx=2, pady=5)
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
 
 	def create_status_table(self):
 		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
 	
 	def update_status(self):
-		if(self.task_list.get() == '' and self.team.get() == ''):
+		if(self.task_text.get("1.0", "end-1c") == '' and self.team.get() == ''):
 			self.error_msg = "Insufficient inputs!"
 		else:
 			try:
@@ -849,7 +939,7 @@ class update_status_page(Frame):
 				months  = datetime.datetime.now().strftime("%b")
 				years   = datetime.datetime.now().strftime("%Y")
 
-				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get()))
+				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c")))
 				self.status_conn.commit()
 				time.sleep(0.02)
 				self.status_conn.close()
@@ -1181,7 +1271,7 @@ class forgot_id_page(Frame):
 
 root=Tk()
 root.title("NSL - Employee daily status update software")
-root.geometry("1000x600")
+root.geometry("1000x750")
 
 header_img = PhotoImage(file='./img/nslHeader.png')
 header = Button(root, relief=FLAT, image = header_img, height = 140, bg="white")
@@ -1233,7 +1323,7 @@ while True:
 	elif screen==4:
 		window=edit_user_email_page(root)
 	elif screen==5:
-		window=edit_user_pass_page(root)
+		window=edit_user_pass_page(root, name)
 	elif screen==6:
 		window=delete_user_page(root)
 	elif screen==7:
