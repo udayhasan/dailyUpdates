@@ -56,7 +56,8 @@ class login_page(Frame):
 		frame1=Frame(self)
 		frame1.pack()
 
-		login_page_label=Label(frame1,text="Login Page")
+		login_page_label=Label(frame1,text="::Login Page::")
+		login_page_label.config(width=200, font=("Courier", 25))
 		login_page_label.pack(pady=10)
 
 		#for line2:
@@ -65,12 +66,12 @@ class login_page(Frame):
 
 		login_name_label=Label(frame2,text="User ID:", anchor=W)
 		login_name_label.config(width=10, height=1)
-		login_name_label.pack(side=LEFT)
+		login_name_label.pack(side=LEFT, pady=5)
 
 		self.login_name=StringVar()
 		login_name_entry=Entry(frame2,textvariable=self.login_name)
-		login_name_entry.config(width=30)
-		login_name_entry.pack(side=LEFT)
+		login_name_entry.config(width=25)
+		login_name_entry.pack(side=LEFT, pady=5)
 		login_name_entry.focus_set()
 
 		#for line3:
@@ -78,24 +79,12 @@ class login_page(Frame):
 		frame3.pack()
 		login_pass_label=Label(frame3,text="Password:", anchor=W)
 		login_pass_label.config(width=10, height=1)
-		login_pass_label.pack(side=LEFT)
+		login_pass_label.pack(side=LEFT, pady=5)
 
 		self.login_pass=StringVar()
 		login_pass_entry=Entry(frame3,textvariable=self.login_pass,show="*")
-		login_pass_entry.config(width=30)
-		login_pass_entry.pack(side=LEFT)
-
-		#for line4:
-		frame4=Frame(self)
-		frame4.pack()
-
-		forgot_id_label=Label(frame4,text="Forgot User ID?", fg = "blue", underline=True)
-		forgot_id_label.bind('<Button-1>',self.forgot_id)
-		forgot_id_label.pack(side=TOP, pady=5)
-
-		forgot_pass_label=Label(frame4,text="Forgot Password?", fg = "blue", underline=True)
-		forgot_pass_label.bind('<Button-1>',self.forgot_password)
-		forgot_pass_label.pack(side=BOTTOM, pady=5)
+		login_pass_entry.config(width=25)
+		login_pass_entry.pack(side=LEFT, pady=5)
 
 		#forline5:
 		frame5=Frame(self)
@@ -105,6 +94,18 @@ class login_page(Frame):
 
 		exit=Button(frame5,text="Exit", bg = "brown3", fg = "white", command=self.leave)
 		exit.pack(side=LEFT, pady=5)
+
+		#for line4:
+		frame4=Frame(self)
+		frame4.pack()
+
+		forgot_id_label=Label(frame4,text="Forgot User ID?", fg = "blue", underline=True)
+		forgot_id_label.bind('<Button-1>',self.forgot_id)
+		forgot_id_label.pack(side=LEFT)
+
+		forgot_pass_label=Label(frame4,text="Forgot Password?", fg = "blue", underline=True)
+		forgot_pass_label.bind('<Button-1>',self.forgot_password)
+		forgot_pass_label.pack(side=LEFT)
 
 	def login_action(self):
 		self.create_user_table()
@@ -144,49 +145,56 @@ class user_dashboard(Frame):
 		frame1 = Frame(self)
 		frame1.pack()
 		dash_board_label=Label(frame1,text="::Dashboard::")
-		dash_board_label.config(width=200, font=("Courier", 44))
-		dash_board_label.pack(pady=10)
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
 
 		#for line2:
 		frame2 = Frame(self)
-		frame2.pack(side=LEFT)
+		frame2.pack()
 
-		log_out=Button(frame2,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white")
-		log_out.pack(side=LEFT)
-
-		exit=Button(frame2,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.pack(side=LEFT)
-
-		edit_name_btn=Button(frame2,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
-		edit_name_btn.pack(side=LEFT)
+		if(self.admin == 0):
+			edit_name_btn=Button(frame2,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
+			edit_name_btn.pack(side=LEFT, padx=2, pady=2)
 
 		edit_email_btn=Button(frame2,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=4, bd=4, bg="gold2")
-		edit_email_btn.pack(side=LEFT)
+		edit_email_btn.pack(side=LEFT, padx=2, pady=2)
 
 		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
-		edit_pass_btn.pack(side=LEFT)
+		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
 
 		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=4, bd=4, bg="cyan3")
-		update_status_btn.pack(side=LEFT)
+		update_status_btn.pack(side=LEFT, padx=2, pady=2)
 
 		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=4, bd=4, bg="PaleGreen2")
-		edit_status_btn.pack(side=LEFT)
+		edit_status_btn.pack(side=LEFT, padx=2, pady=2)
 
 		if(self.admin == 1):
 			#for line3:
 			frame3 = Frame(self)
-			frame3.pack(side=LEFT)
+			frame3.pack()
 			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=4, bd=4, bg="medium orchid")
-			add_user_btn.pack(side=LEFT)
+			add_user_btn.pack(side=LEFT, padx=2, pady=2)
 
 			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
-			delete_user_btn.pack(side=LEFT)
+			delete_user_btn.pack(side=LEFT, padx=2, pady=2)
 
 			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
-			export_report_btn.pack(side=LEFT)
+			export_report_btn.pack(side=LEFT, padx=2, pady=2)
 
 			backup_btn=Button(frame3,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="yellow")
-			backup_btn.pack(side=LEFT)
+			backup_btn.pack(side=LEFT, padx=2, pady=2)
+
+		#for line4
+		frame4 = Frame(self)
+		frame4.pack()
+		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=4, bd=4)
+		log_out.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=4, bd=4)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def set_logout(self):
 		self.screen = 0
@@ -211,43 +219,61 @@ class add_user_page(Frame):
 		super(add_user_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.grid()
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
-		add_page_label=Label(self,text="Add User Page")
-		add_page_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		frame1 = Frame(self)
+		frame1.pack(pady=5)
+		add_page_label=Label(frame1,text="::Add User::")
+		add_page_label.config(width=200, font=("Courier", 25))
+		add_page_label.pack()
 
-		add_name_label=Label(self,text="User Name:")
-		add_name_label.grid(row=2,column=0,sticky=E)
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frame2 = Frame(self)
+		frame2.pack()
+
+		add_name_label=Label(frame2,text="User Name:", width=13, anchor=W)
+		add_name_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.add_name=StringVar()
-		add_name_entry=Entry(self,textvariable=self.add_name)
-		add_name_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+		add_name_entry=Entry(frame2,textvariable=self.add_name, width=40)
+		add_name_entry.pack(side=LEFT, padx=2, pady=2)
 		add_name_entry.focus_set()
 
-		add_email_label=Label(self,text="User Email:")
-		add_email_label.grid(row=3,column=0,sticky=E)
+		frame3 = Frame(self)
+		frame3.pack()
+
+		add_email_label=Label(frame3,text="User Email:", width=13, anchor=W)
+		add_email_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.add_email=StringVar()
-		add_email_entry=Entry(self,textvariable=self.add_email)
-		add_email_entry.grid(row=3,column=1,columnspan=3,sticky=W)
+		add_email_entry=Entry(frame3,textvariable=self.add_email, width=40)
+		add_email_entry.pack(side=LEFT, padx=2, pady=2)
 
-		add_pass_label=Label(self,text="Password:")
-		add_pass_label.grid(row=4,column=0,sticky=E)
+		frame4 = Frame(self)
+		frame4.pack()
+
+		add_pass_label=Label(frame4,text="Password:", width=13, anchor=W)
+		add_pass_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.add_pass=StringVar()
-		add_pass_entry=Entry(self,textvariable=self.add_pass)
-		add_pass_entry.grid(row=4,column=1,columnspan=3,sticky=W)
+		add_pass_entry=Entry(frame4,textvariable=self.add_pass, width=40)
+		add_pass_entry.pack(side=LEFT, padx=2, pady=2)
 
-		add_btn=Button(self,text="Add User", bg="DeepSkyBlue4", fg = "white", command=self.add_user)
-		add_btn.grid(row=5,column=2,sticky=W)
+		frame5 = Frame(self)
+		frame5.pack()
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=5,column=0,sticky=W)
+		add_btn=Button(frame5,text="Add User", bg="DeepSkyBlue4", fg = "white", command=self.add_user)
+		add_btn.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=5,column=1,sticky=W)
+		back=Button(frame5,text="< Prev", command=self.go_prev)
+		back.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame5,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
@@ -295,41 +321,55 @@ class edit_user_name_page(Frame):
 
 	error_msg  = " "
 
-	def __init__(self,master):
+	def __init__(self,master, name):
 		super(edit_user_name_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.grid()
+		self.name       = name
+		self.pack()
 		self.define_widgets()
 
 	def define_widgets(self):
-		edit_name_label=Label(self,text="Edit User Name")
-		edit_name_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		frame1 = Frame(self)
+		frame1.pack()
+		edit_name_label=Label(frame1,text="::Edit Profile::")
+		edit_name_label.config(width=200, font=("Courier", 25))
+		edit_name_label.pack(pady=5)
 
-		edit_name_cur_label=Label(self,text="Current User Name:")
-		edit_name_cur_label.grid(row=1,column=0,sticky=E)
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frame2 = Frame(self)
+		frame2.pack()
+		edit_name_cur_label=Label(frame2,text="Current User Name:", width=13, anchor=W)
+		edit_name_cur_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_name_cur=StringVar()
-		edit_name_cur_entry=Entry(self,textvariable=self.edit_name_cur)
-		edit_name_cur_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		edit_name_cur_entry=Entry(frame2,textvariable=self.edit_name_cur, width=40)
+		self.edit_name_cur.set(self.name)
+		edit_name_cur_entry.pack(side=LEFT, padx=2, pady=2)
 		edit_name_cur_entry.focus_set()
 
-		edit_name_new_label=Label(self,text="New User Name:")
-		edit_name_new_label.grid(row=2,column=0,sticky=E)
+		frame3 = Frame(self)
+		frame3.pack()
+		edit_name_new_label=Label(frame3,text="New User Name:", width=13, anchor=W)
+		edit_name_new_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_name_new=StringVar()
-		edit_name_new_entry=Entry(self,textvariable=self.edit_name_new)
-		edit_name_new_entry.grid(row=2,column=1,columnspan=3,sticky=W)
+		edit_name_new_entry=Entry(frame3,textvariable=self.edit_name_new)
+		edit_name_new_entry.pack(side=LEFT, padx=2, pady=2)
 		edit_name_new_entry.focus_set()
 
-		edit_name_btn=Button(self,text="Add User", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_name)
-		edit_name_btn.grid(row=3,column=2,sticky=W)
+		frame4 = Frame(self)
+		frame4.pack()
+		edit_name_btn=Button(frame4,text="Add User", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_name)
+		edit_name_btn.pack(side=LEFT, padx=2, pady=2)
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=3,column=0,sticky=W)
+		back=Button(frame4,text="< Prev", command=self.go_prev)
+		back.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=3,column=1,sticky=W)
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
@@ -338,6 +378,8 @@ class edit_user_name_page(Frame):
 		self.create_user_table()
 		if(self.edit_name_cur.get() == '' or self.edit_name_new.get() == ''):
 			self.error_msg = "Invalid input!"
+		elif(self.edit_name_cur.get() == 'admin' or self.edit_name_new.get() == 'admin'):
+			self.error_msg = "You cannot change admin name!"
 		else:
 			try:
 				self.login_cur.execute("UPDATE users SET name = ? WHERE name = ?", (self.edit_name_new.get(), self.edit_name_cur.get()))
@@ -1137,10 +1179,19 @@ class forgot_id_page(Frame):
 		quit()
 
 
-
 root=Tk()
 root.title("NSL - Employee daily status update software")
 root.geometry("1000x600")
+
+header_img = PhotoImage(file='./img/nslHeader.png')
+header = Button(root, relief=FLAT, image = header_img, height = 140, bg="white")
+header.pack(fill=X)
+
+bottom_text = Label(root, text = "Neural Semiconductor Ltd. © 2018")
+bottom_text.pack(pady=10, side=BOTTOM)
+
+bottom_line = Canvas(root, height=2, borderwidth=0, highlightthickness=0, bg="black")
+bottom_line.pack(fill=X, padx=80, side=BOTTOM)
 
 window=login_page(root)
 screen=window.screen
@@ -1178,7 +1229,7 @@ while True:
 	elif screen==2:
 		window=add_user_page(root)
 	elif screen==3:
-		window=edit_user_name_page(root)
+		window=edit_user_name_page(root, name)
 	elif screen==4:
 		window=edit_user_email_page(root)
 	elif screen==5:
