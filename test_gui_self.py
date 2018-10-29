@@ -973,63 +973,93 @@ class edit_status_page(Frame):
 		self.status_conn = sqlite3.connect(self.db_name)
 		self.status_cur  = self.status_conn.cursor()
 		self.name        = name
-		self.grid()
+		self.pack()
 		self.define_widgets()
 
 	def create_status_table(self):
 		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
 
 	def define_widgets(self):
-		edit_status_label=Label(self,text="Update Status")
-		edit_status_label.grid(row=0,column=1,columnspan=2,sticky=W)
+		frame1 = Frame(self)
+		frame1.pack()
+		edit_status_label=Label(frame1,text="::Update Status::")
+		edit_status_label.config(width=200, font=("Courier", 25))
+		edit_status_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
 
 		#ID
-		status_id_label=Label(self,text="Status ID:")
-		status_id_label.grid(row=1,column=0,sticky=E)
+		frame2 = Frame(self)
+		frame2.pack()
+
+		status_id_label=Label(frame2,text="Status ID:", width=20)
+		status_id_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.status_id=StringVar()
-		status_entry=Entry(self,textvariable=self.status_id)
-		status_entry.grid(row=1,column=1,columnspan=3,sticky=W)
+		status_entry=Entry(frame2,textvariable=self.status_id, width=40)
+		status_entry.pack(side=LEFT, padx=2, pady=2)
 		status_entry.focus_set()
 
-		edit_status_btn=Button(self,text="Edit Status", bg="DeepSkyBlue4", fg = "white", command=self.edit_status_window)
-		edit_status_btn.grid(row=1,column=5,sticky=W)
+		edit_status_btn=Button(frame2,text="Edit", bg="DeepSkyBlue4", fg = "white", command=self.edit_status_window, width=15)
+		edit_status_btn.pack(side=LEFT, padx=2, pady=2)
 
-		delete_status_btn=Button(self,text="Delete Status", bg="DeepSkyBlue4", fg = "white", command=self.delete_status_window)
-		delete_status_btn.grid(row=1,column=4,sticky=W)
+		delete_status_btn=Button(frame2,text="Delete", bg="brown3", fg = "white", command=self.delete_status_window, width=15)
+		delete_status_btn.pack(side=LEFT, padx=2, pady=2)
 
-		back=Button(self,text="< Prev", command=self.go_prev)
-		back.grid(row=2,column=0,sticky=W)
+		frame3 = Frame(self)
+		frame3.pack()
 
-		exit=Button(self,text="Exit", bg = "brown3", fg = "white", command=self.leave)
-		exit.grid(row=2,column=2,sticky=W)
+		back=Button(frame3,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Status ID")
-		temp.grid(row=4, column=0, sticky=NSEW)
+		exit=Button(frame3,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Date")
-		temp.grid(row=4, column=1, sticky=NSEW)
+		frame4 = Frame(self)
+		frame4.pack()
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Time")
-		temp.grid(row=4, column=2, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Status ID", width=10)
+		temp.pack(side=LEFT, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Team")
-		temp.grid(row=4, column=3, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Date", width=10)
+		temp.pack(side=LEFT, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Task List")
-		temp.grid(row=4, column=4, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Time", width=10)
+		temp.pack(side=LEFT, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Progress Status")
-		temp.grid(row=4, column=5, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Team", width=10)
+		temp.pack(side=LEFT, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Meeting Status")
-		temp.grid(row=4, column=6, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Task List", width=20)
+		temp.pack(side=LEFT, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Project Status")
-		temp.grid(row=4, column=7, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Progress Status", width=20)
+		temp.pack(side=LEFT, pady=2)
 
-		temp = Label(self,relief=RIDGE, bg="light blue", text="Remarks")
-		temp.grid(row=4, column=8, sticky=NSEW)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Meeting Status", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Project Status", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Remarks", width=15)
+		temp.pack(side=LEFT, pady=2)
+
+		frame5 = Frame(self)
+		frame5.pack()
+
+		status_scroll = Scrollbar(frame5)
+		status_canvas = Canvas(frame5, height=200, width=850)
+		status_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		status_canvas.pack(side=LEFT, fill=Y)
+		status_scroll.config(command=status_canvas.yview)
+		status_canvas.config(yscrollcommand=status_scroll.set)
+
+		lists = Frame(status_canvas)
+		lists.pack(fill=X)
+
+		status_canvas.create_window((0,0), window=lists, anchor="nw")
 
 		self.create_status_table()
 		self.status_cur.execute("SELECT ids, dates, up_time, team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE name = ?", (self.name,))
@@ -1042,40 +1072,43 @@ class edit_status_page(Frame):
 			self.temp_user_name_btn.append(None)
 
 		for i in range(len(data)):
-			self.temp_user_name_btn[i] = Button(self, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
-			self.temp_user_name_btn[i].grid(row=5+i, column=0, sticky=NSEW)
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=BOTH)
+
+			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i), width=10)
+			self.temp_user_name_btn[i].pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
 			temp.configure(text=data[i][1])
-			temp.grid(row=5+i, column=1, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
 			temp.configure(text=data[i][2])
-			temp.grid(row=5+i, column=2, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
 			temp.configure(text=data[i][3])
-			temp.grid(row=5+i, column=3, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
 			temp.configure(text=data[i][4])
-			temp.grid(row=5+i, column=4, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
 			temp.configure(text=data[i][5])
-			temp.grid(row=5+i, column=5, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
 			temp.configure(text=data[i][6])
-			temp.grid(row=5+i, column=6, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
 			temp.configure(text=data[i][7])
-			temp.grid(row=5+i, column=7, sticky=NSEW)
+			temp.pack(side=LEFT)
 	
-			temp = Label(self,relief=RIDGE, bg="light blue")
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=15)
 			temp.configure(text=data[i][8])
-			temp.grid(row=5+i, column=8, sticky=NSEW)
+			temp.pack(side=LEFT)
 
 
 	def copy_name_to_field(self, id):
@@ -1271,7 +1304,7 @@ class forgot_id_page(Frame):
 
 root=Tk()
 root.title("NSL - Employee daily status update software")
-root.geometry("1000x750")
+root.geometry("1200x750")
 
 header_img = PhotoImage(file='./img/nslHeader.png')
 header = Button(root, relief=FLAT, image = header_img, height = 140, bg="white")
