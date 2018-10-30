@@ -1110,6 +1110,9 @@ class edit_status_page(Frame):
 			temp.configure(text=data[i][8])
 			temp.pack(side=LEFT)
 
+		self.frameBelow = Frame(self)
+		self.frameBelow.pack(pady=10)
+
 
 	def copy_name_to_field(self, i, id):
 		print(self.temp_user_name_btn[i]['text'])
@@ -1139,7 +1142,12 @@ class edit_status_page(Frame):
 				self.status_cur.execute("SELECT team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE ids = ?", (self.status_id.get(),))
 				data = self.status_cur.fetchall()
 
-				frameLeft = Frame(self)
+				self.frameBelow.pack_forget()
+
+				self.frameBelow = Frame(self)
+				self.frameBelow.pack()
+
+				frameLeft = Frame(self.frameBelow)
 				frameLeft.pack(side=LEFT, padx=5)
 				
 				frame2 = Frame(frameLeft)
@@ -1157,7 +1165,7 @@ class edit_status_page(Frame):
 				
 
 				#Task List
-				frame3 = Frame(frameLeft)
+				frame3 = Frame(frameLeft, width=450, height=200)
 				frame3.pack()
 				
 				task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
@@ -1165,13 +1173,13 @@ class edit_status_page(Frame):
 				
 				task_scroll = Scrollbar(frame3)
 				self.task_text = Text(frame3, height=4, width=38)
-				self.task_text.set(data[0][1])
+				self.task_text.insert("1.0",data[0][1])
 				task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 				self.task_text.pack(side=LEFT, fill=Y)
 				task_scroll.config(command=self.task_text.yview)
 				self.task_text.config(yscrollcommand=task_scroll.set)
 
-				"""#Progress Status
+				#Progress Status
 				frame4 = Frame(frameLeft)
 				frame4.pack()
 				
@@ -1180,13 +1188,13 @@ class edit_status_page(Frame):
 				
 				progress_scroll = Scrollbar(frame4)
 				self.progress_text = Text(frame4, height=4, width=38)
-				self.progress_text.set(data[0][2])
+				self.progress_text.insert("1.0",data[0][2])
 				progress_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 				self.progress_text.pack(side=LEFT, fill=Y)
 				progress_scroll.config(command=self.progress_text.yview)
 				self.progress_text.config(yscrollcommand=progress_scroll.set)
 
-				frameRight = Frame(self)
+				frameRight = Frame(self.frameBelow)
 				frameRight.pack(side=LEFT, padx=5)
 
 				#Meeting Status
@@ -1198,7 +1206,7 @@ class edit_status_page(Frame):
 				
 				meeting_scroll = Scrollbar(frame5)
 				self.meeting_text = Text(frame5, height=4, width=38)
-				self.meeting_text.set(data[0][3])
+				self.meeting_text.insert("1.0",data[0][3])
 				meeting_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 				self.meeting_text.pack(side=LEFT, fill=Y)
 				meeting_scroll.config(command=self.meeting_text.yview)
@@ -1214,7 +1222,7 @@ class edit_status_page(Frame):
 				
 				project_scroll = Scrollbar(frame6)
 				self.project_text = Text(frame6, height=3, width=38)
-				self.progress_text.set(data[0][4])
+				self.progress_text.insert("1.0",data[0][4])
 				project_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 				self.project_text.pack(side=LEFT, fill=Y)
 				project_scroll.config(command=self.project_text.yview)
@@ -1230,21 +1238,21 @@ class edit_status_page(Frame):
 				
 				remarks_scroll = Scrollbar(frame7)
 				self.remarks_text = Text(frame7, height=2, width=38)
-				self.remarks_text.set(data[0][5])
+				self.remarks_text.insert("1.0",data[0][5])
 				remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 				self.remarks_text.pack(side=LEFT, fill=Y)
 				remarks_scroll.config(command=self.remarks_text.yview)
 				self.remarks_text.config(yscrollcommand=remarks_scroll.set)
 
-				frameUpdate = Frame(self)
+				frameUpdate = Frame(self.frameBelow)
 				frameUpdate.pack()
 				update_status_btn=Button(frameUpdate,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
-				update_status_btn.pack(pady=10)"""
+				update_status_btn.pack(pady=10)
 			except Exception:
 				self.error_msg = "No such ID found!"
 
 	def update_status(self):
-		if(self.task_list.get() == '' and self.team.get() == ''):
+		if(self.task_text.get("1.0", "end-1c") == '' and self.team.get() == ''):
 			self.error_msg = "Insufficient inputs!"
 		else:
 			try:
@@ -1256,7 +1264,7 @@ class edit_status_page(Frame):
 				months  = datetime.datetime.now().strftime("%b")
 				years   = datetime.datetime.now().strftime("%Y")
 
-				self.status_cur.execute("UPDATE status SET dates=?, up_time=?, weeks=?, months=?, years=?, team=?, task_list=?, progress_status=?, meeting_status=?, project_status=?, remarks=? WHERE ids=? and name=?", (dates, up_time, weeks, months, years, self.team.get(), self.task_list.get(), self.progress_status.get(), self.meeting_status.get(), self.project_status.get(), self.remarks.get(), self.status_id.get(), self.name))
+				self.status_cur.execute("UPDATE status SET dates=?, up_time=?, weeks=?, months=?, years=?, team=?, task_list=?, progress_status=?, meeting_status=?, project_status=?, remarks=? WHERE ids=? and name=?", (dates, up_time, weeks, months, years, self.team.get(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c"), self.status_id.get(), self.name))
 				self.status_conn.commit()
 				time.sleep(0.02)
 				print("%s, You have successfully updated your daily status!" %(self.name))
@@ -1354,8 +1362,8 @@ header_img = PhotoImage(file='./img/nslHeader.png')
 header = Button(root, relief=FLAT, image = header_img, height = 140, bg="white")
 header.pack(fill=X)
 
-bottom_text = Label(root, text = "Neural Semiconductor Ltd. © 2018")
-bottom_text.pack(pady=10, side=BOTTOM)
+bottom_text = Label(root, text = "Developed by: AKM Uday Hasan Bhuiyan. © 2018")
+bottom_text.pack(pady=4, side=BOTTOM)
 
 bottom_line = Canvas(root, height=2, borderwidth=0, highlightthickness=0, bg="black")
 bottom_line.pack(fill=X, padx=80, side=BOTTOM)
