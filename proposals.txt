@@ -1,0 +1,8 @@
+1. multiple admin add
+2. assigning tasks
+3. view tasks in user dashboard (unfinished)
+4. admin views finished tasks for all users
+5. same tasks for multiple users
+6. backup
+7. export reports
+8. user adds dates for task list updating
