@@ -982,7 +982,7 @@ class edit_status_page(Frame):
 	def define_widgets(self):
 		frame1 = Frame(self)
 		frame1.pack()
-		edit_status_label=Label(frame1,text="::Update Status::")
+		edit_status_label=Label(frame1,text="::Edit Status::")
 		edit_status_label.config(width=200, font=("Courier", 25))
 		edit_status_label.pack(pady=5)
 
@@ -1019,7 +1019,7 @@ class edit_status_page(Frame):
 		frame4 = Frame(self)
 		frame4.pack()
 
-		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Status ID", width=10)
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Serial", width=10)
 		temp.pack(side=LEFT, pady=2)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Date", width=10)
@@ -1050,9 +1050,9 @@ class edit_status_page(Frame):
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=200, width=850)
+		status_canvas = Canvas(frame5, height=100, width=1090)
 		status_scroll.pack(side=RIGHT, fill=Y, padx = 5)
-		status_canvas.pack(side=LEFT, fill=Y)
+		status_canvas.pack(side=LEFT, fill=BOTH)
 		status_scroll.config(command=status_canvas.yview)
 		status_canvas.config(yscrollcommand=status_scroll.set)
 
@@ -1075,7 +1075,7 @@ class edit_status_page(Frame):
 			frame_temp = Frame(lists)
 			frame_temp.pack(fill=BOTH)
 
-			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i), width=10)
+			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.copy_name_to_field(i,data[i][0]), width=7)
 			self.temp_user_name_btn[i].pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
@@ -1111,9 +1111,9 @@ class edit_status_page(Frame):
 			temp.pack(side=LEFT)
 
 
-	def copy_name_to_field(self, id):
-		print(self.temp_user_name_btn[id]['text'])
-		self.status_id.set(self.temp_user_name_btn[id]['text'])
+	def copy_name_to_field(self, i, id):
+		print(self.temp_user_name_btn[i]['text'])
+		self.status_id.set(id)
 
 	def delete_status_window(self):
 		self.create_status_table()
@@ -1138,64 +1138,108 @@ class edit_status_page(Frame):
 				self.create_status_table()
 				self.status_cur.execute("SELECT team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE ids = ?", (self.status_id.get(),))
 				data = self.status_cur.fetchall()
-				
-				#Team
-				team_label=Label(self,text="Team Name:")
-				team_label.grid(row=1,column=10,sticky=E)
 
+				frameLeft = Frame(self)
+				frameLeft.pack(side=LEFT, padx=5)
+				
+				frame2 = Frame(frameLeft)
+				frame2.pack()
+
+				#Team
+				team_label=Label(frame2,text="Team Name:", width=20, anchor=W)
+				team_label.pack(side=LEFT, pady=5)
+				
 				self.team=StringVar()
-				team_entry=Entry(self,textvariable=self.team)
+				team_entry=Entry(frame2,textvariable=self.team, width=40)
 				team_entry.insert(0, data[0][0])
-				team_entry.grid(row=1,column=11,columnspan=3,sticky=W)
+				team_entry.pack(side=LEFT, padx=2, pady=5)
 				team_entry.focus_set()
+				
 
 				#Task List
-				task_list_label=Label(self,text="Task List:")
-				task_list_label.grid(row=2,column=10,sticky=E)
+				frame3 = Frame(frameLeft)
+				frame3.pack()
+				
+				task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
+				task_list_label.pack(side=LEFT, padx=2, pady=5)
+				
+				task_scroll = Scrollbar(frame3)
+				self.task_text = Text(frame3, height=4, width=38)
+				self.task_text.set(data[0][1])
+				task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.task_text.pack(side=LEFT, fill=Y)
+				task_scroll.config(command=self.task_text.yview)
+				self.task_text.config(yscrollcommand=task_scroll.set)
 
-				self.task_list=StringVar()
-				task_list_entry=Entry(self,textvariable=self.task_list)
-				task_list_entry.insert(0, data[0][1])
-				task_list_entry.grid(row=2,column=11,columnspan=3,sticky=W)
+				"""#Progress Status
+				frame4 = Frame(frameLeft)
+				frame4.pack()
+				
+				progress_status_label=Label(frame4,text="Progress:", width=20, anchor=W)
+				progress_status_label.pack(side=LEFT, padx=2, pady=5)
+				
+				progress_scroll = Scrollbar(frame4)
+				self.progress_text = Text(frame4, height=4, width=38)
+				self.progress_text.set(data[0][2])
+				progress_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.progress_text.pack(side=LEFT, fill=Y)
+				progress_scroll.config(command=self.progress_text.yview)
+				self.progress_text.config(yscrollcommand=progress_scroll.set)
 
-				#Progress Status
-				progress_status_label=Label(self,text="Progress Status:")
-				progress_status_label.grid(row=3,column=10,sticky=E)
-
-				self.progress_status=StringVar()
-				progress_status_entry=Entry(self,textvariable=self.progress_status)
-				progress_status_entry.insert(0, data[0][2])
-				progress_status_entry.grid(row=3,column=11,columnspan=3,sticky=W)
+				frameRight = Frame(self)
+				frameRight.pack(side=LEFT, padx=5)
 
 				#Meeting Status
-				meeting_status_label=Label(self,text="Meeting Status:")
-				meeting_status_label.grid(row=4,column=10,sticky=E)
+				frame5 = Frame(frameRight)
+				frame5.pack()
+				
+				meeting_status_label=Label(frame5,text="Meeting Status:", width=20, anchor=W)
+				meeting_status_label.pack(side=LEFT, padx=2, pady=5)
+				
+				meeting_scroll = Scrollbar(frame5)
+				self.meeting_text = Text(frame5, height=4, width=38)
+				self.meeting_text.set(data[0][3])
+				meeting_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.meeting_text.pack(side=LEFT, fill=Y)
+				meeting_scroll.config(command=self.meeting_text.yview)
+				self.meeting_text.config(yscrollcommand=meeting_scroll.set)
 
-				self.meeting_status=StringVar()
-				meeting_status_entry=Entry(self,textvariable=self.meeting_status)
-				meeting_status_entry.insert(0, data[0][3])
-				meeting_status_entry.grid(row=4,column=11,columnspan=3,sticky=W)
 
 				#Project Status
-				project_status_label=Label(self,text="Project Status:")
-				project_status_label.grid(row=5,column=10,sticky=E)
+				frame6 = Frame(frameRight)
+				frame6.pack()
+				
+				project_status_label=Label(frame6,text="Project Status:", width=20, anchor=W)
+				project_status_label.pack(side=LEFT, padx=2, pady=5)
+				
+				project_scroll = Scrollbar(frame6)
+				self.project_text = Text(frame6, height=3, width=38)
+				self.progress_text.set(data[0][4])
+				project_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.project_text.pack(side=LEFT, fill=Y)
+				project_scroll.config(command=self.project_text.yview)
+				self.project_text.config(yscrollcommand=project_scroll.set)
 
-				self.project_status=StringVar()
-				project_status_entry=Entry(self,textvariable=self.project_status)
-				project_status_entry.insert(0, data[0][4])
-				project_status_entry.grid(row=5,column=11,columnspan=3,sticky=W)
 
 				#Remarks
-				remarks_label=Label(self,text="Remarks:")
-				remarks_label.grid(row=6,column=10,sticky=E)
+				frame7 = Frame(frameRight)
+				frame7.pack()
+				
+				remarks_status_label=Label(frame7,text="Remarks:", width=20, anchor=W)
+				remarks_status_label.pack(side=LEFT, padx=2, pady=5)
+				
+				remarks_scroll = Scrollbar(frame7)
+				self.remarks_text = Text(frame7, height=2, width=38)
+				self.remarks_text.set(data[0][5])
+				remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.remarks_text.pack(side=LEFT, fill=Y)
+				remarks_scroll.config(command=self.remarks_text.yview)
+				self.remarks_text.config(yscrollcommand=remarks_scroll.set)
 
-				self.remarks=StringVar()
-				remarks_entry=Entry(self,textvariable=self.remarks)
-				remarks_entry.insert(0, data[0][5])
-				remarks_entry.grid(row=6,column=11,columnspan=3,sticky=W)
-
-				update_status_btn=Button(self,text="Update Status", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
-				update_status_btn.grid(row=7,column=11,sticky=W)
+				frameUpdate = Frame(self)
+				frameUpdate.pack()
+				update_status_btn=Button(frameUpdate,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.update_status)
+				update_status_btn.pack(pady=10)"""
 			except Exception:
 				self.error_msg = "No such ID found!"
 
