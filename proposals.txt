@@ -6,3 +6,4 @@
 6. backup
 7. export reports
 8. user adds dates for task list updating
+9. user can add date while updating status

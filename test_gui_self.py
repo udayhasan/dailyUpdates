@@ -155,6 +155,15 @@ class user_dashboard(Frame):
 		frame2 = Frame(self)
 		frame2.pack()
 
+		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=4, bd=4, bg="cyan3")
+		update_status_btn.pack(side=LEFT, padx=2, pady=2)
+
+		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=4, bd=4, bg="PaleGreen2")
+		edit_status_btn.pack(side=LEFT, padx=2, pady=2)
+
+		assign_task_btn=Button(frame2,text="Assign Task",command=lambda: self.set_value(13), width = 16, height=4, bd=4, bg="blue2")
+		assign_task_btn.pack(side=LEFT, padx=2, pady=2)
+
 		if(self.admin == 0):
 			edit_name_btn=Button(frame2,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
 			edit_name_btn.pack(side=LEFT, padx=2, pady=2)
@@ -164,12 +173,6 @@ class user_dashboard(Frame):
 
 		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
 		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
-
-		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=4, bd=4, bg="cyan3")
-		update_status_btn.pack(side=LEFT, padx=2, pady=2)
-
-		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=4, bd=4, bg="PaleGreen2")
-		edit_status_btn.pack(side=LEFT, padx=2, pady=2)
 
 		if(self.admin == 1):
 			#for line3:
@@ -1371,6 +1374,256 @@ class forgot_id_page(Frame):
 		self.login_conn.close()
 		quit()
 
+class assign_task_page(Frame):
+	screen = 13
+	status_conn = None
+	status_cur  = None
+	name        = None
+	assigned_db  = "task_assigned.db"
+	completed_db = "task_completed.db"
+
+	error_msg  = " "
+
+	def __init__(self,master, name):
+		super(assign_task_page,self).__init__(master)
+
+		self.login_conn = sqlite3.connect('users.db')
+		self.login_cur  = self.login_conn.cursor()
+
+		self.assigned_conn = sqlite3.connect(self.assigned_db)
+		self.assigned_cur  = self.assigned_conn.cursor()
+
+		self.completed_conn = sqlite3.connect(self.completed_db)
+		self.completed_cur  = self.completed_conn.cursor()
+
+		self.name        = name
+		self.pack()
+		self.define_widgets()
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+
+	def define_widgets(self):
+		frame1 = Frame(self)
+		frame1.pack()
+		update_status_label=Label(frame1,text="::Assign Task::")
+		update_status_label.config(width=200, font=("Courier", 25))
+		update_status_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		#Assigned To
+		frame2 = Frame(self)
+		frame2.pack()
+		
+		assigned_to_label=Label(frame2,text="Assigned To:", width=20, anchor=W)
+		assigned_to_label.pack(side=LEFT, pady=5)
+
+		self.login_cur.execute("SELECT name FROM users")
+		name_list = self.login_cur.fetchall()
+
+		self.assigned_to_name=StringVar()
+		self.assigned_to_name.set(self.name)
+
+		assigned_to_list=OptionMenu(frame2,self.assigned_to_name, *name_list)
+		assigned_to_list.config(width=35)
+		assigned_to_list.pack(side=LEFT, padx=2, pady=5)
+		assigned_to_list.focus_set()
+
+		#Task List
+		frame3 = Frame(self)
+		frame3.pack()
+		
+		task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
+		task_list_label.pack(side=LEFT, padx=2, pady=5)
+
+		task_scroll = Scrollbar(frame3)
+		self.task_text = Text(frame3, height=4, width=38)
+		task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.task_text.pack(side=LEFT, fill=Y)
+		task_scroll.config(command=self.task_text.yview)
+		self.task_text.config(yscrollcommand=task_scroll.set)
+
+		#Task Description
+		frame4 = Frame(self)
+		frame4.pack()
+
+		task_des_label=Label(frame4,text="Description:", width=20, anchor=W)
+		task_des_label.pack(side=LEFT, padx=2, pady=5)
+
+		task_des_scroll = Scrollbar(frame4)
+		self.task_des_text = Text(frame4, height=4, width=38)
+		task_des_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.task_des_text.pack(side=LEFT, fill=Y)
+		task_des_scroll.config(command=self.task_des_text.yview)
+		self.task_des_text.config(yscrollcommand=task_des_scroll.set)
+
+		#Estimated Date
+		frame5 = Frame(self)
+		frame5.pack()
+		
+		est_date_label=Label(frame5,text="Est. Date:", width=19, anchor=W)
+		est_date_label.pack(side=LEFT, pady=5, padx=2)
+
+		day_label=Label(frame5,text="Day:", anchor=W)
+		day_label.pack(side=LEFT, pady=5)
+
+		day_name=StringVar()
+		day_name.set(datetime.datetime.now().strftime("%d"))
+
+		day_list=OptionMenu(frame5,day_name, *[str(i) for i in range(1, 32)])
+		#day_list.config(width=5)
+		day_list.pack(side=LEFT, padx=2, pady=5)
+
+		month_label=Label(frame5,text="Month:", anchor=W)
+		month_label.pack(side=LEFT, pady=5)
+
+		month_name=StringVar()
+		month_name.set(datetime.datetime.now().strftime("%b"))
+
+		month_list=OptionMenu(frame5,month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		#month_list.config(width=5)
+		month_list.pack(side=LEFT, padx=2, pady=5)
+
+		year_label=Label(frame5,text="Year:", anchor=W)
+		year_label.pack(side=LEFT, pady=5)
+
+		year_name=StringVar()
+		year_name.set(datetime.datetime.now().strftime("%Y"))
+
+		year_list=OptionMenu(frame5,year_name, *[str(i) for i in range(2011, 2021)])
+		#year_list.config(width=5)
+		year_list.pack(side=LEFT, padx=2, pady=5)
+
+		#Deadline
+		frame6 = Frame(self)
+		frame6.pack()
+		
+		deadline_label=Label(frame6,text="Deadline:", width=19, anchor=W)
+		deadline_label.pack(side=LEFT, pady=5, padx=2)
+
+		day_label=Label(frame6,text="Day:", anchor=W)
+		day_label.pack(side=LEFT, pady=5)
+
+		deadline_day_name=StringVar()
+		deadline_day_name.set(datetime.datetime.now().strftime("%d"))
+
+		deadline_day_list=OptionMenu(frame6,deadline_day_name, *[str(i) for i in range(1, 32)])
+		#day_list.config(width=5)
+		deadline_day_list.pack(side=LEFT, padx=2, pady=5)
+
+		deadline_month_label=Label(frame6,text="Month:", anchor=W)
+		deadline_month_label.pack(side=LEFT, pady=5)
+
+		deadline_month_name=StringVar()
+		deadline_month_name.set(datetime.datetime.now().strftime("%b"))
+
+		deadline_month_list=OptionMenu(frame6,deadline_month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		#month_list.config(width=5)
+		deadline_month_list.pack(side=LEFT, padx=2, pady=5)
+
+		deadline_year_label=Label(frame6,text="Year:", anchor=W)
+		deadline_year_label.pack(side=LEFT, pady=5)
+
+		deadline_year_name=StringVar()
+		deadline_year_name.set(datetime.datetime.now().strftime("%Y"))
+
+		deadline_year_list=OptionMenu(frame6,deadline_year_name, *[str(i) for i in range(2011, 2021)])
+		#year_list.config(width=5)
+		deadline_year_list.pack(side=LEFT, padx=2, pady=5)
+
+		#Comments
+		frame7 = Frame(self)
+		frame7.pack()
+
+		comments_label=Label(frame7,text="Comments:", width=20, anchor=W)
+		comments_label.pack(side=LEFT, padx=2, pady=5)
+
+		comments_scroll = Scrollbar(frame7)
+		self.comments_text = Text(frame7, height=4, width=38)
+		comments_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.comments_text.pack(side=LEFT, fill=Y)
+		comments_scroll.config(command=self.comments_text.yview)
+		self.comments_text.config(yscrollcommand=comments_scroll.set)
+
+		#Priority
+		frame8 = Frame(self)
+		frame8.pack()
+		
+		priority_label=Label(frame8,text="Priority:", width=20, anchor=W)
+		priority_label.pack(side=LEFT, pady=5, padx=2)
+
+		priority_level=StringVar()
+		priority_level.set("5")
+
+		priority_list=OptionMenu(frame8,priority_level, *[str(i) for i in range(1, 6)])
+		priority_list.config(width=35)
+		priority_list.pack(side=LEFT, padx=2, pady=5)
+
+		#Remarks
+		frame9 = Frame(self)
+		frame9.pack()
+
+		remarks_status_label=Label(frame9,text="Remarks:", width=20, anchor=W)
+		remarks_status_label.pack(side=LEFT, padx=2, pady=5)
+
+		remarks_scroll = Scrollbar(frame9)
+		self.remarks_text = Text(frame9, height=2, width=38)
+		remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		self.remarks_text.pack(side=LEFT, fill=Y)
+		remarks_scroll.config(command=self.remarks_text.yview)
+		self.remarks_text.config(yscrollcommand=remarks_scroll.set)
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.update_status, width=10)
+		assign_task_btn.pack(side=LEFT, padx=2, pady=5)
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+	def create_status_table(self):
+		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
+	
+	def update_status(self):
+		if(self.task_text.get("1.0", "end-1c") == '' and self.team.get() == ''):
+			self.error_msg = "Insufficient inputs!"
+		else:
+			try:
+				self.create_status_table()
+
+				ids     = str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
+				dates   = datetime.datetime.now().strftime("%d-%b-%Y")
+				up_time = datetime.datetime.now().strftime("%H:%M:%S")
+				weeks   = datetime.datetime.now().strftime("%U")
+				months  = datetime.datetime.now().strftime("%b")
+				years   = datetime.datetime.now().strftime("%Y")
+
+				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c")))
+				self.status_conn.commit()
+				time.sleep(0.02)
+				self.status_conn.close()
+				print("%s, You have successfully updated your daily status!" %(self.name))
+				self.screen = 8
+				self.quit()
+			except Exception as e:
+				print(e)
+				self.error_msg = "Invalid inputs!"
+		print(self.error_msg)
+	
+	
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()
+
 
 root=Tk()
 root.title("NSL - Employee daily status update software")
@@ -1437,3 +1690,5 @@ while True:
 		window=edit_status_page(root, name)
 	elif screen==12:
 		window=forgot_id_page(root)
+	elif screen==13:
+		window=assign_task_page(root, name)
