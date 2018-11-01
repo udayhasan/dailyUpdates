@@ -1225,7 +1225,7 @@ class edit_status_page(Frame):
 				
 				project_scroll = Scrollbar(frame6)
 				self.project_text = Text(frame6, height=3, width=38)
-				self.progress_text.insert("1.0",data[0][4])
+				self.project_text.insert("1.0",data[0][4])
 				project_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 				self.project_text.pack(side=LEFT, fill=Y)
 				project_scroll.config(command=self.project_text.yview)
@@ -1384,6 +1384,8 @@ class assign_task_page(Frame):
 
 	error_msg  = " "
 
+	assigned_to_users_list = []
+
 	def __init__(self,master, name):
 		super(assign_task_page,self).__init__(master)
 
@@ -1403,6 +1405,9 @@ class assign_task_page(Frame):
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
 
+	def assign_to_user(self, user):
+		self.assigned_to_users_list.append(user)
+
 	def define_widgets(self):
 		frame1 = Frame(self)
 		frame1.pack()
@@ -1413,8 +1418,14 @@ class assign_task_page(Frame):
 		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
 		canvas.pack(fill=X, padx=80, pady=10)
 
+		frameHolder = Frame(self)
+		frameHolder.pack()
+
+		frameLeft = Frame(frameHolder)
+		frameLeft.pack(side=LEFT, padx=5)
+
 		#Assigned To
-		frame2 = Frame(self)
+		frame2 = Frame(frameLeft)
 		frame2.pack()
 		
 		assigned_to_label=Label(frame2,text="Assigned To:", width=20, anchor=W)
@@ -1432,35 +1443,35 @@ class assign_task_page(Frame):
 		assigned_to_list.focus_set()
 
 		#Task List
-		frame3 = Frame(self)
+		frame3 = Frame(frameLeft)
 		frame3.pack()
 		
 		task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
 		task_list_label.pack(side=LEFT, padx=2, pady=5)
 
 		task_scroll = Scrollbar(frame3)
-		self.task_text = Text(frame3, height=4, width=38)
+		self.task_text = Text(frame3, height=4, width=43)
 		task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 		self.task_text.pack(side=LEFT, fill=Y)
 		task_scroll.config(command=self.task_text.yview)
 		self.task_text.config(yscrollcommand=task_scroll.set)
 
 		#Task Description
-		frame4 = Frame(self)
+		frame4 = Frame(frameLeft)
 		frame4.pack()
 
 		task_des_label=Label(frame4,text="Description:", width=20, anchor=W)
 		task_des_label.pack(side=LEFT, padx=2, pady=5)
 
 		task_des_scroll = Scrollbar(frame4)
-		self.task_des_text = Text(frame4, height=4, width=38)
+		self.task_des_text = Text(frame4, height=4, width=43)
 		task_des_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 		self.task_des_text.pack(side=LEFT, fill=Y)
 		task_des_scroll.config(command=self.task_des_text.yview)
 		self.task_des_text.config(yscrollcommand=task_des_scroll.set)
 
 		#Estimated Date
-		frame5 = Frame(self)
+		frame5 = Frame(frameLeft)
 		frame5.pack()
 		
 		est_date_label=Label(frame5,text="Est. Date:", width=19, anchor=W)
@@ -1496,9 +1507,12 @@ class assign_task_page(Frame):
 		#year_list.config(width=5)
 		year_list.pack(side=LEFT, padx=2, pady=5)
 
+		frameRight = Frame(frameHolder)
+		frameRight.pack()
+
 		#Deadline
-		frame6 = Frame(self)
-		frame6.pack()
+		frame6 = Frame(frameRight)
+		frame6.pack(side=LEFT, padx=5)
 		
 		deadline_label=Label(frame6,text="Deadline:", width=19, anchor=W)
 		deadline_label.pack(side=LEFT, pady=5, padx=2)
@@ -1534,21 +1548,21 @@ class assign_task_page(Frame):
 		deadline_year_list.pack(side=LEFT, padx=2, pady=5)
 
 		#Comments
-		frame7 = Frame(self)
+		frame7 = Frame(frameRight)
 		frame7.pack()
 
 		comments_label=Label(frame7,text="Comments:", width=20, anchor=W)
 		comments_label.pack(side=LEFT, padx=2, pady=5)
 
 		comments_scroll = Scrollbar(frame7)
-		self.comments_text = Text(frame7, height=4, width=38)
+		self.comments_text = Text(frame7, height=4, width=43)
 		comments_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 		self.comments_text.pack(side=LEFT, fill=Y)
 		comments_scroll.config(command=self.comments_text.yview)
 		self.comments_text.config(yscrollcommand=comments_scroll.set)
 
 		#Priority
-		frame8 = Frame(self)
+		frame8 = Frame(frameRight)
 		frame8.pack()
 		
 		priority_label=Label(frame8,text="Priority:", width=20, anchor=W)
@@ -1562,20 +1576,34 @@ class assign_task_page(Frame):
 		priority_list.pack(side=LEFT, padx=2, pady=5)
 
 		#Remarks
-		frame9 = Frame(self)
+		frame9 = Frame(frameRight)
 		frame9.pack()
 
 		remarks_status_label=Label(frame9,text="Remarks:", width=20, anchor=W)
 		remarks_status_label.pack(side=LEFT, padx=2, pady=5)
 
 		remarks_scroll = Scrollbar(frame9)
-		self.remarks_text = Text(frame9, height=2, width=38)
+		self.remarks_text = Text(frame9, height=2, width=43)
 		remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 		self.remarks_text.pack(side=LEFT, fill=Y)
 		remarks_scroll.config(command=self.remarks_text.yview)
 		self.remarks_text.config(yscrollcommand=remarks_scroll.set)
 
-		frameLast = Frame(self)
+		#Task Status
+		frame10 = Frame(frameRight)
+		frame10.pack()
+		
+		task_status_label=Label(frame10,text="Status:", width=20, anchor=W)
+		task_status_label.pack(side=LEFT, pady=5, padx=2)
+
+		task_status_level=StringVar()
+		task_status_level.set("discussion")
+
+		task_status_list=OptionMenu(frame10,task_status_level, *['discussion', 'in progress', 'incomplete', 'complete', 'delivered'])
+		task_status_list.config(width=35)
+		task_status_list.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(frameRight)
 		frameLast.pack()
 
 		assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.update_status, width=10)
