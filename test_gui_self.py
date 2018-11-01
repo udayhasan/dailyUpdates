@@ -1375,14 +1375,19 @@ class forgot_id_page(Frame):
 		quit()
 
 class assign_task_page(Frame):
-	screen = 13
-	status_conn = None
-	status_cur  = None
-	name        = None
-	assigned_db  = "task_assigned.db"
-	completed_db = "task_completed.db"
+	screen 			= 13
 
-	error_msg  = " "
+	status_conn 	= None
+	status_cur  	= None
+	
+	task_conn 	= None
+	task_cur  	= None
+	
+	name        	= None
+	
+	task_db  	= "tasks.db"
+
+	error_msg  		= " "
 
 	assigned_to_users_list = []
 
@@ -1392,11 +1397,8 @@ class assign_task_page(Frame):
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
 
-		self.assigned_conn = sqlite3.connect(self.assigned_db)
-		self.assigned_cur  = self.assigned_conn.cursor()
-
-		self.completed_conn = sqlite3.connect(self.completed_db)
-		self.completed_cur  = self.completed_conn.cursor()
+		self.task_conn = sqlite3.connect(self.task_db)
+		self.task_cur  = self.task_conn.cursor()
 
 		self.name        = name
 		self.pack()
@@ -1404,6 +1406,9 @@ class assign_task_page(Frame):
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+
+	def create_task_table(self):
+		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
 
 	def assign_to_user(self, user):
 		self.assigned_to_users_list.append(user)
