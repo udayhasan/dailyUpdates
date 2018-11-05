@@ -1380,12 +1380,12 @@ class assign_task_page(Frame):
 	status_conn 	= None
 	status_cur  	= None
 	
-	task_conn 	= None
-	task_cur  	= None
+	task_conn 		= None
+	task_cur  		= None
 	
 	name        	= None
 	
-	task_db  	= "tasks.db"
+	task_db  		= "tasks.db"
 
 	error_msg  		= " "
 
@@ -1408,10 +1408,16 @@ class assign_task_page(Frame):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
 
 	def create_task_table(self):
-		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
+		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
 
 	def assign_to_user(self, user):
-		self.assigned_to_users_list.append(user)
+		if str(user[2:len(user)-3]) not in self.assigned_to_users_list:
+			self.assigned_to_users_list.append(str(user[2:len(user)-3]))
+			strList = ''
+			for i in self.assigned_to_users_list:
+				strList = strList + str(i) + ", "
+			self.assigned_to_names_str.set(strList)
+			print(strList)
 
 	def define_widgets(self):
 		frame1 = Frame(self)
@@ -1433,19 +1439,32 @@ class assign_task_page(Frame):
 		frame2 = Frame(frameLeft)
 		frame2.pack()
 		
-		assigned_to_label=Label(frame2,text="Assigned To:", width=20, anchor=W)
+		assigned_to_label=Label(frame2,text="Assign To:", width=20, anchor=W)
 		assigned_to_label.pack(side=LEFT, pady=5)
 
 		self.login_cur.execute("SELECT name FROM users")
 		name_list = self.login_cur.fetchall()
+		self.login_conn.close()
 
 		self.assigned_to_name=StringVar()
 		self.assigned_to_name.set(self.name)
 
-		assigned_to_list=OptionMenu(frame2,self.assigned_to_name, *name_list)
+		assigned_to_list=OptionMenu(frame2,self.assigned_to_name, *name_list, command = lambda x: self.assign_to_user(self.assigned_to_name.get()))
 		assigned_to_list.config(width=35)
 		assigned_to_list.pack(side=LEFT, padx=2, pady=5)
 		assigned_to_list.focus_set()
+
+		#Assigned List
+		frame11 = Frame(frameLeft)
+		frame11.pack()
+		
+		assigned_to_label=Label(frame11,text="Assigned To:", width=20, anchor=W)
+		assigned_to_label.pack(side=LEFT, pady=5)
+
+		self.assigned_to_names_str = StringVar()
+		self.assigned_to_users_list = []
+		assigned_to_names=Label(frame11, width=43, anchor=W, textvariable=self.assigned_to_names_str)
+		assigned_to_names.pack(side=LEFT, pady=5)
 
 		#Task List
 		frame3 = Frame(frameLeft)
@@ -1485,38 +1504,35 @@ class assign_task_page(Frame):
 		day_label=Label(frame5,text="Day:", anchor=W)
 		day_label.pack(side=LEFT, pady=5)
 
-		day_name=StringVar()
-		day_name.set(datetime.datetime.now().strftime("%d"))
+		self.day_name=StringVar()
+		self.day_name.set(datetime.datetime.now().strftime("%d"))
 
-		day_list=OptionMenu(frame5,day_name, *[str(i) for i in range(1, 32)])
+		day_list=OptionMenu(frame5,self.day_name, *[str(i) for i in range(1, 32)])
 		#day_list.config(width=5)
 		day_list.pack(side=LEFT, padx=2, pady=5)
 
 		month_label=Label(frame5,text="Month:", anchor=W)
 		month_label.pack(side=LEFT, pady=5)
 
-		month_name=StringVar()
-		month_name.set(datetime.datetime.now().strftime("%b"))
+		self.month_name=StringVar()
+		self.month_name.set(datetime.datetime.now().strftime("%b"))
 
-		month_list=OptionMenu(frame5,month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		month_list=OptionMenu(frame5,self.month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
 		#month_list.config(width=5)
 		month_list.pack(side=LEFT, padx=2, pady=5)
 
 		year_label=Label(frame5,text="Year:", anchor=W)
 		year_label.pack(side=LEFT, pady=5)
 
-		year_name=StringVar()
-		year_name.set(datetime.datetime.now().strftime("%Y"))
+		self.year_name=StringVar()
+		self.year_name.set(datetime.datetime.now().strftime("%Y"))
 
-		year_list=OptionMenu(frame5,year_name, *[str(i) for i in range(2011, 2021)])
+		year_list=OptionMenu(frame5,self.year_name, *[str(i) for i in range(2011, 2021)])
 		#year_list.config(width=5)
 		year_list.pack(side=LEFT, padx=2, pady=5)
 
-		frameRight = Frame(frameHolder)
-		frameRight.pack()
-
 		#Deadline
-		frame6 = Frame(frameRight)
+		frame6 = Frame(frameLeft)
 		frame6.pack(side=LEFT, padx=5)
 		
 		deadline_label=Label(frame6,text="Deadline:", width=19, anchor=W)
@@ -1525,32 +1541,35 @@ class assign_task_page(Frame):
 		day_label=Label(frame6,text="Day:", anchor=W)
 		day_label.pack(side=LEFT, pady=5)
 
-		deadline_day_name=StringVar()
-		deadline_day_name.set(datetime.datetime.now().strftime("%d"))
+		self.deadline_day_name=StringVar()
+		self.deadline_day_name.set(datetime.datetime.now().strftime("%d"))
 
-		deadline_day_list=OptionMenu(frame6,deadline_day_name, *[str(i) for i in range(1, 32)])
+		deadline_day_list=OptionMenu(frame6,self.deadline_day_name, *[str(i) for i in range(1, 32)])
 		#day_list.config(width=5)
 		deadline_day_list.pack(side=LEFT, padx=2, pady=5)
 
 		deadline_month_label=Label(frame6,text="Month:", anchor=W)
 		deadline_month_label.pack(side=LEFT, pady=5)
 
-		deadline_month_name=StringVar()
-		deadline_month_name.set(datetime.datetime.now().strftime("%b"))
+		self.deadline_month_name=StringVar()
+		self.deadline_month_name.set(datetime.datetime.now().strftime("%b"))
 
-		deadline_month_list=OptionMenu(frame6,deadline_month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		deadline_month_list=OptionMenu(frame6,self.deadline_month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
 		#month_list.config(width=5)
 		deadline_month_list.pack(side=LEFT, padx=2, pady=5)
 
 		deadline_year_label=Label(frame6,text="Year:", anchor=W)
 		deadline_year_label.pack(side=LEFT, pady=5)
 
-		deadline_year_name=StringVar()
-		deadline_year_name.set(datetime.datetime.now().strftime("%Y"))
+		self.deadline_year_name=StringVar()
+		self.deadline_year_name.set(datetime.datetime.now().strftime("%Y"))
 
-		deadline_year_list=OptionMenu(frame6,deadline_year_name, *[str(i) for i in range(2011, 2021)])
+		deadline_year_list=OptionMenu(frame6,self.deadline_year_name, *[str(i) for i in range(2011, 2021)])
 		#year_list.config(width=5)
 		deadline_year_list.pack(side=LEFT, padx=2, pady=5)
+
+		frameRight = Frame(frameHolder)
+		frameRight.pack()
 
 		#Comments
 		frame7 = Frame(frameRight)
@@ -1573,10 +1592,10 @@ class assign_task_page(Frame):
 		priority_label=Label(frame8,text="Priority:", width=20, anchor=W)
 		priority_label.pack(side=LEFT, pady=5, padx=2)
 
-		priority_level=StringVar()
-		priority_level.set("5")
+		self.priority_level=StringVar()
+		self.priority_level.set("5")
 
-		priority_list=OptionMenu(frame8,priority_level, *[str(i) for i in range(1, 6)])
+		priority_list=OptionMenu(frame8,self.priority_level, *[str(i) for i in range(1, 6)])
 		priority_list.config(width=35)
 		priority_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -1601,17 +1620,17 @@ class assign_task_page(Frame):
 		task_status_label=Label(frame10,text="Status:", width=20, anchor=W)
 		task_status_label.pack(side=LEFT, pady=5, padx=2)
 
-		task_status_level=StringVar()
-		task_status_level.set("discussion")
+		self.task_status_level=StringVar()
+		self.task_status_level.set("discussion")
 
-		task_status_list=OptionMenu(frame10,task_status_level, *['discussion', 'in progress', 'incomplete', 'complete', 'delivered'])
+		task_status_list=OptionMenu(frame10,self.task_status_level, *['discussion', 'in progress', 'incomplete', 'complete', 'delivered'])
 		task_status_list.config(width=35)
 		task_status_list.pack(side=LEFT, padx=2, pady=5)
 
 		frameLast = Frame(frameRight)
 		frameLast.pack()
 
-		assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.update_status, width=10)
+		assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.assign_task, width=10)
 		assign_task_btn.pack(side=LEFT, padx=2, pady=5)
 
 		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
@@ -1619,30 +1638,26 @@ class assign_task_page(Frame):
 
 		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
 		exit.pack(side=LEFT, padx=2, pady=5)
-
-	def create_status_table(self):
-		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
 	
-	def update_status(self):
-		if(self.task_text.get("1.0", "end-1c") == '' and self.team.get() == ''):
+	def assign_task(self):
+		if(self.task_text.get("1.0", "end-1c") == '' and len(self.assigned_to_users_list)==0):
 			self.error_msg = "Insufficient inputs!"
 		else:
 			try:
-				self.create_status_table()
+				self.create_task_table()
 
-				ids     = str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
-				dates   = datetime.datetime.now().strftime("%d-%b-%Y")
-				up_time = datetime.datetime.now().strftime("%H:%M:%S")
-				weeks   = datetime.datetime.now().strftime("%U")
-				months  = datetime.datetime.now().strftime("%b")
-				years   = datetime.datetime.now().strftime("%Y")
+				for users in self.assigned_to_users_list:
+					ids     = "task"+users+str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
+					dates   = datetime.datetime.now().strftime("%d-%b-%Y")
+					up_time = datetime.datetime.now().strftime("%H:%M:%S")
 
-				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c")))
-				self.status_conn.commit()
-				time.sleep(0.02)
-				self.status_conn.close()
-				print("%s, You have successfully updated your daily status!" %(self.name))
-				self.screen = 8
+					self.task_cur.execute("INSERT INTO tasks(ids, dates, up_time, a_by, a_to, task_list, description, est_date, deadline, comments, priority, remarks, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (ids, dates, up_time, self.name, users, self.task_text.get("1.0", "end-1c"), self.task_des_text.get("1.0", "end-1c"), self.day_name.get()+"-"+self.month_name.get()+"-"+self.year_name.get(), self.deadline_day_name.get()+"-"+self.deadline_month_name.get()+"-"+self.deadline_year_name.get(), self.comments_text.get("1.0", "end-1c"), self.priority_level.get(), self.remarks_text.get("1.0", "end-1c"), self.task_status_level.get()))
+					self.task_conn.commit()
+					time.sleep(0.02)
+
+				self.task_conn.close()
+				print("%s, You have successfully assigned task to!" %(self.name))
+				self.screen = 13
 				self.quit()
 			except Exception as e:
 				print(e)
