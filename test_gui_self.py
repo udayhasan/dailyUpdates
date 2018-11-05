@@ -134,10 +134,13 @@ class user_dashboard(Frame):
 	screen = 1
 	admin  = 0
 
-	def __init__(self,master,admin):
+	def __init__(self,master, name, admin):
 		super(user_dashboard,self).__init__(master)
 		self.pack()
+		self.name = name
 		self.admin = admin
+		self.task_conn = sqlite3.connect(self.task_db)
+		self.task_cur  = self.task_conn.cursor()
 		self.define_widgets()
 
 	def define_widgets(self):
@@ -198,6 +201,52 @@ class user_dashboard(Frame):
 
 		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=4, bd=4)
 		exit.pack(side=LEFT, padx=2, pady=2)
+
+		#assigned tasks
+		frame5 = Frame(self)
+		frame5.pack()
+
+		#scrolling part start
+		scroll_frame = Frame(frame5)
+		scroll_frame.pack()
+
+		#scroll canvas
+		list_scrollbar = Scrollbar(scroll_frame)
+		scroll_canvas = Canvas(scroll_frame, height=200, width=850)
+		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
+		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
+		
+		list_scrollbar.config(command=scroll_canvas.yview)
+		scroll_canvas.config(yscrollcommand=list_scrollbar.set)
+		#scroll_canvas.config(scrollregion=scroll_canvas.bbox("all"))
+
+		lists = Frame(scroll_canvas)
+		lists.pack(fill=X)
+
+		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
+
+		self.create_task_table()
+		self.task_cur.execute("SELECT ids, dates, up_time, a_by, task_list, description, est_date, deadline, comments, priority, remarks, status FROM users WHERE a_to = ?", (self.name,s))
+		data = self.login_cur.fetchall()
+
+		self.temp_user_name_btn = []
+
+		for i in range(len(data)):
+			self.temp_user_name_btn.append(None)
+
+		for i in range(len(data)):
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=BOTH)
+			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
+			self.temp_user_name_btn[i].config(width = 20, height = 1)
+			self.temp_user_name_btn[i].pack(side=LEFT)
+
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
+			temp.config(width = 80, height = 2)
+			temp.pack(side=LEFT, padx=5, fill=X)
+
+	def create_task_table(self):
+		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
 
 	def set_logout(self):
 		self.screen = 0
@@ -1719,7 +1768,7 @@ while True:
 	if screen==0:
 		window=login_page(root)
 	elif screen==1:
-		window=user_dashboard(root, admin)
+		window=user_dashboard(root, name, admin)
 	elif screen==2:
 		window=add_user_page(root)
 	elif screen==3:
