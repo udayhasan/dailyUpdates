@@ -134,6 +134,10 @@ class user_dashboard(Frame):
 	screen = 1
 	admin  = 0
 
+	task_id = None
+
+	task_db= "tasks.db"
+
 	def __init__(self,master, name, admin):
 		super(user_dashboard,self).__init__(master)
 		self.pack()
@@ -195,12 +199,51 @@ class user_dashboard(Frame):
 
 		#for line4
 		frame4 = Frame(self)
-		frame4.pack()
+		frame4.pack(pady=10)
 		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=4, bd=4)
 		log_out.pack(side=LEFT, padx=2, pady=2)
 
 		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=4, bd=4)
 		exit.pack(side=LEFT, padx=2, pady=2)
+
+		#Table Head
+		frame_table_head = Frame(self)
+		frame_table_head.pack()
+
+		#Task ID
+		temp = Label(frame_table_head, relief=RIDGE, text="Serial", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Assigned By
+		temp = Label(frame_table_head,relief=RIDGE, text="Assigned By", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Task List
+		temp = Label(frame_table_head,relief=RIDGE, text="Task List", bg="light blue")
+		temp.config(width = 20, height = 1)
+		temp.pack(side=LEFT)
+
+		#Description
+		temp = Label(frame_table_head,relief=RIDGE, text="Description", bg="light blue")
+		temp.config(width = 25, height = 1)
+		temp.pack(side=LEFT)
+
+		#Dead Line
+		temp = Label(frame_table_head,relief=RIDGE, text="Dead Line", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Priority
+		temp = Label(frame_table_head,relief=RIDGE, text="Priority", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Task Status
+		temp = Label(frame_table_head,relief=RIDGE, text="Task Status", bg="light blue")
+		temp.config(width = 15, height = 1)
+		temp.pack(side=LEFT)
 
 		#assigned tasks
 		frame5 = Frame(self)
@@ -212,7 +255,7 @@ class user_dashboard(Frame):
 
 		#scroll canvas
 		list_scrollbar = Scrollbar(scroll_frame)
-		scroll_canvas = Canvas(scroll_frame, height=200, width=850)
+		scroll_canvas = Canvas(scroll_frame, height=150, width=800)
 		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
 		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
 		
@@ -226,24 +269,58 @@ class user_dashboard(Frame):
 		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
 
 		self.create_task_table()
-		self.task_cur.execute("SELECT ids, dates, up_time, a_by, task_list, description, est_date, deadline, comments, priority, remarks, status FROM users WHERE a_to = ?", (self.name,s))
-		data = self.login_cur.fetchall()
-
-		self.temp_user_name_btn = []
+		self.task_cur.execute("SELECT ids, a_by, task_list, description, deadline, priority, status FROM tasks WHERE a_to = ?", (self.name,))
+		data = self.task_cur.fetchall()
 
 		for i in range(len(data)):
-			self.temp_user_name_btn.append(None)
+			if(data[i][6] == 'complete'):
+				data.pop(i)
+
+		self.task_id_btn = []
+		for i in range(len(data)):
+			self.task_id_btn.append(None)
 
 		for i in range(len(data)):
 			frame_temp = Frame(lists)
 			frame_temp.pack(fill=BOTH)
-			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
-			self.temp_user_name_btn[i].config(width = 20, height = 1)
-			self.temp_user_name_btn[i].pack(side=LEFT)
 
+			#Task ID
+			self.task_id_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.envoke_task_details(i, data[i][0]), width=7)
+			self.task_id_btn[i].pack(side=LEFT)
+
+			#Assigned By
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
-			temp.config(width = 80, height = 2)
-			temp.pack(side=LEFT, padx=5, fill=X)
+			temp.config(width = 10, height = 1)
+			temp.pack(side=LEFT)
+
+			#Task List
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][2], bg="white")
+			temp.config(width = 20, height = 1)
+			temp.pack(side=LEFT)
+
+			#Description
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][3], bg="white")
+			temp.config(width = 25, height = 1)
+			temp.pack(side=LEFT)
+
+			#Dead Line
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][4], bg="tomato")
+			temp.config(width = 10, height = 1)
+			temp.pack(side=LEFT)
+
+			#Priority
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][5], bg="white")
+			temp.config(width = 10, height = 1)
+			temp.pack(side=LEFT)
+
+			#Task Status
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][6], bg="white")
+			temp.config(width = 15, height = 1)
+			temp.pack(side=LEFT)
+
+	def envoke_task_details(self, i, id):
+		self.task_id = id
+		#print(id)
 
 	def create_task_table(self):
 		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
