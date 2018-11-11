@@ -319,8 +319,9 @@ class user_dashboard(Frame):
 			temp.pack(side=LEFT)
 
 	def envoke_task_details(self, i, id):
-		self.screen = 14
 		self.task_id = id
+		print(self.task_id)
+		self.screen = 14
 		self.quit()
 		#print(id)
 
@@ -1841,13 +1842,14 @@ class task_description_page(Frame):
 
 	def define_widgets(self):
 		try:
+			print(self.task_id, self.name)
 			self.create_task_table()
-			self.task_cur.execute("SELECT a_by, dates, up_time, a_by, task_list, description, est_date, deadline, comments, priority, remarks, status FROM tasks WHERE ids = ? and a_to = ?", (self.task_id, self.name))
+			self.task_cur.execute("SELECT a_by, dates, up_time, task_list, description, est_date, deadline, comments, priority, remarks, status FROM tasks WHERE ids = ? and a_to = ?", (self.task_id, self.name))
 			data = self.task_cur.fetchall()
 
 			frame1 = Frame(self)
 			frame1.pack()
-			update_status_label=Label(frame1,text="::Assign Task::")
+			update_status_label=Label(frame1,text="::Task Description::")
 			update_status_label.config(width=200, font=("Courier", 25))
 			update_status_label.pack(pady=5)
 
@@ -1857,11 +1859,8 @@ class task_description_page(Frame):
 			frameHolder = Frame(self)
 			frameHolder.pack()
 
-			frameLeft = Frame(frameHolder)
-			frameLeft.pack(side=LEFT, padx=5)
-
 			#Assigned By
-			frame2 = Frame(frameLeft)
+			frame2 = Frame(frameHolder)
 			frame2.pack()
 			
 			assigned_by_label=Label(frame2,text="Assign By:", width=20, anchor=W)
@@ -1870,80 +1869,80 @@ class task_description_page(Frame):
 			self.assigned_by_name=StringVar()
 			self.assigned_by_name.set(self.name)
 
-			assigned_by_name_label=Label(frame2,text=self.assigned_by_name, width=20, anchor=W)
+			assigned_by_name_label=Label(frame2,text=data[0][0], width=46, anchor=W)
 			assigned_by_name_label.pack(side=LEFT, pady=5)
 
 
 			#Assigned Time
-			frame11 = Frame(frameLeft)
+			frame11 = Frame(frameHolder)
 			frame11.pack()
 			
 			assigned_time_label=Label(frame11,text="Assigning Time:", width=20, anchor=W)
 			assigned_time_label.pack(side=LEFT, pady=5)
 
 			self.assigned_time = StringVar()
-			self.assigned_time.set("On "+str(data[1])+" at "+str(data[2]))
-			assigned_time_name=Label(frame11, width=43, anchor=W, textvariable=self.assigned_time)
+			self.assigned_time.set("On "+str(data[0][1])+" at "+str(data[0][2]))
+			assigned_time_name=Label(frame11, width=46, anchor=W, textvariable=self.assigned_time)
 			assigned_time_name.pack(side=LEFT, pady=5)
 
 			#Task List
-			frame3 = Frame(frameLeft)
+			frame3 = Frame(frameHolder)
 			frame3.pack()
 			
 			task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
 			task_list_label.pack(side=LEFT, padx=2, pady=5)
 
 			task_scroll = Scrollbar(frame3)
-			self.task_text = Text(frame3, height=4, width=43, state=DISABLED)
+			self.task_text = Text(frame3, height=4, width=43)
 			task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 			self.task_text.pack(side=LEFT, fill=Y)
 			task_scroll.config(command=self.task_text.yview)
 			self.task_text.config(yscrollcommand=task_scroll.set)
-			self.task_text.set(data[4])
+			self.task_text.insert(END, data[0][3])
 
 			#Task Description
-			frame4 = Frame(frameLeft)
+			frame4 = Frame(frameHolder)
 			frame4.pack()
 
 			task_des_label=Label(frame4,text="Description:", width=20, anchor=W)
 			task_des_label.pack(side=LEFT, padx=2, pady=5)
 
 			task_des_scroll = Scrollbar(frame4)
-			self.task_des_text = Text(frame4, height=4, width=43, state=DISABLED)
+			self.task_des_text = Text(frame4, height=4, width=43)
 			task_des_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 			self.task_des_text.pack(side=LEFT, fill=Y)
 			task_des_scroll.config(command=self.task_des_text.yview)
 			self.task_des_text.config(yscrollcommand=task_des_scroll.set)
-			self.task_des_text.set(data[5])
+			self.task_des_text.insert(END, data[0][4])
 
 			#Estimated Date
-			frame5 = Frame(frameLeft)
+			frame5 = Frame(frameHolder)
 			frame5.pack()
 			
-			est_date_label=Label(frame5,text="Est. Date:", width=19, anchor=W)
+			est_date_label=Label(frame5,text="Est. Date:", width=20, anchor=W)
 			est_date_label.pack(side=LEFT, pady=5, padx=2)
 
 			self.est_date_name=StringVar()
-			self.est_date_name.set(data[6])
+			self.est_date_name.set(data[0][5])
 
-			est_date_name_label=Label(frame5,textvariable=self.est_date_name, anchor=W)
+			est_date_name_label=Label(frame5,textvariable=self.est_date_name, width = 46, anchor=W)
 			est_date_name_label.pack(side=LEFT, pady=5)
 
 			#Deadline
-			frame6 = Frame(frameLeft)
-			frame6.pack(side=LEFT, padx=5)
+			frame6 = Frame(frameHolder)
+			frame6.pack()
 			
-			deadline_label=Label(frame6,text="Deadline:", width=19, anchor=W)
+			deadline_label=Label(frame6,text="Deadline:", width=20, anchor=W)
 			deadline_label.pack(side=LEFT, pady=5, padx=2)
 
 			self.deadline_date_name=StringVar()
-			self.deadline_date_name.set(data[7])
+			self.deadline_date_name.set(data[0][6])
 
-			deadline_date_name_label=Label(frame6,textvariable=self.deadline_date_name, anchor=W)
+			deadline_date_name_label=Label(frame6,textvariable=self.deadline_date_name, width = 46, anchor=W)
 			deadline_date_name_label.pack(side=LEFT, pady=5)
 
 			#Comments
-			frame7 = Frame(frameRight)
+			frame7 = Frame(frameHolder)
 			frame7.pack()
 
 			comments_label=Label(frame7,text="Comments:", width=20, anchor=W)
@@ -1955,23 +1954,23 @@ class task_description_page(Frame):
 			self.comments_text.pack(side=LEFT, fill=Y)
 			comments_scroll.config(command=self.comments_text.yview)
 			self.comments_text.config(yscrollcommand=comments_scroll.set)
-			self.comments_text.set(data[8])
+			self.comments_text.insert(END, data[0][7])
 
 			#Priority
-			frame8 = Frame(frameRight)
+			frame8 = Frame(frameHolder)
 			frame8.pack()
 			
 			priority_label=Label(frame8,text="Priority:", width=20, anchor=W)
 			priority_label.pack(side=LEFT, pady=5, padx=2)
 
 			self.priority_level=StringVar()
-			self.priority_level.set(data[9])
+			self.priority_level.set(data[0][8])
 
-			priority_name_label=Label(frame6,textvariable=self.priority_level, anchor=W)
+			priority_name_label=Label(frame8,textvariable=self.priority_level, width = 46, anchor=W)
 			priority_name_label.pack(side=LEFT, pady=5)
 
 			#Remarks
-			frame9 = Frame(frameRight)
+			frame9 = Frame(frameHolder)
 			frame9.pack()
 
 			remarks_status_label=Label(frame9,text="Remarks:", width=20, anchor=W)
@@ -1983,26 +1982,23 @@ class task_description_page(Frame):
 			self.remarks_text.pack(side=LEFT, fill=Y)
 			remarks_scroll.config(command=self.remarks_text.yview)
 			self.remarks_text.config(yscrollcommand=remarks_scroll.set)
-			self.remarks_text.set(data[10])
+			self.remarks_text.insert(END, data[0][9])
 
 			#Task Status
-			frame10 = Frame(frameRight)
+			frame10 = Frame(frameHolder)
 			frame10.pack()
 			
 			task_status_label=Label(frame10,text="Status:", width=20, anchor=W)
 			task_status_label.pack(side=LEFT, pady=5, padx=2)
 
 			self.task_status_level=StringVar()
-			self.task_status_level.set(data[11])
+			self.task_status_level.set(data[0][10])
 
-			task_status_name_label=Label(frame6,textvariable=self.task_status_level, anchor=W)
+			task_status_name_label=Label(frame10,textvariable=self.task_status_level, width = 46, anchor=W)
 			task_status_name_label.pack(side=LEFT, pady=5)
 
-			frameLast = Frame(frameRight)
+			frameLast = Frame(frameHolder)
 			frameLast.pack()
-
-			assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.assign_task, width=10)
-			assign_task_btn.pack(side=LEFT, padx=2, pady=5)
 
 			back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
 			back.pack(side=LEFT, padx=2, pady=5)
@@ -2048,10 +2044,11 @@ while True:
 	if screen==0:
 		name=window.login_name.get()
 		admin=window.admin
+	if screen==1:
+		task_id = window.task_id
 
 	screen=window.screen
 	#print(screen)
-	
 
 	if screen<0:
 		print("write data")
