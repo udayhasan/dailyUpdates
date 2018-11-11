@@ -181,6 +181,9 @@ class user_dashboard(Frame):
 		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
 		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
 
+		edit_task_btn=Button(frame2,text="Edit Task",command=lambda: self.set_value(15), width = 16, height=4, bd=4, bg="aquamarine2")
+		edit_task_btn.pack(side=LEFT, padx=2, pady=2)
+
 		if(self.admin == 1):
 			#for line3:
 			frame3 = Frame(self)
@@ -2016,6 +2019,472 @@ class task_description_page(Frame):
 	def leave(self):
 		quit()
 
+class edit_assign_task_page(Frame):
+	screen 			= 15
+	
+	task_conn 		= None
+	task_cur  		= None
+	
+	name        	= None
+	
+	task_db  		= "tasks.db"
+
+	error_msg  		= " "
+
+	assigned_to_users_list = []
+
+	def __init__(self,master, name):
+		super(edit_assign_task_page,self).__init__(master)
+		self.login_conn = sqlite3.connect('users.db')
+		self.login_cur  = self.login_conn.cursor()
+
+		self.task_conn = sqlite3.connect(self.task_db)
+		self.task_cur  = self.task_conn.cursor()
+
+		self.name        = name
+		self.pack()
+		self.define_widgets()
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+
+	def create_task_table(self):
+		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
+
+	def assign_to_user(self, user):
+		if str(user[2:len(user)-3]) not in self.assigned_to_users_list:
+			self.assigned_to_users_list.append(str(user[2:len(user)-3]))
+			strList = ''
+			for i in self.assigned_to_users_list:
+				strList = strList + str(i) + ", "
+			self.assigned_to_names_str.set(strList)
+			print(strList)
+
+	def define_widgets(self):
+		frame1 = Frame(self)
+		frame1.pack()
+		edit_status_label=Label(frame1,text="::Edit Task::")
+		edit_status_label.config(width=200, font=("Courier", 25))
+		edit_status_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		#ID
+		frame2 = Frame(self)
+		frame2.pack()
+
+		task_id_label=Label(frame2,text="Task ID:", width=20)
+		task_id_label.pack(side=LEFT, padx=2, pady=2)
+
+		self.task_id=StringVar()
+		task_id_entry=Entry(frame2,textvariable=self.task_id, width=40)
+		task_id_entry.pack(side=LEFT, padx=2, pady=2)
+		task_id_entry.focus_set()
+
+		edit_task_btn=Button(frame2,text="Edit", bg="DeepSkyBlue4", fg = "white", command=self.edit_task_window, width=15)
+		edit_task_btn.pack(side=LEFT, padx=2, pady=2)
+
+		delete_task_btn=Button(frame2,text="Delete", bg="brown3", fg = "white", command=self.delete_task_window, width=15)
+		delete_task_btn.pack(side=LEFT, padx=2, pady=2)
+
+		frame3 = Frame(self)
+		frame3.pack()
+
+		back=Button(frame3,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame3,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=2)
+
+		#Table Head
+		frame_table_head = Frame(self)
+		frame_table_head.pack()
+
+		#Task ID
+		temp = Label(frame_table_head, relief=RIDGE, text="Serial", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Assigned To
+		temp = Label(frame_table_head,relief=RIDGE, text="Assigned To", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Task List
+		temp = Label(frame_table_head,relief=RIDGE, text="Task List", bg="light blue")
+		temp.config(width = 20, height = 1)
+		temp.pack(side=LEFT)
+
+		#Description
+		temp = Label(frame_table_head,relief=RIDGE, text="Description", bg="light blue")
+		temp.config(width = 25, height = 1)
+		temp.pack(side=LEFT)
+
+		#Dead Line
+		temp = Label(frame_table_head,relief=RIDGE, text="Dead Line", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Priority
+		temp = Label(frame_table_head,relief=RIDGE, text="Priority", bg="light blue")
+		temp.config(width = 10, height = 1)
+		temp.pack(side=LEFT)
+
+		#Task Status
+		temp = Label(frame_table_head,relief=RIDGE, text="Task Status", bg="light blue")
+		temp.config(width = 15, height = 1)
+		temp.pack(side=LEFT)
+
+		#assigned tasks
+		frame5 = Frame(self)
+		frame5.pack()
+
+		#scrolling part start
+		scroll_frame = Frame(frame5)
+		scroll_frame.pack()
+
+		#scroll canvas
+		list_scrollbar = Scrollbar(scroll_frame)
+		scroll_canvas = Canvas(scroll_frame, height=150, width=800)
+		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
+		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
+		
+		list_scrollbar.config(command=scroll_canvas.yview)
+		scroll_canvas.config(yscrollcommand=list_scrollbar.set)
+		#scroll_canvas.config(scrollregion=scroll_canvas.bbox("all"))
+
+		lists = Frame(scroll_canvas)
+		lists.pack(fill=X)
+
+		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
+
+		self.create_task_table()
+		self.task_cur.execute("SELECT ids, a_to, task_list, description, deadline, priority, status FROM tasks WHERE a_by = ?", (self.name,))
+		data = self.task_cur.fetchall()
+
+		for i in range(len(data)):
+			if(data[i][6] == 'complete'):
+				data.pop(i)
+
+		self.task_id_btn = []
+		for i in range(len(data)):
+			self.task_id_btn.append(None)
+
+		for i in range(len(data)):
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=BOTH)
+
+			#Task ID
+			self.task_id_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.copy_name_to_field(i, data[i][0]), width=7)
+			self.task_id_btn[i].pack(side=LEFT)
+
+			#Assigned By
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
+			temp.config(width = 10, height = 1)
+			temp.pack(side=LEFT)
+
+			#Task List
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][2], bg="white")
+			temp.config(width = 20, height = 1)
+			temp.pack(side=LEFT)
+
+			#Description
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][3], bg="white")
+			temp.config(width = 25, height = 1)
+			temp.pack(side=LEFT)
+
+			#Dead Line
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][4], bg="tomato")
+			temp.config(width = 10, height = 1)
+			temp.pack(side=LEFT)
+
+			#Priority
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][5], bg="white")
+			temp.config(width = 10, height = 1)
+			temp.pack(side=LEFT)
+
+			#Task Status
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][6], bg="white")
+			temp.config(width = 15, height = 1)
+			temp.pack(side=LEFT)
+
+		self.frameBelow = Frame(self)
+		self.frameBelow.pack(pady=10)
+
+
+	def copy_name_to_field(self, i, id):
+		print(self.temp_user_name_btn[i]['text'])
+		self.task_id.set(id)
+
+	def delete_task_window(self):
+		self.create_task_table()
+		if(self.task_id.get() == ''):
+			self.error_msg = "Invalid Status ID!"
+		else:
+			try:
+				self.task_cur.execute("DELETE FROM tasks WHERE ids = ?", (self.task_id.get(),))
+				self.task_conn.commit()
+				time.sleep(0.02)
+				print("Task corresponding to ID %s has been deleted successfully!" %(self.task_id.get()))
+				self.screen = 15
+				self.quit()
+			except Exception:
+				self.error_msg = "Invalid search name!"
+
+	def edit_task_window(self):
+		if(self.task_id.get() == ''):
+			self.error_msg = "Invalid ID!"
+		else:
+			try:
+				print(self.task_id, self.name)
+				self.create_task_table()
+				self.task_cur.execute("SELECT a_to, dates, up_time, task_list, description, est_date, deadline, comments, priority, remarks, status FROM tasks WHERE ids = ? and a_by = ?", (self.task_id, self.name))
+				data = self.task_cur.fetchall()
+
+				frameHolder = Frame(self)
+				frameHolder.pack()
+
+				frameLeft = Frame(frameHolder)
+				frameLeft.pack(side=LEFT, padx=5)
+
+				#Assigned To
+				frame2 = Frame(frameLeft)
+				frame2.pack()
+				
+				assigned_to_label=Label(frame2,text="Assign To:", width=20, anchor=W)
+				assigned_to_label.pack(side=LEFT, pady=5)
+
+				self.login_cur.execute("SELECT name FROM users")
+				name_list = self.login_cur.fetchall()
+				self.login_conn.close()
+
+				self.assigned_to_name=StringVar()
+				self.assigned_to_name.set(self.name)
+
+				assigned_to_list=OptionMenu(frame2,self.assigned_to_name, *name_list, command = lambda x: self.assign_to_user(self.assigned_to_name.get()))
+				assigned_to_list.config(width=35)
+				assigned_to_list.pack(side=LEFT, padx=2, pady=5)
+				assigned_to_list.focus_set()
+
+				#Assigned List
+				frame11 = Frame(frameLeft)
+				frame11.pack()
+				
+				assigned_to_label=Label(frame11,text="Assigned To:", width=20, anchor=W)
+				assigned_to_label.pack(side=LEFT, pady=5)
+
+				self.assigned_to_names_str = StringVar()
+				self.assigned_to_users_list = []
+				assigned_to_names=Label(frame11, width=43, anchor=W, textvariable=self.assigned_to_names_str)
+				assigned_to_names.pack(side=LEFT, pady=5)
+
+				#Task List
+				frame3 = Frame(frameLeft)
+				frame3.pack()
+				
+				task_list_label=Label(frame3,text="Task List:", width=20, anchor=W)
+				task_list_label.pack(side=LEFT, padx=2, pady=5)
+
+				task_scroll = Scrollbar(frame3)
+				self.task_text = Text(frame3, height=4, width=43)
+				task_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.task_text.pack(side=LEFT, fill=Y)
+				task_scroll.config(command=self.task_text.yview)
+				self.task_text.config(yscrollcommand=task_scroll.set)
+
+				#Task Description
+				frame4 = Frame(frameLeft)
+				frame4.pack()
+
+				task_des_label=Label(frame4,text="Description:", width=20, anchor=W)
+				task_des_label.pack(side=LEFT, padx=2, pady=5)
+
+				task_des_scroll = Scrollbar(frame4)
+				self.task_des_text = Text(frame4, height=4, width=43)
+				task_des_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.task_des_text.pack(side=LEFT, fill=Y)
+				task_des_scroll.config(command=self.task_des_text.yview)
+				self.task_des_text.config(yscrollcommand=task_des_scroll.set)
+
+				#Estimated Date
+				frame5 = Frame(frameLeft)
+				frame5.pack()
+				
+				est_date_label=Label(frame5,text="Est. Date:", width=19, anchor=W)
+				est_date_label.pack(side=LEFT, pady=5, padx=2)
+
+				day_label=Label(frame5,text="Day:", anchor=W)
+				day_label.pack(side=LEFT, pady=5)
+
+				self.day_name=StringVar()
+				self.day_name.set(datetime.datetime.now().strftime("%d"))
+
+				day_list=OptionMenu(frame5,self.day_name, *[str(i) for i in range(1, 32)])
+				#day_list.config(width=5)
+				day_list.pack(side=LEFT, padx=2, pady=5)
+
+				month_label=Label(frame5,text="Month:", anchor=W)
+				month_label.pack(side=LEFT, pady=5)
+
+				self.month_name=StringVar()
+				self.month_name.set(datetime.datetime.now().strftime("%b"))
+
+				month_list=OptionMenu(frame5,self.month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+				#month_list.config(width=5)
+				month_list.pack(side=LEFT, padx=2, pady=5)
+
+				year_label=Label(frame5,text="Year:", anchor=W)
+				year_label.pack(side=LEFT, pady=5)
+
+				self.year_name=StringVar()
+				self.year_name.set(datetime.datetime.now().strftime("%Y"))
+
+				year_list=OptionMenu(frame5,self.year_name, *[str(i) for i in range(2011, 2021)])
+				#year_list.config(width=5)
+				year_list.pack(side=LEFT, padx=2, pady=5)
+
+				#Deadline
+				frame6 = Frame(frameLeft)
+				frame6.pack(side=LEFT, padx=5)
+				
+				deadline_label=Label(frame6,text="Deadline:", width=19, anchor=W)
+				deadline_label.pack(side=LEFT, pady=5, padx=2)
+
+				day_label=Label(frame6,text="Day:", anchor=W)
+				day_label.pack(side=LEFT, pady=5)
+
+				self.deadline_day_name=StringVar()
+				self.deadline_day_name.set(datetime.datetime.now().strftime("%d"))
+
+				deadline_day_list=OptionMenu(frame6,self.deadline_day_name, *[str(i) for i in range(1, 32)])
+				#day_list.config(width=5)
+				deadline_day_list.pack(side=LEFT, padx=2, pady=5)
+
+				deadline_month_label=Label(frame6,text="Month:", anchor=W)
+				deadline_month_label.pack(side=LEFT, pady=5)
+
+				self.deadline_month_name=StringVar()
+				self.deadline_month_name.set(datetime.datetime.now().strftime("%b"))
+
+				deadline_month_list=OptionMenu(frame6,self.deadline_month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+				#month_list.config(width=5)
+				deadline_month_list.pack(side=LEFT, padx=2, pady=5)
+
+				deadline_year_label=Label(frame6,text="Year:", anchor=W)
+				deadline_year_label.pack(side=LEFT, pady=5)
+
+				self.deadline_year_name=StringVar()
+				self.deadline_year_name.set(datetime.datetime.now().strftime("%Y"))
+
+				deadline_year_list=OptionMenu(frame6,self.deadline_year_name, *[str(i) for i in range(2011, 2021)])
+				#year_list.config(width=5)
+				deadline_year_list.pack(side=LEFT, padx=2, pady=5)
+
+				frameRight = Frame(frameHolder)
+				frameRight.pack()
+
+				#Comments
+				frame7 = Frame(frameRight)
+				frame7.pack()
+
+				comments_label=Label(frame7,text="Comments:", width=20, anchor=W)
+				comments_label.pack(side=LEFT, padx=2, pady=5)
+
+				comments_scroll = Scrollbar(frame7)
+				self.comments_text = Text(frame7, height=4, width=43)
+				comments_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.comments_text.pack(side=LEFT, fill=Y)
+				comments_scroll.config(command=self.comments_text.yview)
+				self.comments_text.config(yscrollcommand=comments_scroll.set)
+
+				#Priority
+				frame8 = Frame(frameRight)
+				frame8.pack()
+				
+				priority_label=Label(frame8,text="Priority:", width=20, anchor=W)
+				priority_label.pack(side=LEFT, pady=5, padx=2)
+
+				self.priority_level=StringVar()
+				self.priority_level.set("5")
+
+				priority_list=OptionMenu(frame8,self.priority_level, *[str(i) for i in range(1, 6)])
+				priority_list.config(width=35)
+				priority_list.pack(side=LEFT, padx=2, pady=5)
+
+				#Remarks
+				frame9 = Frame(frameRight)
+				frame9.pack()
+
+				remarks_status_label=Label(frame9,text="Remarks:", width=20, anchor=W)
+				remarks_status_label.pack(side=LEFT, padx=2, pady=5)
+
+				remarks_scroll = Scrollbar(frame9)
+				self.remarks_text = Text(frame9, height=2, width=43)
+				remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+				self.remarks_text.pack(side=LEFT, fill=Y)
+				remarks_scroll.config(command=self.remarks_text.yview)
+				self.remarks_text.config(yscrollcommand=remarks_scroll.set)
+
+				#Task Status
+				frame10 = Frame(frameRight)
+				frame10.pack()
+				
+				task_status_label=Label(frame10,text="Status:", width=20, anchor=W)
+				task_status_label.pack(side=LEFT, pady=5, padx=2)
+
+				self.task_status_level=StringVar()
+				self.task_status_level.set("discussion")
+
+				task_status_list=OptionMenu(frame10,self.task_status_level, *['discussion', 'in progress', 'incomplete', 'complete', 'delivered'])
+				task_status_list.config(width=35)
+				task_status_list.pack(side=LEFT, padx=2, pady=5)
+
+				frameLast = Frame(frameRight)
+				frameLast.pack()
+
+				assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.assign_task, width=10)
+				assign_task_btn.pack(side=LEFT, padx=2, pady=5)
+
+
+			except Exception as e:
+				print(e)
+
+	def assign_task(self):
+		if(self.task_text.get("1.0", "end-1c") == '' and len(self.assigned_to_users_list)==0):
+			self.error_msg = "Insufficient inputs!"
+		else:
+			try:
+				self.create_task_table()
+
+				for users in self.assigned_to_users_list:
+					ids     = "task"+users+str(time.time()).split(".")[0]+str(time.time()).split(".")[1]+self.name
+					dates   = datetime.datetime.now().strftime("%d-%b-%Y")
+					up_time = datetime.datetime.now().strftime("%H:%M:%S")
+
+					self.task_cur.execute("INSERT INTO tasks(ids, dates, up_time, a_by, a_to, task_list, description, est_date, deadline, comments, priority, remarks, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", (ids, dates, up_time, self.name, users, self.task_text.get("1.0", "end-1c"), self.task_des_text.get("1.0", "end-1c"), self.day_name.get()+"-"+self.month_name.get()+"-"+self.year_name.get(), self.deadline_day_name.get()+"-"+self.deadline_month_name.get()+"-"+self.deadline_year_name.get(), self.comments_text.get("1.0", "end-1c"), self.priority_level.get(), self.remarks_text.get("1.0", "end-1c"), self.task_status_level.get()))
+					self.task_conn.commit()
+					time.sleep(0.02)
+
+				self.task_conn.close()
+				print("%s, You have successfully assigned task to!" %(self.name))
+				self.screen = 13
+				self.quit()
+			except Exception as e:
+				print(e)
+				self.error_msg = "Invalid inputs!"
+		print(self.error_msg)
+	
+	
+	def go_prev(self):
+		self.status_conn.close()
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		self.status_conn.close()
+		quit()  
+
 
 root=Tk()
 root.title("NSL - Employee daily status update software")
@@ -2089,3 +2558,5 @@ while True:
 		window=assign_task_page(root, name)
 	elif screen==14:
 		window=task_description_page(root, name, task_id)
+	elif screen==15:
+		window=edit_assign_task_page(root, name)
