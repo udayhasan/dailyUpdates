@@ -23,7 +23,7 @@ class login_page(Frame):
 		self.define_widgets()
 
 	def create_user_table(self):
-		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
 
 	def login(self, name, password):
 		#print(name, password)
@@ -35,14 +35,16 @@ class login_page(Frame):
 			try:
 				success = 0
 				admin   = 0
-				self.login_cur.execute("SELECT password FROM users WHERE name = ?", (name,))
+				self.login_cur.execute("SELECT password, admin_status FROM users WHERE name = ?", (name,))
 				check = self.login_cur.fetchall()
 				self.login_conn.close()
 				if(password == check[0][0]):
 					success = 1
 					self.screen = 1
-					if(name == 'admin'): admin = 1
-					else: admin = 0
+					if(check[0][1] == '1'):
+						admin = 1
+					else:
+						admin = 0
 				else:
 					self.screen = 0
 					self.error_msg = "Incorrect Password!"
@@ -132,10 +134,11 @@ class login_page(Frame):
 class user_dashboard(Frame):
 
 	screen = 1
-	admin  = 0
+
+	name   = None
+	admin  = None
 
 	task_id = None
-
 	task_db= "tasks.db"
 
 	def __init__(self,master, name, admin):
@@ -151,7 +154,7 @@ class user_dashboard(Frame):
 		#for line1:
 		frame1 = Frame(self)
 		frame1.pack()
-		dash_board_label=Label(frame1,text="::Dashboard::")
+		dash_board_label=Label(frame1,text="::Dashboard - "+self.name+"::")
 		dash_board_label.config(width=200, font=("Courier", 25))
 		dash_board_label.pack(pady=5)
 
@@ -174,10 +177,6 @@ class user_dashboard(Frame):
 		edit_task_btn=Button(frame2,text="Edit Task",command=lambda: self.set_value(15), width = 16, height=4, bd=4, bg="aquamarine2")
 		edit_task_btn.pack(side=LEFT, padx=2, pady=2)
 
-		# if(self.name == 'admin'):
-		# 	edit_name_btn=Button(frame2,text="Edit User Name",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
-		# 	edit_name_btn.pack(side=LEFT, padx=2, pady=2)
-
 		edit_email_btn=Button(frame2,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=4, bd=4, bg="gold2")
 		edit_email_btn.pack(side=LEFT, padx=2, pady=2)
 
@@ -189,10 +188,13 @@ class user_dashboard(Frame):
 			frame3 = Frame(self)
 			frame3.pack()
 
+			edit_user_admin_sts_btn=Button(frame3,text="Admin Privilege",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
+			edit_user_admin_sts_btn.pack(side=LEFT, padx=2, pady=2)
+
 			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = 16, height=4, bd=4, bg="medium orchid")
 			all_task_btn.pack(side=LEFT, padx=2, pady=2)
 
-			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=4, bd=4, bg="medium orchid")
+			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=4, bd=4, bg="yellow")
 			add_user_btn.pack(side=LEFT, padx=2, pady=2)
 
 			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
@@ -201,7 +203,7 @@ class user_dashboard(Frame):
 			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
 			export_report_btn.pack(side=LEFT, padx=2, pady=2)
 
-			backup_btn=Button(frame3,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="yellow")
+			backup_btn=Button(frame3,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="medium orchid")
 			backup_btn.pack(side=LEFT, padx=2, pady=2)
 
 		#for line4
@@ -403,6 +405,13 @@ class add_user_page(Frame):
 		add_pass_entry=Entry(frame4,textvariable=self.add_pass, width=40)
 		add_pass_entry.pack(side=LEFT, padx=2, pady=2)
 
+		frame6 = Frame(self)
+		frame6.pack()
+
+		self.admin_status=IntVar()
+		add_admin_check=Checkbutton(frame6,text="Add as admin?", variable=self.admin_status, width=30)
+		add_admin_check.pack(side=RIGHT, padx=2, pady=2)
+
 		frame5 = Frame(self)
 		frame5.pack()
 
@@ -416,7 +425,7 @@ class add_user_page(Frame):
 		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
-		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
 
 	def add_user(self):
 		self.create_user_table()
@@ -432,7 +441,7 @@ class add_user_page(Frame):
 				print(user_names, user_emails)
 
 				if((self.add_name.get() not in user_names) and (self.add_email.get() not in user_emails)):
-					self.login_cur.execute("INSERT INTO users(name, email, password) VALUES (?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get()))
+					self.login_cur.execute("INSERT INTO users(name, email, password, admin_status) VALUES (?, ?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get(), str(self.admin_status.get())))
 					self.login_conn.commit()
 					time.sleep(0.02)
 					self.login_conn.close()
@@ -454,7 +463,7 @@ class add_user_page(Frame):
 	def leave(self):
 		quit()
 
-class edit_user_name_page(Frame):
+"""class edit_user_name_page(Frame):
 	screen = 3
 	login_conn = None
 	login_cur  = None
@@ -533,6 +542,86 @@ class edit_user_name_page(Frame):
 				self.error_msg = "Invalid search name or replacing name!"
 
 	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()"""
+
+class edit_user_admin_sts_page(Frame):
+	screen = 3
+	login_conn = None
+	login_cur  = None
+
+	error_msg  = " "
+
+	def __init__(self,master, name):
+		super(edit_user_admin_sts_page,self).__init__(master)
+		self.login_conn = sqlite3.connect('users.db')
+		self.login_cur  = self.login_conn.cursor()
+		self.name       = name
+		self.pack()
+		self.define_widgets()
+
+	def define_widgets(self):
+		frame1 = Frame(self)
+		frame1.pack()
+		edit_name_label=Label(frame1,text="::Edit Admin Status::")
+		edit_name_label.config(width=200, font=("Courier", 25))
+		edit_name_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+		
+		frame2 = Frame(self)
+		frame2.pack()
+		
+		assigned_to_label=Label(frame2,text="Make Admin:", width=20, anchor=W)
+		assigned_to_label.pack(side=LEFT, pady=5)
+
+		self.login_cur.execute("SELECT name FROM users")
+		name_list = self.login_cur.fetchall()
+
+		self.assigned_to_name=StringVar()
+		self.assigned_to_name.set('admin')
+
+		assigned_to_list=OptionMenu(frame2,self.assigned_to_name, *name_list)
+		assigned_to_list.config(width=35)
+		assigned_to_list.pack(side=LEFT, padx=2, pady=5)
+		assigned_to_list.focus_set()
+
+		frame4 = Frame(self)
+		frame4.pack()
+
+		admin_btn = Button(frame4,text="Make Admin", command=self.make_admin_def, fg = 'white', bg = 'DeepSkyBlue4', width=10)
+		admin_btn.pack(side=LEFT, padx=2, pady=2)
+
+		back=Button(frame4,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=2)
+
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=2)
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
+
+	def make_admin_def(self):
+		self.create_user_table()
+		if(self.assigned_to_name.get()==''):
+			self.error_msg = "Invalid input!"
+		else:
+			try:
+				self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('1', self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
+				self.login_conn.commit()
+				time.sleep(0.02)
+				print("User %s is made an Admin" %(self.assigned_to_name.get()))
+				self.screen = 3
+				self.quit()
+			except Exception:
+				self.error_msg = "Invalid search name or replacing name!"
+
+	def go_prev(self):
+		self.login_conn.close()
 		self.screen = 1
 		self.quit()
 
@@ -721,13 +810,15 @@ class delete_user_page(Frame):
 	screen = 6
 	login_conn = None
 	login_cur  = None
+	name       = None
 
 	error_msg  = " "
 
-	def __init__(self,master):
+	def __init__(self,master, name):
 		super(delete_user_page,self).__init__(master)
 		self.login_conn = sqlite3.connect('users.db')
 		self.login_cur  = self.login_conn.cursor()
+		self.name       = name
 		self.pack()
 		self.define_widgets()
 
@@ -750,16 +841,19 @@ class delete_user_page(Frame):
 
 		#frame for line3:
 		frame3 = Frame(self)
-		frame3.config(width=100, height=2)
-		frame3.pack(fill=X)
+		frame3.pack()
 
 		temp = Label(frame3,relief=RIDGE, text="Current Users", bg="light blue")
 		temp.config(width=23, height=2)
 		temp.pack(side=LEFT)
 
 		temp = Label(frame3,relief=RIDGE, text="Email", bg="light blue")
-		temp.config(width=80, height=2)
-		temp.pack(side=LEFT, padx=5, pady=5)
+		temp.config(width=70, height=2)
+		temp.pack(side=LEFT, pady=5)
+
+		temp = Label(frame3,relief=RIDGE, text="Admin Status", bg="light blue")
+		temp.config(width=30, height=2)
+		temp.pack(side=LEFT, pady=5)
 
 		#scrolling part start
 		scroll_frame = Frame(self)
@@ -767,9 +861,9 @@ class delete_user_page(Frame):
 
 		#scroll canvas
 		list_scrollbar = Scrollbar(scroll_frame)
-		scroll_canvas = Canvas(scroll_frame, height=200, width=850)
+		scroll_canvas = Canvas(scroll_frame, height=200, width=980)
 		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
-		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
+		list_scrollbar.pack(side=RIGHT, fill=Y)
 		
 		list_scrollbar.config(command=scroll_canvas.yview)
 		scroll_canvas.config(yscrollcommand=list_scrollbar.set)
@@ -781,7 +875,7 @@ class delete_user_page(Frame):
 		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
 
 		self.create_user_table()
-		self.login_cur.execute("SELECT name, email FROM users")
+		self.login_cur.execute("SELECT name, email, admin_status FROM users")
 		data = self.login_cur.fetchall()
 
 		self.temp_user_name_btn = []
@@ -797,13 +891,18 @@ class delete_user_page(Frame):
 			self.temp_user_name_btn[i].pack(side=LEFT)
 
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
-			temp.config(width = 80, height = 2)
-			temp.pack(side=LEFT, padx=5, fill=X)
+			temp.config(width = 70, height = 2)
+			temp.pack(side=LEFT, fill=X)
+
+			temp = Label(frame_temp,relief=RIDGE, text=data[i][2], bg="white")
+			temp.config(width = 30, height = 2)
+			temp.pack(side=LEFT, fill=X)
 
 		#frame for line2:
 		frame2 = Frame(self)
 		frame2.pack(pady=10)
-		refresh_user_btn=Button(frame2,text="Refresh",command=self.refresh_user)
+
+		refresh_user_btn=Button(frame2,text="Refresh",command=self.refresh_user, bg='DeepSkyBlue4', fg='white')
 		refresh_user_btn.pack(side=LEFT)
 
 		back=Button(frame2,text="< Prev", command=self.go_prev)
@@ -817,25 +916,48 @@ class delete_user_page(Frame):
 		self.delete_user_name.set(self.temp_user_name_btn[id]['text'])
 
 	def create_user_table(self):
-		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
 
 	def delete_user(self):
-		self.create_user_table()
+
 		if(self.delete_user_name.get() == ''):
 			self.error_msg = "Invalid input!"
 		elif(self.delete_user_name.get() == 'admin'):
 			self.error_msg = "You cannot delete admin"
 		else:
 			try:
-				self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				self.login_conn.close()
-				print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
-				self.screen = 6
-				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name!"
+				self.create_user_table()
+				self.login_cur.execute("SELECT admin_status FROM users WHERE name = ?", (self.delete_user_name.get(),))
+				data = self.login_cur.fetchall()
+				print(data[0][0])
+
+				if(self.name == 'admin'):
+					try:
+						self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
+						self.login_conn.commit()
+						time.sleep(0.02)
+						self.login_conn.close()
+						print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
+						self.screen = 6
+						self.quit()
+					except Exception:
+						self.error_msg = "Invalid search name!"
+				elif(self.name != 'admin' and data[0][0] == '0'):
+					try:
+						self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
+						self.login_conn.commit()
+						time.sleep(0.02)
+						self.login_conn.close()
+						print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
+						self.screen = 6
+						self.quit()
+					except Exception:
+						self.error_msg = "Invalid search name!"
+				else:
+					self.error_msg = "You cannot delete another admin"
+					print(self.error_msg)
+			except Exception as e:
+				print(e)
 
 	def refresh_user(self):
 		self.screen = 6
@@ -2912,13 +3034,13 @@ while True:
 	elif screen==2:
 		window=add_user_page(root)
 	elif screen==3:
-		window=edit_user_name_page(root, name)
+		window=edit_user_admin_sts_page(root, name)
 	elif screen==4:
 		window=edit_user_email_page(root)
 	elif screen==5:
 		window=edit_user_pass_page(root, name)
 	elif screen==6:
-		window=delete_user_page(root)
+		window=delete_user_page(root, name)
 	elif screen==7:
 		window=forgot_pass_page(root)
 	elif screen==8:
