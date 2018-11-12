@@ -185,7 +185,7 @@ class user_dashboard(Frame):
 			msg['To'] = ", ".join(self.to_email)
 			msg.attach(MIMEText("This is backup on "+datetime.datetime.now().strftime("%d-%b-%Y")+" at time: "+datetime.datetime.now().strftime("%H:%M:%S"), 'html'))
 
-			attachment = ['users.db', 'status.db', 'tasks.db']
+			attachment = ['users.db', 'status.db', 'tasks.db', 'attns.db']
 
 			for f in attachment:
 				with open(f, 'rb') as a_file:
