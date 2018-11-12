@@ -253,7 +253,7 @@ class user_dashboard(Frame):
 			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
 			delete_user_btn.pack(side=LEFT, padx=2, pady=2)
 
-			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
+			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(18), width = 16, height=4, bd=4, bg="turquoise")
 			export_report_btn.pack(side=LEFT, padx=2, pady=2)
 
 			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=4, bd=4, bg="medium orchid")
@@ -1157,7 +1157,7 @@ class update_status_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name        = None
-	db_name     = "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
+	db_name     = "status.db"
 
 	error_msg  = " "
 
@@ -1351,7 +1351,7 @@ class edit_status_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name        = None
-	db_name     = "status_" + datetime.datetime.now().strftime("%b") + datetime.datetime.now().strftime("%Y") + ".db"
+	db_name     = "status.db"
 
 	error_msg  = " "
 
@@ -3067,6 +3067,272 @@ class all_tasks_page(Frame):
 	def leave(self):
 		quit()
 
+class export_status_report_page(Frame):
+
+	screen = 18
+
+	status_conn = None
+	status_cur  = None
+	name        = None
+	db_name     = "status.db"
+
+	error_msg  = " "
+
+	def __init__(self,master):
+		super(export_status_report_page,self).__init__(master)
+		self.pack()
+
+		self.login_conn= sqlite3.connect('users.db')
+		self.login_cur = self.login_conn.cursor()
+
+		self.status_conn = sqlite3.connect(self.db_name)
+		self.status_cur  = self.status_conn.cursor()
+
+		self.pack()
+		self.define_widgets()
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
+
+	def create_status_table(self):
+		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
+
+	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Tasks::")
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		self.create_user_table()
+		self.create_status_table()
+
+		#Status of
+		frameUser = Frame(self)
+		frameUser.pack()
+		
+		status_of_label=Label(frameUser,text="User:", width=20, anchor=W)
+		status_of_label.pack(side=LEFT, pady=5)
+
+		self.login_cur.execute("SELECT name FROM users")
+		user_list = self.login_cur.fetchall()
+		self.login_conn.close()
+		user_list.append('*')
+
+		self.status_of_name=StringVar()
+		self.status_of_name.set('*')
+
+		status_of_box=OptionMenu(frameUser,self.status_of_name, *user_list)
+		status_of_box.config(width=35)
+		status_of_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Team
+		frameTeam = Frame(self)
+		frameTeam.pack()
+		
+		team_label=Label(frameTeam,text="Team:", width=20, anchor=W)
+		team_label.pack(side=LEFT, pady=5)
+
+		self.status_cur.execute("SELECT team FROM status")
+		team_list = self.status_cur.fetchall()
+		team_list.append('*')
+
+		self.team_name=StringVar()
+		self.team_name.set('*')
+
+		team_list_box=OptionMenu(frameTeam,self.team_name, *team_list)
+		team_list_box.config(width=35)
+		team_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Date
+		frameDate = Frame(self)
+		frameDate.pack()
+		
+		date_label=Label(frameDate,text="Date:", width=20, anchor=W)
+		date_label.pack(side=LEFT, pady=5)
+
+		self.status_cur.execute("SELECT dates FROM status")
+		date_list = self.status_cur.fetchall()
+		date_list.append('*')
+
+		self.date_name=StringVar()
+		self.date_name.set('*')
+
+		date_list_box=OptionMenu(frameDate,self.date_name, *date_list)
+		date_list_box.config(width=35)
+		date_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Week
+		frameWeek = Frame(self)
+		frameWeek.pack()
+		
+		week_label=Label(frameWeek,text="Week:", width=20, anchor=W)
+		week_label.pack(side=LEFT, pady=5)
+
+		self.status_cur.execute("SELECT weeks FROM status")
+		week_list = self.status_cur.fetchall()
+		week_list.append('*')
+
+		self.week_name=StringVar()
+		self.week_name.set('*')
+
+		week_list_box=OptionMenu(frameWeek,self.week_name, *week_list)
+		week_list_box.config(width=35)
+		week_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Month
+		frameMonth = Frame(self)
+		frameMonth.pack()
+		
+		month_label=Label(frameMonth,text="Month:", width=20, anchor=W)
+		month_label.pack(side=LEFT, pady=5)
+
+		month_list = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+		month_list.append('*')
+
+		self.month_name=StringVar()
+		self.month_name.set('*')
+
+		month_list_box=OptionMenu(frameMonth,self.month_name, *month_list)
+		month_list_box.config(width=35)
+		month_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Year
+		frameYear = Frame(self)
+		frameYear.pack()
+		
+		year_label=Label(frameYear,text="Year:", width=20, anchor=W)
+		year_label.pack(side=LEFT, pady=5)
+
+		year_list = [i for i in range(2011, 2022)]
+		year_list.append('*')
+
+		self.year_name=StringVar()
+		self.year_name.set('*')
+
+		year_list_box=OptionMenu(frameYear,self.year_name, *year_list)
+		year_list_box.config(width=35)
+		year_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		search_btn=Button(frameLast,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.make_report(), width=10)
+		search_btn.pack(side=LEFT, padx=2, pady=5)
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+	def make_report(self):
+
+		self.frameTable.pack_forget()
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+		self.create_status_table()
+		self.status_cur.execute("SELECT task_list, progress_status, meeting_status, project_status, remarksFROM status WHERE name = ? and team = ? and dates = ? and weeks = ? and months = ? and years = ?", (self.user_name.get(), self.team_name.get(), self.date_name.get(), self.week_name.get(), self.month_name.get(), self.year_name.get()))
+		data = self.status_cur.fetchall()
+
+		#Table Head
+
+		frame4 = Frame(self.frameTable)
+		frame4.pack()
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Date", width=10)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="User", width=10)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Team", width=10)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Task List", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Progress Status", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Meeting Status", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Project Status", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Remarks", width=15)
+		temp.pack(side=LEFT, pady=2)
+
+		frame5 = Frame(self)
+		frame5.pack()
+
+		status_scroll = Scrollbar(frame5)
+		status_canvas = Canvas(frame5, height=100, width=1090)
+		status_scroll.pack(side=RIGHT, fill=Y, padx = 5)
+		status_canvas.pack(side=LEFT, fill=BOTH)
+		status_scroll.config(command=status_canvas.yview)
+		status_canvas.config(yscrollcommand=status_scroll.set)
+
+		lists = Frame(status_canvas)
+		lists.pack(fill=X)
+
+		status_canvas.create_window((0,0), window=lists, anchor="nw")
+
+		for i in range(len(data)):
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=BOTH)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
+			temp.configure(text=data[i][0])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
+			temp.configure(text=data[i][1])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
+			temp.configure(text=data[i][2])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
+			temp.configure(text=data[i][3])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
+			temp.configure(text=data[i][4])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
+			temp.configure(text=data[i][5])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
+			temp.configure(text=data[i][6])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=15)
+			temp.configure(text=data[i][7])
+			temp.pack(side=LEFT)
+
+		self.frameBelow = Frame(self)
+		self.frameBelow.pack(pady=10)
+
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()
+
 root=Tk()
 root.title("NSL - Employee daily status update software")
 root.geometry("1200x750")
@@ -3150,3 +3416,5 @@ while True:
 	elif screen==17:
 		window=all_tasks_page(root)
 		prev_screen = 17
+	elif screen==18:
+		window=export_status_report_page(root)
