@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 import sqlite3
-import smtplib
 import time
-import datetime
 from tkinter import *
+import os.path
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
+import datetime
 
 class login_page(Frame):
 
@@ -138,17 +142,66 @@ class user_dashboard(Frame):
 	name   = None
 	admin  = None
 
-	task_id = None
-	task_db= "tasks.db"
+	login_conn = None
+	login_cur  = None
+
+	me     		= "noreply.nslstatus@gmail.com"
+	you    		= "noreply.nslstatus@gmail.com"
+	password 	= 'a1234567890z'
+	to_email    = []
+
+	task_id 	= None
+	task_db 	= "tasks.db"
 
 	def __init__(self,master, name, admin):
 		super(user_dashboard,self).__init__(master)
 		self.pack()
 		self.name = name
 		self.admin = admin
+		self.login_conn = sqlite3.connect('users.db')
+		self.login_cur  = self.login_conn.cursor()
 		self.task_conn = sqlite3.connect(self.task_db)
 		self.task_cur  = self.task_conn.cursor()
 		self.define_widgets()
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
+
+	def backup_def(self):
+		try:
+			self.create_user_table()
+			self.login_cur.execute("SELECT email FROM users WHERE admin_status = 1")
+			data = self.login_cur.fetchall()
+
+			for mail in data:
+				self.to_email.append(mail[0])
+
+			print(self.to_email)
+			self.login_conn.close()
+
+			msg = MIMEMultipart()
+			msg['Subject'] = 'Backup-'+datetime.datetime.now().strftime("%d-%b-%Y")+"-"+datetime.datetime.now().strftime("%H:%M:%S")
+			msg['From'] = self.me
+			msg['To'] = ", ".join(self.to_email)
+			msg.attach(MIMEText("This is backup on "+datetime.datetime.now().strftime("%d-%b-%Y")+" at time: "+datetime.datetime.now().strftime("%H:%M:%S"), 'html'))
+
+			attachment = ['users.db', 'status.db', 'tasks.db']
+
+			for f in attachment:
+				with open(f, 'rb') as a_file:
+					basename = os.path.basename(f)
+					part = MIMEApplication(a_file.read(), Name=basename)
+				part['Content-Disposition'] = 'attachment; filename="%s"' % basename
+				msg.attach(part)
+
+			server  = smtplib.SMTP("smtp.gmail.com", 25)
+			server.ehlo()
+			server.starttls()
+			server.login(self.me, self.password)
+			server.sendmail(self.me, self.to_email, msg.as_string())
+			server.quit()
+		except Exception as e:
+			print(e)
 
 	def define_widgets(self):
 		#for line1:
@@ -203,7 +256,7 @@ class user_dashboard(Frame):
 			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(10), width = 16, height=4, bd=4, bg="turquoise")
 			export_report_btn.pack(side=LEFT, padx=2, pady=2)
 
-			backup_btn=Button(frame3,text="Backup",command=lambda: self.set_value(11), width = 16, height=4, bd=4, bg="medium orchid")
+			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=4, bd=4, bg="medium orchid")
 			backup_btn.pack(side=LEFT, padx=2, pady=2)
 
 		#for line4
