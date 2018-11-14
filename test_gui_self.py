@@ -8,6 +8,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import datetime
+import csv
 
 class login_page(Frame):
 
@@ -317,9 +318,9 @@ class user_dashboard(Frame):
 
 		#scroll canvas
 		list_scrollbar = Scrollbar(scroll_frame)
-		scroll_canvas = Canvas(scroll_frame, height=150, width=800)
-		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
-		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
+		scroll_canvas = Canvas(scroll_frame, height=150, width=814)
+		scroll_canvas.pack(side=LEFT)
+		list_scrollbar.pack(side=RIGHT, fill=Y)
 		
 		list_scrollbar.config(command=scroll_canvas.yview)
 		scroll_canvas.config(yscrollcommand=list_scrollbar.set)
@@ -348,37 +349,37 @@ class user_dashboard(Frame):
 			frame_temp.pack(fill=BOTH)
 
 			#Task ID
-			self.task_id_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.envoke_task_details(i, data[i][0]), width=7)
+			self.task_id_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.envoke_task_details(i, data[i][0]), width=7, anchor="nw")
 			self.task_id_btn[i].pack(side=LEFT)
 
 			#Assigned By
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
-			temp.config(width = 10, height = 1)
+			temp.config(width = 10, height = 1, anchor="nw")
 			temp.pack(side=LEFT)
 
 			#Task List
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][2], bg="white")
-			temp.config(width = 20, height = 1)
+			temp.config(width = 20, height = 1, anchor="nw")
 			temp.pack(side=LEFT)
 
 			#Description
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][3], bg="white")
-			temp.config(width = 25, height = 1)
+			temp.config(width = 25, height = 1, anchor="nw")
 			temp.pack(side=LEFT)
 
 			#Dead Line
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][4], bg="tomato")
-			temp.config(width = 10, height = 1)
+			temp.config(width = 10, height = 1, anchor="nw")
 			temp.pack(side=LEFT)
 
 			#Priority
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][5], bg="white")
-			temp.config(width = 10, height = 1)
+			temp.config(width = 10, height = 1, anchor="nw")
 			temp.pack(side=LEFT)
 
 			#Task Status
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][6], bg="white")
-			temp.config(width = 15, height = 1)
+			temp.config(width = 15, height = 1, anchor="nw")
 			temp.pack(side=LEFT)
 
 	def envoke_task_details(self, i, id):
@@ -932,15 +933,15 @@ class delete_user_page(Frame):
 		frame3.pack()
 
 		temp = Label(frame3,relief=RIDGE, text="Current Users", bg="light blue")
-		temp.config(width=23, height=2)
+		temp.config(width=23, height=1)
 		temp.pack(side=LEFT)
 
 		temp = Label(frame3,relief=RIDGE, text="Email", bg="light blue")
-		temp.config(width=70, height=2)
+		temp.config(width=70, height=1)
 		temp.pack(side=LEFT, pady=5)
 
 		temp = Label(frame3,relief=RIDGE, text="Admin Status", bg="light blue")
-		temp.config(width=30, height=2)
+		temp.config(width=30, height=1)
 		temp.pack(side=LEFT, pady=5)
 
 		#scrolling part start
@@ -975,15 +976,15 @@ class delete_user_page(Frame):
 			frame_temp = Frame(lists)
 			frame_temp.pack(fill=BOTH)
 			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(data[i][0]), command=lambda i=i : self.copy_name_to_field(i))
-			self.temp_user_name_btn[i].config(width = 20, height = 1)
+			self.temp_user_name_btn[i].config(width = 20, height = 1, anchor="nw")
 			self.temp_user_name_btn[i].pack(side=LEFT)
 
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][1], bg="white")
-			temp.config(width = 70, height = 2)
+			temp.config(width = 70, height = 1, anchor="nw")
 			temp.pack(side=LEFT, fill=X)
 
 			temp = Label(frame_temp,relief=RIDGE, text=data[i][2], bg="white")
-			temp.config(width = 30, height = 2)
+			temp.config(width = 30, height = 1, anchor="nw")
 			temp.pack(side=LEFT, fill=X)
 
 		#frame for line2:
@@ -1213,7 +1214,7 @@ class update_status_page(Frame):
 		self.month_name=StringVar()
 		self.month_name.set(datetime.datetime.now().strftime("%b"))
 
-		month_list=OptionMenu(frameDate,self.month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		month_list=OptionMenu(frameDate,self.month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 		#month_list.config(width=5)
 		month_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -1326,7 +1327,7 @@ class update_status_page(Frame):
 				months  = datetime.datetime.now().strftime("%b")
 				years   = datetime.datetime.now().strftime("%Y")
 
-				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c")))
+				self.status_cur.execute("INSERT INTO status(ids, dates, up_time, weeks, months, years, name, team, task_list, progress_status, meeting_status, project_status, remarks) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (ids, dates, up_time, weeks, months, years, self.name, self.team.get().lower(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c")))
 				self.status_conn.commit()
 				time.sleep(0.02)
 				self.status_conn.close()
@@ -1462,39 +1463,39 @@ class edit_status_page(Frame):
 			frame_temp = Frame(lists)
 			frame_temp.pack(fill=BOTH)
 
-			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.copy_name_to_field(i,data[i][0]), width=7)
+			self.temp_user_name_btn[i] = Button(frame_temp, bg="white", fg="black", text=str(i+1), command=lambda i=i : self.copy_name_to_field(i,data[i][0]), width=7, height="1", anchor="nw")
 			self.temp_user_name_btn[i].pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
-			temp.configure(text=data[i][1])
+			temp.configure(text=data[i][1], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
-			temp.configure(text=data[i][2])
+			temp.configure(text=data[i][2], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
-			temp.configure(text=data[i][3])
+			temp.configure(text=data[i][3], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][4])
+			temp.configure(text=data[i][4], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][5])
+			temp.configure(text=data[i][5], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][6])
+			temp.configure(text=data[i][6], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][7])
+			temp.configure(text=data[i][7], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 	
 			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=15)
-			temp.configure(text=data[i][8])
+			temp.configure(text=data[i][8], height="1", anchor="nw")
 			temp.pack(side=LEFT)
 
 		self.frameBelow = Frame(self)
@@ -1574,7 +1575,7 @@ class edit_status_page(Frame):
 				self.month_name=StringVar()
 				self.month_name.set(date[1])
 
-				month_list=OptionMenu(frameDate,self.month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+				month_list=OptionMenu(frameDate,self.month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 				#month_list.config(width=5)
 				month_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -1688,7 +1689,7 @@ class edit_status_page(Frame):
 				months  = datetime.datetime.now().strftime("%b")
 				years   = datetime.datetime.now().strftime("%Y")
 
-				self.status_cur.execute("UPDATE status SET dates=?, up_time=?, weeks=?, months=?, years=?, team=?, task_list=?, progress_status=?, meeting_status=?, project_status=?, remarks=? WHERE ids=? and name=?", (dates, up_time, weeks, months, years, self.team.get(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c"), self.status_id.get(), self.name))
+				self.status_cur.execute("UPDATE status SET dates=?, up_time=?, weeks=?, months=?, years=?, team=?, task_list=?, progress_status=?, meeting_status=?, project_status=?, remarks=? WHERE ids=? and name=?", (dates, up_time, weeks, months, years, self.team.get().lower(), self.task_text.get("1.0", "end-1c"), self.progress_text.get("1.0", "end-1c"), self.meeting_text.get("1.0", "end-1c"), self.project_text.get("1.0", "end-1c"), self.remarks_text.get("1.0", "end-1c"), self.status_id.get(), self.name))
 				self.status_conn.commit()
 				time.sleep(0.02)
 				print("%s, You have successfully updated your daily status!" %(self.name))
@@ -1938,7 +1939,7 @@ class assign_task_page(Frame):
 		self.month_name=StringVar()
 		self.month_name.set(datetime.datetime.now().strftime("%b"))
 
-		month_list=OptionMenu(frame5,self.month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		month_list=OptionMenu(frame5,self.month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 		#month_list.config(width=5)
 		month_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -1975,7 +1976,7 @@ class assign_task_page(Frame):
 		self.deadline_month_name=StringVar()
 		self.deadline_month_name.set(datetime.datetime.now().strftime("%b"))
 
-		deadline_month_list=OptionMenu(frame6,self.deadline_month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		deadline_month_list=OptionMenu(frame6,self.deadline_month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 		#month_list.config(width=5)
 		deadline_month_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -2692,7 +2693,7 @@ class update_assign_task_page(Frame):
 		self.month_name=StringVar()
 		self.month_name.set(est_date_str_list[1])
 
-		month_list=OptionMenu(frame5,self.month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		month_list=OptionMenu(frame5,self.month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 		#month_list.config(width=5)
 		month_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -2730,7 +2731,7 @@ class update_assign_task_page(Frame):
 		self.deadline_month_name=StringVar()
 		self.deadline_month_name.set(dead_date_str_list[1])
 
-		deadline_month_list=OptionMenu(frame6,self.deadline_month_name, *['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'])
+		deadline_month_list=OptionMenu(frame6,self.deadline_month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
 		#month_list.config(width=5)
 		deadline_month_list.pack(side=LEFT, padx=2, pady=5)
 
@@ -3075,6 +3076,7 @@ class export_status_report_page(Frame):
 	status_cur  = None
 	name        = None
 	db_name     = "status.db"
+	file_name 	= ""
 
 	error_msg  = " "
 
@@ -3101,7 +3103,7 @@ class export_status_report_page(Frame):
 		#for line1:
 		frame1 = Frame(self)
 		frame1.pack()
-		dash_board_label=Label(frame1,text="::Tasks::")
+		dash_board_label=Label(frame1,text="::Reports::")
 		dash_board_label.config(width=200, font=("Courier", 25))
 		dash_board_label.pack(pady=5)
 
@@ -3115,113 +3117,92 @@ class export_status_report_page(Frame):
 		frameUser = Frame(self)
 		frameUser.pack()
 		
-		status_of_label=Label(frameUser,text="User:", width=20, anchor=W)
+		status_of_label=Label(frameUser,text="User:", anchor=W)
 		status_of_label.pack(side=LEFT, pady=5)
 
 		self.login_cur.execute("SELECT name FROM users")
-		user_list = self.login_cur.fetchall()
+		user_list = list(set(self.login_cur.fetchall()))
 		self.login_conn.close()
-		user_list.append('*')
+		user_list.append('All')
 
 		self.status_of_name=StringVar()
-		self.status_of_name.set('*')
+		self.status_of_name.set('All')
 
 		status_of_box=OptionMenu(frameUser,self.status_of_name, *user_list)
-		status_of_box.config(width=35)
 		status_of_box.pack(side=LEFT, padx=2, pady=5)
 
 		#Of Team
-		frameTeam = Frame(self)
-		frameTeam.pack()
-		
-		team_label=Label(frameTeam,text="Team:", width=20, anchor=W)
+		team_label=Label(frameUser,text="Team:", anchor=W)
 		team_label.pack(side=LEFT, pady=5)
 
 		self.status_cur.execute("SELECT team FROM status")
-		team_list = self.status_cur.fetchall()
-		team_list.append('*')
+		team_list = list(set(self.status_cur.fetchall()))
+		team_list.append('All')
 
 		self.team_name=StringVar()
-		self.team_name.set('*')
+		self.team_name.set('All')
 
-		team_list_box=OptionMenu(frameTeam,self.team_name, *team_list)
-		team_list_box.config(width=35)
+		team_list_box=OptionMenu(frameUser,self.team_name, *team_list)
 		team_list_box.pack(side=LEFT, padx=2, pady=5)
 
-		#Of Date
-		frameDate = Frame(self)
-		frameDate.pack()
-		
-		date_label=Label(frameDate,text="Date:", width=20, anchor=W)
+		#Of Date	
+		date_label=Label(frameUser,text="Date:",anchor=W)
 		date_label.pack(side=LEFT, pady=5)
 
 		self.status_cur.execute("SELECT dates FROM status")
-		date_list = self.status_cur.fetchall()
-		date_list.append('*')
+		date_list = list(set(self.status_cur.fetchall()))
+		date_list.append('All')
 
 		self.date_name=StringVar()
-		self.date_name.set('*')
+		self.date_name.set('All')
 
-		date_list_box=OptionMenu(frameDate,self.date_name, *date_list)
-		date_list_box.config(width=35)
+		date_list_box=OptionMenu(frameUser,self.date_name, *date_list)
 		date_list_box.pack(side=LEFT, padx=2, pady=5)
 
 		#Of Week
-		frameWeek = Frame(self)
-		frameWeek.pack()
-		
-		week_label=Label(frameWeek,text="Week:", width=20, anchor=W)
+		week_label=Label(frameUser,text="Week:", anchor=W)
 		week_label.pack(side=LEFT, pady=5)
 
 		self.status_cur.execute("SELECT weeks FROM status")
-		week_list = self.status_cur.fetchall()
-		week_list.append('*')
+		week_list = list(set(self.status_cur.fetchall()))
+		week_list.append('All')
 
 		self.week_name=StringVar()
-		self.week_name.set('*')
+		self.week_name.set('All')
 
-		week_list_box=OptionMenu(frameWeek,self.week_name, *week_list)
-		week_list_box.config(width=35)
+		week_list_box=OptionMenu(frameUser,self.week_name, *week_list)
 		week_list_box.pack(side=LEFT, padx=2, pady=5)
 
 		#Of Month
-		frameMonth = Frame(self)
-		frameMonth.pack()
-		
-		month_label=Label(frameMonth,text="Month:", width=20, anchor=W)
+		month_label=Label(frameUser,text="Month:", anchor=W)
 		month_label.pack(side=LEFT, pady=5)
 
-		month_list = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
-		month_list.append('*')
+		month_list = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+		month_list.append('All')
 
 		self.month_name=StringVar()
-		self.month_name.set('*')
+		self.month_name.set('All')
 
-		month_list_box=OptionMenu(frameMonth,self.month_name, *month_list)
-		month_list_box.config(width=35)
+		month_list_box=OptionMenu(frameUser,self.month_name, *month_list)
 		month_list_box.pack(side=LEFT, padx=2, pady=5)
 
 		#Of Year
-		frameYear = Frame(self)
-		frameYear.pack()
-		
-		year_label=Label(frameYear,text="Year:", width=20, anchor=W)
+		year_label=Label(frameUser,text="Year:", anchor=W)
 		year_label.pack(side=LEFT, pady=5)
 
 		year_list = [i for i in range(2011, 2022)]
-		year_list.append('*')
+		year_list.append('All')
 
 		self.year_name=StringVar()
-		self.year_name.set('*')
+		self.year_name.set('All')
 
-		year_list_box=OptionMenu(frameYear,self.year_name, *year_list)
-		year_list_box.config(width=35)
+		year_list_box=OptionMenu(frameUser,self.year_name, *year_list)
 		year_list_box.pack(side=LEFT, padx=2, pady=5)
 
 		frameLast = Frame(self)
 		frameLast.pack()
 
-		search_btn=Button(frameLast,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.make_report(), width=10)
+		search_btn=Button(frameLast,text="Refresh", bg="DeepSkyBlue4", fg = "white", command = lambda : self.make_report(), width=10)
 		search_btn.pack(side=LEFT, padx=2, pady=5)
 
 		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
@@ -3239,9 +3220,59 @@ class export_status_report_page(Frame):
 		self.frameTable = Frame(self)
 		self.frameTable.pack()
 
+		#Status Of
+		if(self.status_of_name.get()=='All'):
+			name = '*'
+			self.file_name += 'all_'
+		else:
+			name = str(self.status_of_name.get()[2:len(self.status_of_name.get())-3])
+			self.file_name += name+"_"
+
+		#Team
+		if(self.team_name.get()=='All'):
+			team = '*'
+			self.file_name += 'all_'
+		else:
+			team = str(self.team_name.get()[2:len(self.team_name.get())-3])
+			self.file_name += team+"_"
+
+		#Date
+		if(self.date_name.get()=='All'):
+			date = '*'
+			self.file_name += 'all_'
+		else:
+			date = str(self.date_name.get()[2:len(self.date_name.get())-3])
+			self.file_name += date+"_"
+
+		#Week
+		if(self.week_name.get()=='All'):
+			week = '*'
+			self.file_name += 'all_'
+		else:
+			week = str(self.week_name.get()[2:len(self.week_name.get())-3])
+			self.file_name += week+"_"
+
+		#Month
+		if(self.month_name.get()=='All'):
+			month = '*'
+			self.file_name += 'all_'
+		else:
+			month = str(self.month_name.get())
+			self.file_name += month+"_"
+
+		#Year
+		if(self.year_name.get()=='All'):
+			year = '*'
+			self.file_name += 'all'
+		else:
+			year = str(self.year_name.get())
+			self.file_name += year
+
+		self.file_name += ".xlsx"
+
 		self.create_status_table()
-		self.status_cur.execute("SELECT task_list, progress_status, meeting_status, project_status, remarksFROM status WHERE name = ? and team = ? and dates = ? and weeks = ? and months = ? and years = ?", (self.user_name.get(), self.team_name.get(), self.date_name.get(), self.week_name.get(), self.month_name.get(), self.year_name.get()))
-		data = self.status_cur.fetchall()
+		self.status_cur.execute("SELECT dates, name, team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE name GLOB ? and team GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, team, date, week, month, year))
+		self.data = self.status_cur.fetchall()
 
 		#Table Head
 
@@ -3272,59 +3303,75 @@ class export_status_report_page(Frame):
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Remarks", width=15)
 		temp.pack(side=LEFT, pady=2)
 
-		frame5 = Frame(self)
+		frame5 = Frame(self.frameTable)
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=100, width=1090)
-		status_scroll.pack(side=RIGHT, fill=Y, padx = 5)
-		status_canvas.pack(side=LEFT, fill=BOTH)
+		status_canvas = Canvas(frame5, height=250, width=1016)
+		status_scroll.pack(side=RIGHT, fill=Y)
+		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
 		status_canvas.config(yscrollcommand=status_scroll.set)
 
 		lists = Frame(status_canvas)
-		lists.pack(fill=X)
+		lists.pack()
 
 		status_canvas.create_window((0,0), window=lists, anchor="nw")
 
-		for i in range(len(data)):
+		for i in range(len(self.data)):
 			frame_temp = Frame(lists)
 			frame_temp.pack(fill=BOTH)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
-			temp.configure(text=data[i][0])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=10, height=1)
+			temp.configure(text=self.data[i][0], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
-			temp.configure(text=data[i][1])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=10, height=1)
+			temp.configure(text=self.data[i][1], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=10)
-			temp.configure(text=data[i][2])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=10, height=1)
+			temp.configure(text=self.data[i][2], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][3])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=20, height=1)
+			temp.configure(text=self.data[i][3], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][4])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=20, height=1)
+			temp.configure(text=self.data[i][4], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][5])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=20, height=1)
+			temp.configure(text=self.data[i][5], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=20)
-			temp.configure(text=data[i][6])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=20, height=1)
+			temp.configure(text=self.data[i][6], anchor="nw")
 			temp.pack(side=LEFT)
 	
-			temp = Label(frame_temp,relief=RIDGE, bg="light blue", width=15)
-			temp.configure(text=data[i][7])
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=15, height=1)
+			temp.configure(text=self.data[i][7], anchor="nw")
 			temp.pack(side=LEFT)
 
-		self.frameBelow = Frame(self)
-		self.frameBelow.pack(pady=10)
+		frameReport = Frame(self.frameTable)
+		frameReport.pack()
+
+		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(), width=10)
+		export_btn.pack(pady=5)
+
+	def save_report(self):
+		try:
+			with open(self.file_name, "w") as csv_file:
+				writer = csv.writer(csv_file, delimiter=',')
+				writer.writerow(['Date', 'User', 'Team', 'Task List', 'Progress Status', 'Meeting Status', 'Project Status', 'Remarks'])
+				for line in self.data:
+					writer.writerow(list(line))
+				print("Write to ",self.file_name," is successful!")
+				self.screen = 18
+				self.quit()
+		except Exception as e:
+			print(e)
 
 	def go_prev(self):
 		self.screen = 1
