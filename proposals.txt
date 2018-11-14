@@ -1,3 +1,4 @@
-10. attendance
-11. food order
-12. admin can view, print and export report of attendance and food
+1. export file as pdf
+2. dropdown contains deleted user names also from database
+3. fix dropdownmenu width
+4. try mysql database

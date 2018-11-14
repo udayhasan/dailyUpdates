@@ -143,30 +143,66 @@ class user_dashboard(Frame):
 	name   = None
 	admin  = None
 
-	login_conn = None
-	login_cur  = None
-
 	me     		= "noreply.nslstatus@gmail.com"
 	you    		= "noreply.nslstatus@gmail.com"
 	password 	= 'a1234567890z'
 	to_email    = []
 
 	task_id 	= None
-	task_db 	= "./db/tasks.db"
 
 	def __init__(self,master, name, admin):
 		super(user_dashboard,self).__init__(master)
 		self.pack()
 		self.name = name
 		self.admin = admin
+
 		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
-		self.task_conn = sqlite3.connect(self.task_db)
+
+		self.task_conn = sqlite3.connect("./db/tasks.db")
 		self.task_cur  = self.task_conn.cursor()
+
+		self.food_conn = sqlite3.connect("./db/foods.db")
+		self.food_cur  = self.food_conn.cursor()
+
 		self.define_widgets()
 
 	def create_user_table(self):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
+
+	def create_food_table(self):
+		self.food_cur.execute("CREATE TABLE IF NOT EXISTS foods(name TEXT, value TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
+
+	def food_order(self, existing, order, dates, weeks, months, years):
+		if(existing == 0):
+			#order activate
+			self.food_btn.config(bg='green3')
+			self.create_food_table()
+			self.food_cur.execute("INSERT INTO foods(name, value, dates, weeks, months, years) VALUES (?, ?, ?, ?, ?, ?)", (self.name, str(1), dates, weeks, months, years))
+			self.food_conn.commit()
+			time.sleep(0.02)
+			self.screen = 1
+			self.quit()
+
+		elif(existing == 1 and order == 0):
+			#button red korbe
+			self.food_btn.config(bg='tomato')
+			self.create_food_table()
+			self.food_cur.execute("DELETE FROM foods WHERE name = ? and dates = ?", (self.name, dates))
+			self.food_conn.commit()
+			time.sleep(0.02)
+			self.screen = 1
+			self.quit()
+
+		elif(existing == 1 and order == 1):
+			#button green korbe
+			self.food_btn.config(bg='green3')
+			self.create_food_table()
+			self.food_cur.execute("UPDATE foods SET name = ?, value = ?, dates = ?, weeks = ?, months = ?, years = ? WHERE name = ? and dates = ?", (self.name, str(1), dates, weeks, months, years, self.name, dates))
+			self.food_conn.commit()
+			time.sleep(0.02)
+			self.screen = 1
+			self.quit()
 
 	def backup_def(self):
 		try:
@@ -219,25 +255,25 @@ class user_dashboard(Frame):
 		frame2 = Frame(self)
 		frame2.pack()
 
-		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=4, bd=4, bg="cyan3")
+		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=2, bd=4, bg="cyan3")
 		update_status_btn.pack(side=LEFT, padx=2, pady=2)
 
-		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=4, bd=4, bg="PaleGreen2")
+		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=2, bd=4, bg="PaleGreen2")
 		edit_status_btn.pack(side=LEFT, padx=2, pady=2)
 
-		assign_task_btn=Button(frame2,text="Assign Task",command=lambda: self.set_value(13), width = 16, height=4, bd=4, bg="blue2")
+		assign_task_btn=Button(frame2,text="Assign Task",command=lambda: self.set_value(13), width = 16, height=2, bd=4, bg="blue2")
 		assign_task_btn.pack(side=LEFT, padx=2, pady=2)
 
-		edit_task_btn=Button(frame2,text="Edit Task",command=lambda: self.set_value(15), width = 16, height=4, bd=4, bg="aquamarine2")
+		edit_task_btn=Button(frame2,text="Edit Task",command=lambda: self.set_value(15), width = 16, height=2, bd=4, bg="aquamarine2")
 		edit_task_btn.pack(side=LEFT, padx=2, pady=2)
 
-		edit_email_btn=Button(frame2,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=4, bd=4, bg="gold2")
+		edit_email_btn=Button(frame2,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=2, bd=4, bg="gold2")
 		edit_email_btn.pack(side=LEFT, padx=2, pady=2)
 
-		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
+		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=2, bd=4, bg="magenta3")
 		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
 
-		attns_btn=Button(frame2,text="Attendance",command=lambda: self.set_value(19), width = 16, height=4, bd=4, bg="LightSteelBlue3")
+		attns_btn=Button(frame2,text="Attendance",command=lambda: self.set_value(19), width = 16, height=2, bd=4, bg="LightSteelBlue3")
 		attns_btn.pack(side=LEFT, padx=2, pady=2)
 
 		if(self.admin == 1):
@@ -245,34 +281,74 @@ class user_dashboard(Frame):
 			frame3 = Frame(self)
 			frame3.pack()
 
-			edit_user_admin_sts_btn=Button(frame3,text="Admin Privilege",command=lambda: self.set_value(3), width = 16, height=4, bd=4, bg="aquamarine2")
+			edit_user_admin_sts_btn=Button(frame3,text="Admin Privilege",command=lambda: self.set_value(3), width = 16, height=2, bd=4, bg="aquamarine2")
 			edit_user_admin_sts_btn.pack(side=LEFT, padx=2, pady=2)
 
-			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = 16, height=4, bd=4, bg="medium orchid")
+			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = 16, height=2, bd=4, bg="medium orchid")
 			all_task_btn.pack(side=LEFT, padx=2, pady=2)
 
-			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=4, bd=4, bg="yellow")
+			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=2, bd=4, bg="yellow")
 			add_user_btn.pack(side=LEFT, padx=2, pady=2)
 
-			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
+			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=2, bd=4, bg="LightSteelBlue3")
 			delete_user_btn.pack(side=LEFT, padx=2, pady=2)
 
-			export_report_btn=Button(frame3,text="Export Status",command=lambda: self.set_value(18), width = 16, height=4, bd=4, bg="turquoise")
+			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(22), width = 16, height=2, bd=4, bg="turquoise")
 			export_report_btn.pack(side=LEFT, padx=2, pady=2)
 
-			export_report_btn=Button(frame3,text="Export Attendance",command=lambda: self.set_value(20), width = 16, height=4, bd=4, bg="aquamarine2")
-			export_report_btn.pack(side=LEFT, padx=2, pady=2)
-
-			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=4, bd=4, bg="medium orchid")
+			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=2, bd=4, bg="medium orchid")
 			backup_btn.pack(side=LEFT, padx=2, pady=2)
+
+		###########################################################
+		#Foods
+		dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
+		weeks   = datetime.datetime.now().strftime("%U")
+		months  = datetime.datetime.now().strftime("%b")
+		years   = datetime.datetime.now().strftime("%Y")
+
+		self.create_food_table()
+		self.food_cur.execute("SELECT value FROM foods WHERE name = ? and dates = ?", (self.name, dates))
+		foodData = self.food_cur.fetchall()
+		print(self.name, dates, int(foodData[0][0]))
 
 		#for line4
 		frame4 = Frame(self)
-		frame4.pack(pady=10)
-		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=4, bd=4)
+		frame4.pack()
+
+		if(int(datetime.datetime.now().strftime("%H"))>=10 and len(foodData) > 0 and int(foodData[0][0]) == 1):
+
+			self.food_btn=Button(frame4,text="Food Order\n(Given)", bg="green3", state = DISABLED, fg = "white", width = 16, height=2, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+
+		elif((int(datetime.datetime.now().strftime("%H"))>=10 and len(foodData) == 0) or ((int(datetime.datetime.now().strftime("%H"))>=10 and len(foodData) > 0 and int(foodData[0][0]) == 0))):
+
+			self.food_btn=Button(frame4,text="Food Order\n(Not Given)", bg="tomato", state = DISABLED, fg = "white", width = 16, height=2, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+
+		elif(int(datetime.datetime.now().strftime("%H"))<10 and len(foodData) > 0 and int(foodData[0][0]) == 1):
+
+			self.food_btn=Button(frame4,text="Food Order\n(Given)", bg="green3", fg = "white", command = lambda : self.food_order(1, 0, dates, weeks, months, years), width = 16, height=2, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+			
+		elif(int(datetime.datetime.now().strftime("%H"))<10 and len(foodData) > 0 and int(foodData[0][0]) == 0):
+
+			self.food_btn=Button(frame4, text="Food Order\n(Not Given)", bg="tomato", fg = "white", command = lambda : self.food_order(1, 1, dates, weeks, months, years), width = 16, height=2, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+
+		elif(int(datetime.datetime.now().strftime("%H"))<10 and len(foodData) == 0):
+
+			self.food_btn=Button(frame4, text="Food Order\n(Not Given)", bg="tomato", fg = "white", command = lambda : self.food_order(0, 1, dates, weeks, months, years), width = 16, height=2, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+		else:
+			self.error_msg = "Error Happend!"
+			print(self.error_msg)
+
+		###########################################################
+
+		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=2, bd=4)
 		log_out.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=4, bd=4)
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=2, bd=4)
 		exit.pack(side=LEFT, padx=2, pady=2)
 
 		#Table Head
@@ -343,8 +419,10 @@ class user_dashboard(Frame):
 		data = []
 
 		for i in range(len(data1)):
-			if(data1[i][6] == 'complete'):
+			if(data1[i][6] != 'complete'):
 				data.append(data1[i])
+
+		print(data1)
 
 		self.task_id_btn = []
 		for i in range(len(data)):
@@ -3380,7 +3458,7 @@ class export_status_report_page(Frame):
 			print(e)
 
 	def go_prev(self):
-		self.screen = 1
+		self.screen = 22
 		self.quit()
 
 	def leave(self):
@@ -3739,7 +3817,7 @@ class export_attendance_report_page(Frame):
 			year = str(self.year_name.get())
 			file_name += year
 
-		file_name += "_attendance.xlsx"
+		file_name += ".xlsx"
 
 		self.create_attns_table()
 		self.attns_cur.execute("SELECT name, intime, outtime, dates FROM attns WHERE name GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, date, week, month, year))
@@ -3815,6 +3893,332 @@ class export_attendance_report_page(Frame):
 				self.quit()
 		except Exception as e:
 			print(e)
+
+	def go_prev(self):
+		self.screen = 22
+		self.quit()
+
+	def leave(self):
+		quit()
+
+class export_food_report_page(Frame):
+
+	screen = 21
+
+	food_conn 	= None
+	food_cur  	= None
+	name        = None
+
+	error_msg  = " "
+
+	def __init__(self,master):
+		super(export_food_report_page,self).__init__(master)
+		self.pack()
+
+		self.food_conn = sqlite3.connect('./db/foods.db')
+		self.food_cur  = self.food_conn.cursor()
+
+		self.pack()
+		self.define_widgets()
+
+	def create_food_table(self):
+		self.food_cur.execute("CREATE TABLE IF NOT EXISTS foods(name TEXT, value TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
+
+	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Food Report::")
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		#Status of
+		frameUser = Frame(self)
+		frameUser.pack()
+		
+		status_of_label=Label(frameUser,text="User:", anchor=W)
+		status_of_label.pack(side=LEFT, pady=5)
+
+		self.create_food_table()
+		self.food_cur.execute("SELECT name FROM foods")
+		user_list = list(set(self.food_cur.fetchall()))
+		user_list.append('All')
+
+		self.status_of_name=StringVar()
+		self.status_of_name.set('All')
+
+		status_of_box=OptionMenu(frameUser,self.status_of_name, *user_list)
+		status_of_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Date	
+		date_label=Label(frameUser,text="Date:",anchor=W)
+		date_label.pack(side=LEFT, pady=5)
+
+		self.food_cur.execute("SELECT dates FROM foods")
+		date_list = list(set(self.food_cur.fetchall()))
+		date_list.append('All')
+
+		self.date_name=StringVar()
+		self.date_name.set('All')
+
+		date_list_box=OptionMenu(frameUser,self.date_name, *date_list)
+		date_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Week
+		week_label=Label(frameUser,text="Week:", anchor=W)
+		week_label.pack(side=LEFT, pady=5)
+
+		self.food_cur.execute("SELECT weeks FROM foods")
+		week_list = list(set(self.food_cur.fetchall()))
+		week_list.append('All')
+
+		self.week_name=StringVar()
+		self.week_name.set('All')
+
+		week_list_box=OptionMenu(frameUser,self.week_name, *week_list)
+		week_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Month
+		month_label=Label(frameUser,text="Month:", anchor=W)
+		month_label.pack(side=LEFT, pady=5)
+
+		self.food_cur.execute("SELECT months FROM foods")
+		month_list = list(set(self.food_cur.fetchall()))
+		month_list.append('All')
+
+		self.month_name=StringVar()
+		self.month_name.set('All')
+
+		month_list_box=OptionMenu(frameUser,self.month_name, *month_list)
+		month_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Year
+		year_label=Label(frameUser,text="Year:", anchor=W)
+		year_label.pack(side=LEFT, pady=5)
+
+		self.food_cur.execute("SELECT years FROM foods")
+		year_list = list(set(self.food_cur.fetchall()))
+		year_list.append('All')
+
+		self.year_name=StringVar()
+		self.year_name.set('All')
+
+		year_list_box=OptionMenu(frameUser,self.year_name, *year_list)
+		year_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		search_btn=Button(frameLast,text="Refresh", bg="DeepSkyBlue4", fg = "white", command = lambda : self.make_report(), width=10)
+		search_btn.pack(side=LEFT, padx=2, pady=5)
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+	def make_report(self):
+		file_name = "./food/"
+
+		self.frameTable.pack_forget()
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+		#Status Of
+		if(self.status_of_name.get()=='All'):
+			name = '*'
+			file_name += 'all_'
+		else:
+			name = str(self.status_of_name.get()[2:len(self.status_of_name.get())-3])
+			file_name += name+"_"
+
+		#Date
+		if(self.date_name.get()=='All'):
+			date = '*'
+			file_name += 'all_'
+		else:
+			date = str(self.date_name.get()[2:len(self.date_name.get())-3])
+			file_name += date+"_"
+
+		#Week
+		if(self.week_name.get()=='All'):
+			week = '*'
+			file_name += 'all_'
+		else:
+			week = str(self.week_name.get()[2:len(self.week_name.get())-3])
+			file_name += week+"_"
+
+		#Month
+		if(self.month_name.get()=='All'):
+			month = '*'
+			file_name += 'all_'
+		else:
+			month = str(self.month_name.get())
+			file_name += month+"_"
+
+		#Year
+		if(self.year_name.get()=='All'):
+			year = '*'
+			file_name += 'all'
+		else:
+			year = str(self.year_name.get())
+			file_name += year
+
+		file_name += ".xlsx"
+
+		self.create_food_table()
+		self.food_cur.execute("SELECT name, value, dates FROM foods WHERE name GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, date, week, month, year))
+		data1 = self.food_cur.fetchall()
+		self.data = []
+
+		for i in data1:
+			if(int(i[1])==1):
+				self.data.append(i)
+		print(self.data)
+
+		#Table Head
+
+		frame4 = Frame(self.frameTable)
+		frame4.pack()
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Serial", width=10)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Date", width=15)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="User", width=30)
+		temp.pack(side=LEFT, pady=2)
+
+		frame5 = Frame(self.frameTable)
+		frame5.pack()
+
+		status_scroll = Scrollbar(frame5)
+		status_canvas = Canvas(frame5, height=250, width=436)
+		status_scroll.pack(side=RIGHT, fill=Y)
+		status_canvas.pack(side=LEFT)
+		status_scroll.config(command=status_canvas.yview)
+		status_canvas.config(yscrollcommand=status_scroll.set)
+
+		lists = Frame(status_canvas)
+		lists.pack()
+
+		status_canvas.create_window((0,0), window=lists, anchor="nw")
+
+		for i in range(len(self.data)):
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=BOTH)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=10, height=1)
+			temp.configure(text=str(i+1))
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=15, height=1)
+			temp.configure(text=self.data[i][2])
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=30, height=1)
+			temp.configure(text=self.data[i][0])
+			temp.pack(side=LEFT)
+
+		frameTotal = Frame(self.frameTable)
+		frameTotal.pack()
+
+		temp = Label(frameTotal, text= "Total: ", fg='red', width=10, height=1)
+		temp.config(font=("Courier", 20))
+		temp.pack(side=LEFT)
+
+		temp = Label(frameTotal, text= str(len(self.data)), fg='red', width=10, height=1)
+		temp.config(font=("Courier", 20))
+		temp.pack(side=LEFT)
+
+		frameReport = Frame(self.frameTable)
+		frameReport.pack()
+
+		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name, str(len(self.data))), width=10)
+		export_btn.pack(pady=5)
+
+	def save_report(self, file_name, total):
+		try:
+			with open(file_name, "w") as csv_file:
+				writer = csv.writer(csv_file, delimiter=',')
+				writer.writerow(['Serial', 'Date', 'User'])
+				i = 1
+				for line in self.data:
+					writer.writerow([str(i), line[2], line[0]])
+				writer.writerow(['\n'])
+				writer.writerow(['', 'Total', total])
+				print("Write to ",file_name," is successful!")
+				self.screen = 20
+				self.quit()
+		except Exception as e:
+			print(e)
+
+	def go_prev(self):
+		self.screen = 22
+		self.quit()
+
+	def leave(self):
+		quit()
+
+class export_report_page(Frame):
+
+	screen = 22
+
+	error_msg  = " "
+
+	def __init__(self,master):
+		super(export_report_page,self).__init__(master)
+		self.pack()
+
+		self.pack()
+		self.define_widgets()
+
+	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Export Reports::")
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frameButton = Frame(self)
+		frameButton.pack()
+
+		export_status_btn=Button(frameButton,text="Export\nStatus\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(18), width=10, height=3)
+		export_status_btn.pack(side=LEFT, padx=2, pady=5)
+
+		export_attns_btn=Button(frameButton,text="Export\nAttendance\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(20), width=10, height=3)
+		export_attns_btn.pack(side=LEFT, padx=2, pady=5)
+
+		export_food_btn=Button(frameButton,text="Export\nFood\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(21), width=10, height=3)
+		export_food_btn.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+	def set_value(self, value):
+		self.screen = value
+		self.quit()
 
 	def go_prev(self):
 		self.screen = 1
@@ -3912,3 +4316,7 @@ while True:
 		window=attendance_page(root, name)
 	elif screen==20:
 		window=export_attendance_report_page(root)
+	elif screen==21:
+		window=export_food_report_page(root)
+	elif screen==22:
+		window=export_report_page(root)
