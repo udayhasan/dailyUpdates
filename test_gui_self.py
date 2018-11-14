@@ -22,7 +22,7 @@ class login_page(Frame):
 
 	def __init__(self,master):
 		super(login_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.pack()
 		self.define_widgets()
@@ -152,14 +152,14 @@ class user_dashboard(Frame):
 	to_email    = []
 
 	task_id 	= None
-	task_db 	= "tasks.db"
+	task_db 	= "./db/tasks.db"
 
 	def __init__(self,master, name, admin):
 		super(user_dashboard,self).__init__(master)
 		self.pack()
 		self.name = name
 		self.admin = admin
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.task_conn = sqlite3.connect(self.task_db)
 		self.task_cur  = self.task_conn.cursor()
@@ -186,7 +186,7 @@ class user_dashboard(Frame):
 			msg['To'] = ", ".join(self.to_email)
 			msg.attach(MIMEText("This is backup on "+datetime.datetime.now().strftime("%d-%b-%Y")+" at time: "+datetime.datetime.now().strftime("%H:%M:%S"), 'html'))
 
-			attachment = ['users.db', 'status.db', 'tasks.db', 'attns.db']
+			attachment = ['./db/users.db', './db/status.db', './db/tasks.db', './db/attns.db', './db/foods.db']
 
 			for f in attachment:
 				with open(f, 'rb') as a_file:
@@ -237,6 +237,9 @@ class user_dashboard(Frame):
 		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=4, bd=4, bg="magenta3")
 		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
 
+		attns_btn=Button(frame2,text="Attendance",command=lambda: self.set_value(19), width = 16, height=4, bd=4, bg="LightSteelBlue3")
+		attns_btn.pack(side=LEFT, padx=2, pady=2)
+
 		if(self.admin == 1):
 			#for line3:
 			frame3 = Frame(self)
@@ -254,7 +257,10 @@ class user_dashboard(Frame):
 			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=4, bd=4, bg="LightSteelBlue3")
 			delete_user_btn.pack(side=LEFT, padx=2, pady=2)
 
-			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(18), width = 16, height=4, bd=4, bg="turquoise")
+			export_report_btn=Button(frame3,text="Export Status",command=lambda: self.set_value(18), width = 16, height=4, bd=4, bg="turquoise")
+			export_report_btn.pack(side=LEFT, padx=2, pady=2)
+
+			export_report_btn=Button(frame3,text="Export Attendance",command=lambda: self.set_value(20), width = 16, height=4, bd=4, bg="aquamarine2")
 			export_report_btn.pack(side=LEFT, padx=2, pady=2)
 
 			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=4, bd=4, bg="medium orchid")
@@ -413,7 +419,7 @@ class add_user_page(Frame):
 
 	def __init__(self,master):
 		super(add_user_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.pack()
 		self.define_widgets()
@@ -526,7 +532,7 @@ class add_user_page(Frame):
 
 	def __init__(self,master, name):
 		super(edit_user_name_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.name       = name
 		self.pack()
@@ -611,7 +617,7 @@ class edit_user_admin_sts_page(Frame):
 
 	def __init__(self,master, name):
 		super(edit_user_admin_sts_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.name       = name
 		self.pack()
@@ -726,7 +732,7 @@ class edit_user_email_page(Frame):
 
 	def __init__(self,master):
 		super(edit_user_email_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.pack()
 		self.define_widgets()
@@ -810,7 +816,7 @@ class edit_user_pass_page(Frame):
 
 	def __init__(self,master, name):
 		super(edit_user_pass_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.name = name
 		self.pack()
@@ -905,7 +911,7 @@ class delete_user_page(Frame):
 
 	def __init__(self,master, name):
 		super(delete_user_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.name       = name
 		self.pack()
@@ -1068,7 +1074,7 @@ class forgot_pass_page(Frame):
 
 	def __init__(self,master):
 		super(forgot_pass_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.pack()
 		self.define_widgets()
@@ -1158,7 +1164,7 @@ class update_status_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name        = None
-	db_name     = "status.db"
+	db_name     = "./db/status.db"
 
 	error_msg  = " "
 
@@ -1352,7 +1358,7 @@ class edit_status_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name        = None
-	db_name     = "status.db"
+	db_name     = "./db/status.db"
 
 	error_msg  = " "
 
@@ -1720,7 +1726,7 @@ class forgot_id_page(Frame):
 
 	def __init__(self,master):
 		super(forgot_id_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.pack()
 		self.define_widgets()
@@ -1807,7 +1813,7 @@ class assign_task_page(Frame):
 	
 	name        	= None
 	
-	task_db  		= "tasks.db"
+	task_db  		= "./db/tasks.db"
 
 	error_msg  		= " "
 
@@ -1816,7 +1822,7 @@ class assign_task_page(Frame):
 	def __init__(self,master, name):
 		super(assign_task_page,self).__init__(master)
 
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 
 		self.task_conn = sqlite3.connect(self.task_db)
@@ -2107,7 +2113,7 @@ class task_description_page(Frame):
 	name        	= None
 	task_id 		= 0
 	
-	task_db  		= "tasks.db"
+	task_db  		= "./db/tasks.db"
 
 	error_msg  		= " "
 
@@ -2116,7 +2122,7 @@ class task_description_page(Frame):
 	def __init__(self,master, name, task_id, prev_screen):
 		super(task_description_page,self).__init__(master)
 
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 
 		self.task_conn = sqlite3.connect(self.task_db)
@@ -2319,7 +2325,7 @@ class edit_assign_task_page(Frame):
 	
 	name        	= None
 	
-	task_db  		= "tasks.db"
+	task_db  		= "./db/tasks.db"
 
 	error_msg  		= " "
 
@@ -2327,7 +2333,7 @@ class edit_assign_task_page(Frame):
 
 	def __init__(self,master, name):
 		super(edit_assign_task_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 
 		self.task_conn = sqlite3.connect(self.task_db)
@@ -2552,7 +2558,7 @@ class update_assign_task_page(Frame):
 	name        	= None
 	task_no 		= None
 	
-	task_db  		= "tasks.db"
+	task_db  		= "./db/tasks.db"
 
 	error_msg  		= " "
 
@@ -2561,7 +2567,7 @@ class update_assign_task_page(Frame):
 	def __init__(self,master, name, task_no):
 		super(update_assign_task_page,self).__init__(master)
 
-		self.login_conn = sqlite3.connect('users.db')
+		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 
 		self.task_conn = sqlite3.connect(self.task_db)
@@ -2857,13 +2863,13 @@ class all_tasks_page(Frame):
 
 	task_id = None
 
-	task_db= "tasks.db"
+	task_db= "./db/tasks.db"
 
 	def __init__(self,master):
 		super(all_tasks_page,self).__init__(master)
 		self.pack()
 
-		self.login_conn= sqlite3.connect('users.db')
+		self.login_conn= sqlite3.connect('./db/users.db')
 		self.login_cur = self.login_conn.cursor()
 
 		self.task_conn = sqlite3.connect(self.task_db)
@@ -3075,8 +3081,7 @@ class export_status_report_page(Frame):
 	status_conn = None
 	status_cur  = None
 	name        = None
-	db_name     = "status.db"
-	file_name 	= ""
+	db_name     = "./db/status.db"
 
 	error_msg  = " "
 
@@ -3084,7 +3089,7 @@ class export_status_report_page(Frame):
 		super(export_status_report_page,self).__init__(master)
 		self.pack()
 
-		self.login_conn= sqlite3.connect('users.db')
+		self.login_conn= sqlite3.connect('./db/users.db')
 		self.login_cur = self.login_conn.cursor()
 
 		self.status_conn = sqlite3.connect(self.db_name)
@@ -3215,6 +3220,7 @@ class export_status_report_page(Frame):
 		self.frameTable.pack()
 
 	def make_report(self):
+		file_name = "./status/"
 
 		self.frameTable.pack_forget()
 		self.frameTable = Frame(self)
@@ -3223,52 +3229,52 @@ class export_status_report_page(Frame):
 		#Status Of
 		if(self.status_of_name.get()=='All'):
 			name = '*'
-			self.file_name += 'all_'
+			file_name += 'all_'
 		else:
 			name = str(self.status_of_name.get()[2:len(self.status_of_name.get())-3])
-			self.file_name += name+"_"
+			file_name += name+"_"
 
 		#Team
 		if(self.team_name.get()=='All'):
 			team = '*'
-			self.file_name += 'all_'
+			file_name += 'all_'
 		else:
 			team = str(self.team_name.get()[2:len(self.team_name.get())-3])
-			self.file_name += team+"_"
+			file_name += team+"_"
 
 		#Date
 		if(self.date_name.get()=='All'):
 			date = '*'
-			self.file_name += 'all_'
+			file_name += 'all_'
 		else:
 			date = str(self.date_name.get()[2:len(self.date_name.get())-3])
-			self.file_name += date+"_"
+			file_name += date+"_"
 
 		#Week
 		if(self.week_name.get()=='All'):
 			week = '*'
-			self.file_name += 'all_'
+			file_name += 'all_'
 		else:
 			week = str(self.week_name.get()[2:len(self.week_name.get())-3])
-			self.file_name += week+"_"
+			file_name += week+"_"
 
 		#Month
 		if(self.month_name.get()=='All'):
 			month = '*'
-			self.file_name += 'all_'
+			file_name += 'all_'
 		else:
 			month = str(self.month_name.get())
-			self.file_name += month+"_"
+			file_name += month+"_"
 
 		#Year
 		if(self.year_name.get()=='All'):
 			year = '*'
-			self.file_name += 'all'
+			file_name += 'all'
 		else:
 			year = str(self.year_name.get())
-			self.file_name += year
+			file_name += year
 
-		self.file_name += ".xlsx"
+		file_name += ".xlsx"
 
 		self.create_status_table()
 		self.status_cur.execute("SELECT dates, name, team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE name GLOB ? and team GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, team, date, week, month, year))
@@ -3357,18 +3363,455 @@ class export_status_report_page(Frame):
 		frameReport = Frame(self.frameTable)
 		frameReport.pack()
 
-		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(), width=10)
+		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name), width=10)
 		export_btn.pack(pady=5)
 
-	def save_report(self):
+	def save_report(self, file_name):
 		try:
-			with open(self.file_name, "w") as csv_file:
+			with open(file_name, "w") as csv_file:
 				writer = csv.writer(csv_file, delimiter=',')
 				writer.writerow(['Date', 'User', 'Team', 'Task List', 'Progress Status', 'Meeting Status', 'Project Status', 'Remarks'])
 				for line in self.data:
 					writer.writerow(list(line))
-				print("Write to ",self.file_name," is successful!")
+				print("Write to ",file_name," is successful!")
 				self.screen = 18
+				self.quit()
+		except Exception as e:
+			print(e)
+
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()
+
+class attendance_page(Frame):
+	screen 			= 19
+	
+	attns_conn 		= None
+	attns_cur  		= None
+	
+	name        	= None
+	
+	attns_db  		= "./db/attns.db"
+
+	error_msg  		= " "
+
+	def __init__(self,master, name):
+		super(attendance_page,self).__init__(master)
+
+		self.attns_conn = sqlite3.connect(self.attns_db)
+		self.attns_cur  = self.attns_conn.cursor()
+
+		self.name        = name
+
+		self.pack()
+		self.define_widgets()
+
+	def create_attns_table(self):
+		self.attns_cur.execute("CREATE TABLE IF NOT EXISTS attns(date TEXT, name TEXT, intime TEXT, outtime TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
+
+	def define_widgets(self):
+		frame1 = Frame(self)
+		frame1.pack()
+		update_status_label=Label(frame1,text="::Attendance & Food::")
+		update_status_label.config(width=200, font=("Courier", 25))
+		update_status_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frameHolder = Frame(self)
+		frameHolder.pack()
+
+		#Date
+		frameDate = Frame(frameHolder)
+		frameDate.pack()
+		
+		date_label=Label(frameDate,text="Date:", width=20, anchor=W)
+		date_label.pack(side=LEFT, pady=5, padx=2)
+
+		day_label=Label(frameDate,text="Day:", anchor=W)
+		day_label.pack(side=LEFT, pady=5)
+
+		self.day_name=StringVar()
+		self.day_name.set(datetime.datetime.now().strftime("%d"))
+
+		day_list=OptionMenu(frameDate,self.day_name, *[str(i) for i in range(1, 32)])
+		#day_list.config(width=5)
+		day_list.pack(side=LEFT, padx=2, pady=5)
+
+		month_label=Label(frameDate,text="Month:", anchor=W)
+		month_label.pack(side=LEFT, pady=5)
+
+		self.month_name=StringVar()
+		self.month_name.set(datetime.datetime.now().strftime("%b"))
+
+		month_list=OptionMenu(frameDate,self.month_name, *['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])
+		#month_list.config(width=5)
+		month_list.pack(side=LEFT, padx=2, pady=5)
+
+		year_label=Label(frameDate,text="Year:", anchor=W)
+		year_label.pack(side=LEFT, pady=5)
+
+		self.year_name=StringVar()
+		self.year_name.set(datetime.datetime.now().strftime("%Y"))
+
+		year_list=OptionMenu(frameDate,self.year_name, *[str(i) for i in range(2011, 2021)])
+		#year_list.config(width=5)
+		year_list.pack(side=LEFT, padx=2, pady=5)
+
+		#In time
+		frame5 = Frame(frameHolder)
+		frame5.pack()
+		
+		in_time_label=Label(frame5,text="In Time:", width=19, anchor=W)
+		in_time_label.pack(side=LEFT, pady=5, padx=2)
+
+		in_hour_label=Label(frame5,text="Hour:", anchor=W)
+		in_hour_label.pack(side=LEFT, pady=5)
+
+		self.in_hour_name=StringVar()
+		self.in_hour_name.set(datetime.datetime.now().strftime("%H"))
+
+		in_hour_list=OptionMenu(frame5,self.in_hour_name, *[str(i) for i in range(1, 25)])
+		in_hour_list.pack(side=LEFT, padx=2, pady=5)
+
+		in_minute_label=Label(frame5,text="Minute:", anchor=W)
+		in_minute_label.pack(side=LEFT, pady=5)
+
+		self.in_minute_name=StringVar()
+		self.in_minute_name.set(datetime.datetime.now().strftime("%M"))
+
+		in_minute_list=OptionMenu(frame5,self.in_minute_name, *[str(i) for i in range(0, 61, 5)])
+		in_minute_list.pack(side=LEFT, padx=2, pady=5)
+
+		#Out time
+		frame5 = Frame(frameHolder)
+		frame5.pack()
+
+		out_time_label=Label(frame5,text="In Time:", width=19, anchor=W)
+		out_time_label.pack(side=LEFT, pady=5, padx=2)
+
+		out_hour_label=Label(frame5,text="Hour:", anchor=W)
+		out_hour_label.pack(side=LEFT, pady=5)
+
+		self.out_hour_name=StringVar()
+		self.out_hour_name.set(datetime.datetime.now().strftime("%H"))
+
+		out_hour_list=OptionMenu(frame5,self.out_hour_name, *[str(i) for i in range(1, 25)])
+		out_hour_list.pack(side=LEFT, padx=2, pady=5)
+
+		out_minute_label=Label(frame5,text="Minute:", anchor=W)
+		out_minute_label.pack(side=LEFT, pady=5)
+
+		self.out_minute_name=StringVar()
+		self.out_minute_name.set(datetime.datetime.now().strftime("%M"))
+
+		out_minute_list=OptionMenu(frame5,self.out_minute_name, *[str(i) for i in range(0, 61, 5)])
+		out_minute_list.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(frameHolder)
+		frameLast.pack()
+
+		update_btn=Button(frameLast,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.attendance_done, width=10)
+		update_btn.pack(side=LEFT, padx=2, pady=5)
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+	
+	def attendance_done(self):
+		try:
+			month_dict = {'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+			dates   = self.day_name.get()+"-"+self.month_name.get()+"-"+self.year_name.get()
+			weeks   = datetime.date(int(self.year_name.get()), int(month_dict[self.month_name.get()]), int(self.day_name.get())).isocalendar()[1]
+			months  = self.month_name.get()
+			years   = self.year_name.get()
+
+			self.create_attns_table()
+			self.attns_cur.execute("SELECT * FROM attns WHERE name = ? and dates = ?", (self.name, dates))
+			data = self.attns_cur.fetchall()
+
+			if(len(data)==0):
+				self.attns_cur.execute("INSERT INTO attns(name, intime, outtime, dates, weeks, months, years) VALUES (?,?,?,?,?,?,?)", (self.name, self.in_hour_name.get()+":"+self.in_minute_name.get(), self.out_hour_name.get()+":"+self.out_minute_name.get(), dates, weeks, months, years))
+				self.attns_conn.commit()
+				time.sleep(0.02)
+			else:
+				self.attns_cur.execute("UPDATE attns SET name = ?, intime = ?, outtime = ?, dates = ?, weeks = ?, months = ?, years = ? WHERE dates = ?", (self.name, self.in_hour_name.get()+":"+self.in_minute_name.get(), self.out_hour_name.get()+":"+self.out_minute_name.get(), dates, weeks, months, years, dates))
+				self.attns_conn.commit()
+				time.sleep(0.02)
+
+			self.attns_conn.close()
+			print("%s, You have successfully gave your attendance!" %(self.name))
+			self.screen = 19
+			self.quit()
+		except Exception as e:
+			print(e)
+			self.error_msg = "Invalid inputs!"
+		print(self.error_msg)
+	
+	
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()
+
+class export_attendance_report_page(Frame):
+
+	screen = 20
+
+	status_conn = None
+	status_cur  = None
+	name        = None
+
+	error_msg  = " "
+
+	def __init__(self,master):
+		super(export_attendance_report_page,self).__init__(master)
+		self.pack()
+
+		self.login_conn= sqlite3.connect('./db/users.db')
+		self.login_cur = self.login_conn.cursor()
+
+		self.attns_conn = sqlite3.connect('./db/attns.db')
+		self.attns_cur  = self.attns_conn.cursor()
+
+		self.pack()
+		self.define_widgets()
+
+	def create_user_table(self):
+		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
+
+	def create_attns_table(self):
+		self.attns_cur.execute("CREATE TABLE IF NOT EXISTS attns(name TEXT, intime TEXT, outtime TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
+
+	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Attendance::")
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		self.create_user_table()
+		self.create_attns_table()
+
+		#Status of
+		frameUser = Frame(self)
+		frameUser.pack()
+		
+		status_of_label=Label(frameUser,text="User:", anchor=W)
+		status_of_label.pack(side=LEFT, pady=5)
+
+		self.login_cur.execute("SELECT name FROM users")
+		user_list = list(set(self.login_cur.fetchall()))
+		self.login_conn.close()
+		user_list.append('All')
+
+		self.status_of_name=StringVar()
+		self.status_of_name.set('All')
+
+		status_of_box=OptionMenu(frameUser,self.status_of_name, *user_list)
+		status_of_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Date	
+		date_label=Label(frameUser,text="Date:",anchor=W)
+		date_label.pack(side=LEFT, pady=5)
+
+		self.attns_cur.execute("SELECT dates FROM attns")
+		date_list = list(set(self.attns_cur.fetchall()))
+		date_list.append('All')
+
+		self.date_name=StringVar()
+		self.date_name.set('All')
+
+		date_list_box=OptionMenu(frameUser,self.date_name, *date_list)
+		date_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Week
+		week_label=Label(frameUser,text="Week:", anchor=W)
+		week_label.pack(side=LEFT, pady=5)
+
+		self.attns_cur.execute("SELECT weeks FROM attns")
+		week_list = list(set(self.attns_cur.fetchall()))
+		week_list.append('All')
+
+		self.week_name=StringVar()
+		self.week_name.set('All')
+
+		week_list_box=OptionMenu(frameUser,self.week_name, *week_list)
+		week_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Month
+		month_label=Label(frameUser,text="Month:", anchor=W)
+		month_label.pack(side=LEFT, pady=5)
+
+		month_list = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+		month_list.append('All')
+
+		self.month_name=StringVar()
+		self.month_name.set('All')
+
+		month_list_box=OptionMenu(frameUser,self.month_name, *month_list)
+		month_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		#Of Year
+		year_label=Label(frameUser,text="Year:", anchor=W)
+		year_label.pack(side=LEFT, pady=5)
+
+		year_list = [i for i in range(2011, 2022)]
+		year_list.append('All')
+
+		self.year_name=StringVar()
+		self.year_name.set('All')
+
+		year_list_box=OptionMenu(frameUser,self.year_name, *year_list)
+		year_list_box.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		search_btn=Button(frameLast,text="Refresh", bg="DeepSkyBlue4", fg = "white", command = lambda : self.make_report(), width=10)
+		search_btn.pack(side=LEFT, padx=2, pady=5)
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+	def make_report(self):
+		file_name = "./attendance/"
+
+		self.frameTable.pack_forget()
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+		#Status Of
+		if(self.status_of_name.get()=='All'):
+			name = '*'
+			file_name += 'all_'
+		else:
+			name = str(self.status_of_name.get()[2:len(self.status_of_name.get())-3])
+			file_name += name+"_"
+
+		#Date
+		if(self.date_name.get()=='All'):
+			date = '*'
+			file_name += 'all_'
+		else:
+			date = str(self.date_name.get()[2:len(self.date_name.get())-3])
+			file_name += date+"_"
+
+		#Week
+		if(self.week_name.get()=='All'):
+			week = '*'
+			file_name += 'all_'
+		else:
+			week = str(self.week_name.get()[2:len(self.week_name.get())-3])
+			file_name += week+"_"
+
+		#Month
+		if(self.month_name.get()=='All'):
+			month = '*'
+			file_name += 'all_'
+		else:
+			month = str(self.month_name.get())
+			file_name += month+"_"
+
+		#Year
+		if(self.year_name.get()=='All'):
+			year = '*'
+			file_name += 'all'
+		else:
+			year = str(self.year_name.get())
+			file_name += year
+
+		file_name += "_attendance.xlsx"
+
+		self.create_attns_table()
+		self.attns_cur.execute("SELECT name, intime, outtime, dates FROM attns WHERE name GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, date, week, month, year))
+		self.data = self.attns_cur.fetchall()
+
+		#Table Head
+
+		frame4 = Frame(self.frameTable)
+		frame4.pack()
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Date", width=15)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="User", width=10)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="In Time", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Out Time", width=20)
+		temp.pack(side=LEFT, pady=2)
+
+		frame5 = Frame(self.frameTable)
+		frame5.pack()
+
+		status_scroll = Scrollbar(frame5)
+		status_canvas = Canvas(frame5, height=250, width=518)
+		status_scroll.pack(side=RIGHT, fill=Y)
+		status_canvas.pack(side=LEFT)
+		status_scroll.config(command=status_canvas.yview)
+		status_canvas.config(yscrollcommand=status_scroll.set)
+
+		lists = Frame(status_canvas)
+		lists.pack()
+
+		status_canvas.create_window((0,0), window=lists, anchor="nw")
+
+		for i in range(len(self.data)):
+			frame_temp = Frame(lists)
+			frame_temp.pack(fill=BOTH)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=15, height=1)
+			temp.configure(text=self.data[i][3], anchor="nw")
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=10, height=1)
+			temp.configure(text=self.data[i][0], anchor="nw")
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=20, height=1)
+			temp.configure(text=self.data[i][1], anchor="nw")
+			temp.pack(side=LEFT)
+	
+			temp = Label(frame_temp,relief=RIDGE, bg="white", width=20, height=1)
+			temp.configure(text=self.data[i][2], anchor="nw")
+			temp.pack(side=LEFT)
+
+		frameReport = Frame(self.frameTable)
+		frameReport.pack()
+
+		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name), width=10)
+		export_btn.pack(pady=5)
+
+	def save_report(self, file_name):
+		try:
+			with open(file_name, "w") as csv_file:
+				writer = csv.writer(csv_file, delimiter=',')
+				writer.writerow(['Date', 'User', 'In time', 'Out Time'])
+				for line in self.data:
+					writer.writerow(list(line))
+				print("Write to ",file_name," is successful!")
+				self.screen = 20
 				self.quit()
 		except Exception as e:
 			print(e)
@@ -3465,3 +3908,7 @@ while True:
 		prev_screen = 17
 	elif screen==18:
 		window=export_status_report_page(root)
+	elif screen==19:
+		window=attendance_page(root, name)
+	elif screen==20:
+		window=export_attendance_report_page(root)

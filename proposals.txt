@@ -1,4 +1,3 @@
-7. export reports
 10. attendance
 11. food order
 12. admin can view, print and export report of attendance and food
