@@ -2,6 +2,7 @@
 import sqlite3
 import time
 from tkinter import *
+from tkinter import messagebox
 import os.path
 import smtplib
 from email.mime.multipart import MIMEMultipart
@@ -34,8 +35,10 @@ class login_page(Frame):
 		#print(name, password)
 		if(name == ''):
 			self.error_msg = "Name field cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		elif(password == ''):
-			self.error_msg = "Password field cannot be empty! "
+			self.error_msg = "Password field cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				success = 0
@@ -53,9 +56,11 @@ class login_page(Frame):
 				else:
 					self.screen = 0
 					self.error_msg = "Incorrect Password!"
+					messagebox.showinfo("Error", self.error_msg)
 				return success, admin
-			except Exception:
-				self.error_msg = "Invalid login name or password!"
+			except Exception as e:
+				self.error_msg = "Error happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 				return success, admin
 
 	def define_widgets(self):
@@ -341,7 +346,7 @@ class user_dashboard(Frame):
 			self.food_btn.pack(side=LEFT, padx=2, pady=2)
 		else:
 			self.error_msg = "Error Happend!"
-			print(self.error_msg)
+			messagebox.showinfo("Error", self.error_msg)
 
 		###########################################################
 
@@ -566,33 +571,36 @@ class add_user_page(Frame):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
 
 	def add_user(self):
-		self.create_user_table()
-		if(self.add_name.get() == '' or self.add_email.get() == '' or self.add_pass.get() == ''):
-			error_msg = "Invalid input!"
-		else:
-			try:
-				self.login_cur.execute("SELECT name, email FROM users")
-				user_details = self.login_cur.fetchall()
-				user_names  = [user_details[i][0] for i in range(len(user_details))]
-				user_emails = [user_details[i][1] for i in range(len(user_details))]
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			self.create_user_table()
+			if(self.add_name.get() == '' or self.add_email.get() == '' or self.add_pass.get() == ''):
+				self.error_msg = "Necessary field(s) cannot be empty!"
+				messagebox.showinfo("Error", self.error_msg)
+			else:
+				try:
+					self.login_cur.execute("SELECT name, email FROM users")
+					user_details = self.login_cur.fetchall()
+					user_names  = [user_details[i][0] for i in range(len(user_details))]
+					user_emails = [user_details[i][1] for i in range(len(user_details))]
 
-				print(user_names, user_emails)
+					print(user_names, user_emails)
 
-				if((self.add_name.get() not in user_names) and (self.add_email.get() not in user_emails)):
-					self.login_cur.execute("INSERT INTO users(name, email, password, admin_status) VALUES (?, ?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get(), str(self.admin_status.get())))
-					self.login_conn.commit()
-					time.sleep(0.02)
-					self.login_conn.close()
-					print("New User named %s is added to the database" %(self.add_name.get()))
-					self.screen = 2
-					self.quit()
-				else:
-					self.error_msg = "You cannot add this User Name/Email, already exists!"
-					self.screen = 2
-					self.quit()
-			except Exception as e:
-				error_msg = "Invalid input"
-				print(e)
+					if((self.add_name.get() not in user_names) and (self.add_email.get() not in user_emails)):
+						self.login_cur.execute("INSERT INTO users(name, email, password, admin_status) VALUES (?, ?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get(), str(self.admin_status.get())))
+						self.login_conn.commit()
+						time.sleep(0.02)
+						self.login_conn.close()
+						print("New User named %s is added to the database" %(self.add_name.get()))
+						self.screen = 2
+						self.quit()
+					else:
+						self.error_msg = "You cannot add this User Name/Email, already exists!"
+						messagebox.showinfo("Error", self.error_msg)
+						self.screen = 2
+						self.quit()
+				except Exception as e:
+					self.error_msg = "Error happened!\nError: "+str(e)
+					messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
 		self.screen = 1
@@ -665,8 +673,10 @@ class add_user_page(Frame):
 		self.create_user_table()
 		if(self.edit_name_cur.get() == '' or self.edit_name_new.get() == ''):
 			self.error_msg = "Invalid input!"
+			messagebox.showinfo("Error", self.error_msg)
 		elif(self.edit_name_cur.get() == 'admin' or self.edit_name_new.get() == 'admin'):
 			self.error_msg = "You cannot change admin name!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.login_cur.execute("UPDATE users SET name = ? WHERE name = ?", (self.edit_name_new.get(), self.edit_name_cur.get()))
@@ -678,6 +688,7 @@ class add_user_page(Frame):
 				self.quit()
 			except Exception:
 				self.error_msg = "Invalid search name or replacing name!"
+				messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
 		self.screen = 1
@@ -762,36 +773,43 @@ class edit_user_admin_sts_page(Frame):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
 
 	def make_admin_def(self):
-		self.create_user_table()
-		if(self.assigned_to_name.get()==''):
-			self.error_msg = "Invalid input!"
-		else:
-			try:
-				self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('1', self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				print("User %s is made an Admin" %(self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
-				self.screen = 3
-				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name or replacing name!"
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			self.create_user_table()
+			if(self.assigned_to_name.get()==''):
+				self.error_msg = "Name field cannot be empty!"
+				messagebox.showinfo("Error", self.error_msg)
+			else:
+				try:
+					self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('1', self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
+					self.login_conn.commit()
+					time.sleep(0.02)
+					print("User %s is made an Admin" %(self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
+					self.screen = 3
+					self.quit()
+				except Exception:
+					self.error_msg = "Invalid search name!"
+					messagebox.showinfo("Error", self.error_msg)
 
 	def remove_admin_def(self):
-		self.create_user_table()
-		if(self.remove_from_name.get()==''):
-			self.error_msg = "Invalid input!"
-		elif(self.remove_from_name.get()=='admin'):
-			self.error_msg = "You cannot delete 'admin'"
-		else:
-			try:
-				self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('0', self.remove_from_name.get()[2:len(self.remove_from_name.get())-3]))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				print("User %s is removed from Admin" %(self.remove_from_name.get()[2:len(self.remove_from_name.get())-3]))
-				self.screen = 3
-				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name or replacing name!"
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			self.create_user_table()
+			if(self.remove_from_name.get()==''):
+				self.error_msg = "Name field cannot be empty!"
+				messagebox.showinfo("Error", self.error_msg)
+			elif(self.remove_from_name.get()=='admin'):
+				self.error_msg = "You cannot delete 'admin'"
+				messagebox.showinfo("Error", self.error_msg)
+			else:
+				try:
+					self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('0', self.remove_from_name.get()[2:len(self.remove_from_name.get())-3]))
+					self.login_conn.commit()
+					time.sleep(0.02)
+					print("User %s is removed from Admin" %(self.remove_from_name.get()[2:len(self.remove_from_name.get())-3]))
+					self.screen = 3
+					self.quit()
+				except Exception as e:
+					self.error_msg = "Error happened!\nError: "+str(e)
+					messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
 		self.login_conn.close()
@@ -865,7 +883,8 @@ class edit_user_email_page(Frame):
 	def edit_user_email(self):
 		self.create_user_table()
 		if(self.edit_name_cur.get() == '' or self.edit_email_new.get() == ''):
-			self.error_msg = "Invalid input!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.login_cur.execute("UPDATE users SET email = ? WHERE name = ?", (self.edit_email_new.get(), self.edit_name_cur.get()))
@@ -875,8 +894,9 @@ class edit_user_email_page(Frame):
 				print("User email of %s is replaced by %s" %(self.edit_name_cur.get(), self.edit_email_new.get()))
 				self.screen = 4
 				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name or replacing name!"
+			except Exception as e:
+				self.error_msg = "Error happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
 		self.screen = 1
@@ -958,7 +978,8 @@ class edit_user_pass_page(Frame):
 	def edit_user_password(self):
 		self.create_user_table()
 		if(self.edit_pass_confirm.get() == '' or self.edit_pass_cur.get() == '' or self.edit_pass_new.get() == ''):
-			self.error_msg = "Invalid input!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		elif(self.edit_pass_confirm.get() == self.edit_pass_new.get()):
 			try:
 				self.login_cur.execute("UPDATE users SET password = ? WHERE name = ? and password = ?", (self.edit_pass_new.get(), self.name, self.edit_pass_cur.get()))
@@ -966,10 +987,12 @@ class edit_user_pass_page(Frame):
 				time.sleep(0.02)
 				self.login_conn.close()
 				print("Password for %s is changed successfully!" %(name))
-			except Exception:
-				self.error_msg = "Invalid search name or previous password or new password!"
+			except Exception as e:
+				self.error_msg = "Error happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 		else:
 			self.error_msg = "Your password is not confirmed correctly!"
+			messagebox.showinfo("Error", self.error_msg)
 
 
 	def go_prev(self):
@@ -1092,45 +1115,49 @@ class delete_user_page(Frame):
 		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT, admin_status TEXT)")
 
 	def delete_user(self):
+		if(messagebox.askyesno("Warning", "Are you sure to delete this user?")):
+			if(self.delete_user_name.get() == ''):
+				self.error_msg = "Necessary field(s) cannot be empty!"
+				messagebox.showinfo("Error", self.error_msg)
+			elif(self.delete_user_name.get() == 'admin'):
+				self.error_msg = "You cannot delete admin"
+				messagebox.showinfo("Error", self.error_msg)
+			else:
+				try:
+					self.create_user_table()
+					self.login_cur.execute("SELECT admin_status FROM users WHERE name = ?", (self.delete_user_name.get(),))
+					data = self.login_cur.fetchall()
+					print(data[0][0])
 
-		if(self.delete_user_name.get() == ''):
-			self.error_msg = "Invalid input!"
-		elif(self.delete_user_name.get() == 'admin'):
-			self.error_msg = "You cannot delete admin"
-		else:
-			try:
-				self.create_user_table()
-				self.login_cur.execute("SELECT admin_status FROM users WHERE name = ?", (self.delete_user_name.get(),))
-				data = self.login_cur.fetchall()
-				print(data[0][0])
-
-				if(self.name == 'admin'):
-					try:
-						self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
-						self.login_conn.commit()
-						time.sleep(0.02)
-						self.login_conn.close()
-						print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
-						self.screen = 6
-						self.quit()
-					except Exception:
-						self.error_msg = "Invalid search name!"
-				elif(self.name != 'admin' and data[0][0] == '0'):
-					try:
-						self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
-						self.login_conn.commit()
-						time.sleep(0.02)
-						self.login_conn.close()
-						print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
-						self.screen = 6
-						self.quit()
-					except Exception:
-						self.error_msg = "Invalid search name!"
-				else:
-					self.error_msg = "You cannot delete another admin"
-					print(self.error_msg)
-			except Exception as e:
-				print(e)
+					if(self.name == 'admin'):
+						try:
+							self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
+							self.login_conn.commit()
+							time.sleep(0.02)
+							self.login_conn.close()
+							print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
+							self.screen = 6
+							self.quit()
+						except Exception:
+							self.error_msg = "Invalid search name!"
+							messagebox.showinfo("Error", self.error_msg)
+					elif(self.name != 'admin' and data[0][0] == '0'):
+						try:
+							self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
+							self.login_conn.commit()
+							time.sleep(0.02)
+							self.login_conn.close()
+							print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
+							self.screen = 6
+							self.quit()
+						except Exception:
+							self.error_msg = "Invalid search name!"
+							messagebox.showinfo("Error", self.error_msg)
+					else:
+						self.error_msg = "You cannot delete another admin"
+						messagebox.showinfo("Error", self.error_msg)
+				except Exception as e:
+					print(e)
 
 	def refresh_user(self):
 		self.screen = 6
@@ -1206,7 +1233,8 @@ class forgot_pass_page(Frame):
 	def forgot_pass_send(self):
 		self.create_user_table()
 		if(self.forgot_pass_name.get() == '' or self.forgot_pass_email.get() == ''):
-			self.error_msg = "Invalid input!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.login_cur.execute("SELECT password FROM users WHERE name = ? and email = ?", (self.forgot_pass_name.get(), self.forgot_pass_email.get()))
@@ -1214,21 +1242,28 @@ class forgot_pass_page(Frame):
 	
 				me      = "noreply.nslstatus@gmail.com"
 				you     = self.forgot_pass_email.get()
-				body    = "Dear "+name+",\nYour lost password is :"+str(password[0][0])+"\nN.B: You don't need to reply this message.\nThanks.\n"+time.asctime(time.localtime(time.time()))
-	
+				body    = "Dear "+self.forgot_pass_name.get()+",\nYour lost password is :"+str(password[0][0])+"\nN.B: You don't need to reply this message.\nThanks.\n"+time.asctime(time.localtime(time.time()))
+
+				msg = MIMEMultipart()
+				msg['Subject'] = "Forgotten user password"
+				msg['From'] = me
+				msg['To'] = you
+				msg.attach(MIMEText(str(body), 'html'))
+
 				server  = smtplib.SMTP("smtp.gmail.com", 25)
 				server.ehlo()
 				server.starttls()
 				server.login(me, 'a1234567890z')
-				server.sendmail(me, you, body)
+				server.sendmail(me, you, msg.as_string())
 				server.quit()
 				self.login_conn.close()
 				print("Mail sent successfully!")
 				self.screen = 7
 				self.quit()
 	
-			except Exception:
-				self.error_msg = "Invalid search name or email!"
+			except Exception as e:
+				self.error_msg = "Error happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
 		self.screen = 0
@@ -1399,7 +1434,8 @@ class update_status_page(Frame):
 	
 	def update_status(self):
 		if(self.task_text.get("1.0", "end-1c") == '' and self.team.get() == ''):
-			self.error_msg = "Insufficient inputs!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.create_status_table()
@@ -1419,10 +1455,8 @@ class update_status_page(Frame):
 				self.screen = 8
 				self.quit()
 			except Exception as e:
-				print(e)
-				self.error_msg = "Invalid inputs!"
-		print(self.error_msg)
-	
+				self.error_msg = "Invalid inputs! Error Happened!\n Error: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
 		self.screen = 1
@@ -1591,23 +1625,27 @@ class edit_status_page(Frame):
 		self.status_id.set(id)
 
 	def delete_status_window(self):
-		self.create_status_table()
-		if(self.status_id.get() == ''):
-			self.error_msg = "Invalid Status ID!"
-		else:
-			try:
-				self.status_cur.execute("DELETE FROM status WHERE ids = ?", (self.status_id.get(),))
-				self.status_conn.commit()
-				time.sleep(0.02)
-				print("Status corresponding to ID %s has been deleted successfully!" %(self.status_id.get()))
-				self.screen = 9
-				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name!"
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			self.create_status_table()
+			if(self.status_id.get() == ''):
+				self.error_msg = "Necessary field(s) cannot be empty!"
+				messagebox.showinfo("Error", self.error_msg)
+			else:
+				try:
+					self.status_cur.execute("DELETE FROM status WHERE ids = ?", (self.status_id.get(),))
+					self.status_conn.commit()
+					time.sleep(0.02)
+					print("Status corresponding to ID %s has been deleted successfully!" %(self.status_id.get()))
+					self.screen = 9
+					self.quit()
+				except Exception:
+					self.error_msg = "Invalid search name!"
+					messagebox.showinfo("Error", self.error_msg)
 
 	def edit_status_window(self):
 		if(self.status_id.get() == ''):
-			self.error_msg = "Invalid ID!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.create_status_table()
@@ -1757,12 +1795,14 @@ class edit_status_page(Frame):
 				frameUpdate.pack()
 				update_status_btn=Button(frameUpdate,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.update_status, width=20)
 				update_status_btn.pack(pady=10)
-			except Exception:
-				self.error_msg = "No such ID found!"
+			except Exception as e:
+				self.error_msg = "Error happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 
 	def update_status(self):
 		if(self.task_text.get("1.0", "end-1c") == '' and self.team.get() == ''):
-			self.error_msg = "Insufficient inputs!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.create_status_table()
@@ -1780,10 +1820,8 @@ class edit_status_page(Frame):
 				self.screen = 9
 				self.quit()
 			except Exception as e:
-				print(e)
-				self.error_msg = "Invalid inputs!"
-		print(self.error_msg)
-	
+				self.error_msg = "Invalid inputs! Error happened! \nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
 		self.status_conn.close()
@@ -1859,7 +1897,8 @@ class forgot_id_page(Frame):
 	def forgot_id_find(self):
 		self.create_user_table()
 		if(self.forgot_id_email.get() == ''):
-			self.error_msg = "Invalid input!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 			self.screen = 12
 			self.quit()
 		else:
@@ -1868,8 +1907,8 @@ class forgot_id_page(Frame):
 				id_name = self.login_cur.fetchall()
 				self.forgot_id_name_label.configure(text=":: "+str(id_name[0][0])+" ::", state=ACTIVE, fg="blue", font=("Courier", 25))
 			except Exception as e:
-				self.error_msg = "No such email address!"
-				print(e)
+				self.error_msg = "Error Happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
 		self.login_conn.close()
@@ -2147,7 +2186,8 @@ class assign_task_page(Frame):
 	
 	def assign_task(self):
 		if(self.task_text.get("1.0", "end-1c") == '' and len(self.assigned_to_users_list)==0):
-			self.error_msg = "Insufficient inputs!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.create_task_table()
@@ -2166,10 +2206,8 @@ class assign_task_page(Frame):
 				self.screen = 13
 				self.quit()
 			except Exception as e:
-				print(e)
-				self.error_msg = "Invalid inputs!"
-		print(self.error_msg)
-	
+				self.error_msg = "Error Happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
 		self.screen = 1
@@ -2596,19 +2634,22 @@ class edit_assign_task_page(Frame):
 		#print(self.task_id.get())
 
 	def delete_task_window(self):
-		self.create_task_table()
-		if(self.task_id.get() == ''):
-			self.error_msg = "Invalid Status ID!"
-		else:
-			try:
-				self.task_cur.execute("DELETE FROM tasks WHERE ids = ?", (self.task_id.get(),))
-				self.task_conn.commit()
-				time.sleep(0.02)
-				print("Task corresponding to ID %s has been deleted successfully!" %(self.task_id.get()))
-				self.screen = 15
-				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name!"
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			self.create_task_table()
+			if(self.task_id.get() == ''):
+				self.error_msg = "Necessary field(s) cannot be empty!"
+				messagebox.showinfo("Error", self.error_msg)
+			else:
+				try:
+					self.task_cur.execute("DELETE FROM tasks WHERE ids = ?", (self.task_id.get(),))
+					self.task_conn.commit()
+					time.sleep(0.02)
+					print("Task corresponding to ID %s has been deleted successfully!" %(self.task_id.get()))
+					self.screen = 15
+					self.quit()
+				except Exception as e:
+					self.error_msg = "Error happened!\nError: "+str(e)
+					messagebox.showinfo("Error", self.error_msg)
 
 	def edit_task_window(self):
 		self.task_conn.close()
@@ -2904,7 +2945,8 @@ class update_assign_task_page(Frame):
 	
 	def assign_task(self):
 		if(self.task_text.get("1.0", "end-1c") == '' and len(self.assigned_to_users_list)==0):
-			self.error_msg = "Insufficient inputs!"
+			self.error_msg = "Necessary field(s) cannot be empty!"
+			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
 				self.create_task_table()
@@ -2923,10 +2965,8 @@ class update_assign_task_page(Frame):
 				self.screen = 15
 				self.quit()
 			except Exception as e:
-				print(e)
-				self.error_msg = "Invalid inputs!"
-		print(self.error_msg)
-	
+				self.error_msg = "Error happened!\nError: "+str(e)
+				messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
 		self.screen = 15
@@ -3446,17 +3486,18 @@ class export_status_report_page(Frame):
 		export_btn.pack(pady=5)
 
 	def save_report(self, file_name):
-		try:
-			with open(file_name, "w") as csv_file:
-				writer = csv.writer(csv_file, delimiter=',')
-				writer.writerow(['Date', 'User', 'Team', 'Task List', 'Progress Status', 'Meeting Status', 'Project Status', 'Remarks'])
-				for line in self.data:
-					writer.writerow(list(line))
-				print("Write to ",file_name," is successful!")
-				self.screen = 18
-				self.quit()
-		except Exception as e:
-			print(e)
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			try:
+				with open(file_name, "w") as csv_file:
+					writer = csv.writer(csv_file, delimiter=',')
+					writer.writerow(['Date', 'User', 'Team', 'Task List', 'Progress Status', 'Meeting Status', 'Project Status', 'Remarks'])
+					for line in self.data:
+						writer.writerow(list(line))
+					print("Write to ",file_name," is successful!")
+					self.screen = 18
+					self.quit()
+			except Exception as e:
+				print(e)
 
 	def go_prev(self):
 		self.screen = 22
@@ -3629,10 +3670,8 @@ class attendance_page(Frame):
 			self.screen = 19
 			self.quit()
 		except Exception as e:
-			print(e)
-			self.error_msg = "Invalid inputs!"
-		print(self.error_msg)
-	
+			self.error_msg = "Error happened!\nError: "+str(e)
+			messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
 		self.screen = 1
@@ -3698,7 +3737,7 @@ class export_attendance_report_page(Frame):
 		self.status_of_name=StringVar()
 		self.status_of_name.set('All')
 
-		status_of_box=OptionMenu(frameUser,self.status_of_name, *user_list)
+		status_of_box=OptionMenu(frameUser,self.status_of_name, *status_of_list)
 		status_of_box.pack(side=LEFT, padx=2, pady=5)
 
 		#Of Date	
@@ -3884,17 +3923,18 @@ class export_attendance_report_page(Frame):
 		export_btn.pack(pady=5)
 
 	def save_report(self, file_name):
-		try:
-			with open(file_name, "w") as csv_file:
-				writer = csv.writer(csv_file, delimiter=',')
-				writer.writerow(['Date', 'User', 'In time', 'Out Time'])
-				for line in self.data:
-					writer.writerow(list(line))
-				print("Write to ",file_name," is successful!")
-				self.screen = 20
-				self.quit()
-		except Exception as e:
-			print(e)
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			try:
+				with open(file_name, "w") as csv_file:
+					writer = csv.writer(csv_file, delimiter=',')
+					writer.writerow(['Date', 'User', 'In time', 'Out Time'])
+					for line in self.data:
+						writer.writerow(list(line))
+					print("Write to ",file_name," is successful!")
+					self.screen = 20
+					self.quit()
+			except Exception as e:
+				print(e)
 
 	def go_prev(self):
 		self.screen = 22
@@ -4148,20 +4188,21 @@ class export_food_report_page(Frame):
 		export_btn.pack(pady=5)
 
 	def save_report(self, file_name, total):
-		try:
-			with open(file_name, "w") as csv_file:
-				writer = csv.writer(csv_file, delimiter=',')
-				writer.writerow(['Serial', 'Date', 'User'])
-				i = 1
-				for line in self.data:
-					writer.writerow([str(i), line[2], line[0]])
-				writer.writerow(['\n'])
-				writer.writerow(['', 'Total', total])
-				print("Write to ",file_name," is successful!")
-				self.screen = 20
-				self.quit()
-		except Exception as e:
-			print(e)
+		if(messagebox.askyesno("Warning", "Are you sure?")):
+			try:
+				with open(file_name, "w") as csv_file:
+					writer = csv.writer(csv_file, delimiter=',')
+					writer.writerow(['Serial', 'Date', 'User'])
+					i = 1
+					for line in self.data:
+						writer.writerow([str(i), line[2], line[0]])
+					writer.writerow(['\n'])
+					writer.writerow(['', 'Total', total])
+					print("Write to ",file_name," is successful!")
+					self.screen = 20
+					self.quit()
+			except Exception as e:
+				print(e)
 
 	def go_prev(self):
 		self.screen = 22
