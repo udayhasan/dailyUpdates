@@ -1,4 +1,3 @@
 1. export file as pdf
-2. dropdown contains deleted user names also from database
 3. fix dropdownmenu width
 4. try mysql database
