@@ -307,9 +307,9 @@ class user_dashboard(Frame):
 		years   = datetime.datetime.now().strftime("%Y")
 
 		self.create_food_table()
-		self.food_cur.execute("SELECT value FROM foods WHERE name = ? and dates = ?", (self.name, dates))
+		self.food_cur.execute("SELECT value, name FROM foods WHERE name = ? and dates = ?", (self.name, dates))
 		foodData = self.food_cur.fetchall()
-		print(self.name, dates, int(foodData[0][0]))
+		print(self.name, dates, foodData)
 
 		#for line4
 		frame4 = Frame(self)
