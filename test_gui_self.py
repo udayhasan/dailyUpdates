@@ -770,7 +770,7 @@ class edit_user_admin_sts_page(Frame):
 				self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('1', self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
 				self.login_conn.commit()
 				time.sleep(0.02)
-				print("User %s is made an Admin" %(self.assigned_to_name.get()))
+				print("User %s is made an Admin" %(self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
 				self.screen = 3
 				self.quit()
 			except Exception:
@@ -784,10 +784,10 @@ class edit_user_admin_sts_page(Frame):
 			self.error_msg = "You cannot delete 'admin'"
 		else:
 			try:
-				self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('0', self.assigned_to_name.get()[2:len(self.assigned_to_name.get())-3]))
+				self.login_cur.execute("UPDATE users SET admin_status = ? WHERE name = ?", ('0', self.remove_from_name.get()[2:len(self.remove_from_name.get())-3]))
 				self.login_conn.commit()
 				time.sleep(0.02)
-				print("User %s is made an Admin" %(self.assigned_to_name.get()))
+				print("User %s is removed from Admin" %(self.remove_from_name.get()[2:len(self.remove_from_name.get())-3]))
 				self.screen = 3
 				self.quit()
 			except Exception:
@@ -1523,8 +1523,8 @@ class edit_status_page(Frame):
 
 		status_scroll = Scrollbar(frame5)
 		status_canvas = Canvas(frame5, height=100, width=1090)
-		status_scroll.pack(side=RIGHT, fill=Y, padx = 5)
-		status_canvas.pack(side=LEFT, fill=BOTH)
+		status_scroll.pack(side=RIGHT, fill=Y)
+		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
 		status_canvas.config(yscrollcommand=status_scroll.set)
 
@@ -2523,15 +2523,15 @@ class edit_assign_task_page(Frame):
 		#scroll canvas
 		list_scrollbar = Scrollbar(scroll_frame)
 		scroll_canvas = Canvas(scroll_frame, height=150, width=800)
-		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
-		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
+		list_scrollbar.pack(side=RIGHT, fill=Y)
+		scroll_canvas.pack(side=LEFT)
 		
 		list_scrollbar.config(command=scroll_canvas.yview)
 		scroll_canvas.config(yscrollcommand=list_scrollbar.set)
 		#scroll_canvas.config(scrollregion=scroll_canvas.bbox("all"))
 
 		lists = Frame(scroll_canvas)
-		lists.pack(fill=X)
+		lists.pack()
 
 		scroll_canvas.create_window((0,0), window=lists, anchor="nw")
 
@@ -3203,9 +3203,8 @@ class export_status_report_page(Frame):
 		status_of_label=Label(frameUser,text="User:", anchor=W)
 		status_of_label.pack(side=LEFT, pady=5)
 
-		self.login_cur.execute("SELECT name FROM users")
-		user_list = list(set(self.login_cur.fetchall()))
-		self.login_conn.close()
+		self.status_cur.execute("SELECT name FROM status")
+		user_list = list(set(self.status_cur.fetchall()))
 		user_list.append('All')
 
 		self.status_of_name=StringVar()
@@ -3260,7 +3259,8 @@ class export_status_report_page(Frame):
 		month_label=Label(frameUser,text="Month:", anchor=W)
 		month_label.pack(side=LEFT, pady=5)
 
-		month_list = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+		self.status_cur.execute("SELECT months FROM status")
+		month_list = list(set(self.status_cur.fetchall()))
 		month_list.append('All')
 
 		self.month_name=StringVar()
@@ -3273,7 +3273,8 @@ class export_status_report_page(Frame):
 		year_label=Label(frameUser,text="Year:", anchor=W)
 		year_label.pack(side=LEFT, pady=5)
 
-		year_list = [i for i in range(2011, 2022)]
+		self.status_cur.execute("SELECT years FROM status")
+		year_list = list(set(self.status_cur.fetchall()))
 		year_list.append('All')
 
 		self.year_name=StringVar()
@@ -3507,7 +3508,7 @@ class attendance_page(Frame):
 		frameDate = Frame(frameHolder)
 		frameDate.pack()
 		
-		date_label=Label(frameDate,text="Date:", width=20, anchor=W)
+		date_label=Label(frameDate,text="Date:", width=10, anchor=W)
 		date_label.pack(side=LEFT, pady=5, padx=2)
 
 		day_label=Label(frameDate,text="Day:", anchor=W)
@@ -3544,7 +3545,7 @@ class attendance_page(Frame):
 		frame5 = Frame(frameHolder)
 		frame5.pack()
 		
-		in_time_label=Label(frame5,text="In Time:", width=19, anchor=W)
+		in_time_label=Label(frame5,text="In Time:", width=25, anchor=W)
 		in_time_label.pack(side=LEFT, pady=5, padx=2)
 
 		in_hour_label=Label(frame5,text="Hour:", anchor=W)
@@ -3569,7 +3570,7 @@ class attendance_page(Frame):
 		frame5 = Frame(frameHolder)
 		frame5.pack()
 
-		out_time_label=Label(frame5,text="In Time:", width=19, anchor=W)
+		out_time_label=Label(frame5,text="In Time:", width=25, anchor=W)
 		out_time_label.pack(side=LEFT, pady=5, padx=2)
 
 		out_hour_label=Label(frame5,text="Hour:", anchor=W)
@@ -3690,10 +3691,9 @@ class export_attendance_report_page(Frame):
 		status_of_label=Label(frameUser,text="User:", anchor=W)
 		status_of_label.pack(side=LEFT, pady=5)
 
-		self.login_cur.execute("SELECT name FROM users")
-		user_list = list(set(self.login_cur.fetchall()))
-		self.login_conn.close()
-		user_list.append('All')
+		self.attns_cur.execute("SELECT name FROM attns")
+		status_of_list = list(set(self.attns_cur.fetchall()))
+		status_of_list.append('All')
 
 		self.status_of_name=StringVar()
 		self.status_of_name.set('All')
@@ -3733,7 +3733,8 @@ class export_attendance_report_page(Frame):
 		month_label=Label(frameUser,text="Month:", anchor=W)
 		month_label.pack(side=LEFT, pady=5)
 
-		month_list = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+		self.attns_cur.execute("SELECT months FROM attns")
+		month_list = list(set(self.attns_cur.fetchall()))
 		month_list.append('All')
 
 		self.month_name=StringVar()
@@ -3746,7 +3747,8 @@ class export_attendance_report_page(Frame):
 		year_label=Label(frameUser,text="Year:", anchor=W)
 		year_label.pack(side=LEFT, pady=5)
 
-		year_list = [i for i in range(2011, 2022)]
+		self.attns_cur.execute("SELECT years FROM attns")
+		year_list = list(set(self.attns_cur.fetchall()))
 		year_list.append('All')
 
 		self.year_name=StringVar()
