@@ -1204,7 +1204,7 @@ class update_status_page(Frame):
 		frameDate = Frame(self)
 		frameDate.pack()
 		
-		date_label=Label(frameDate,text="Date:", width=20, anchor=W)
+		date_label=Label(frameDate,text="Date:", width=19, anchor=W)
 		date_label.pack(side=LEFT, pady=5, padx=2)
 
 		day_label=Label(frameDate,text="Day:", anchor=W)
@@ -1446,7 +1446,7 @@ class edit_status_page(Frame):
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=100, width=1090)
+		status_canvas = Canvas(frame5, height=100, width=1100)
 		status_scroll.pack(side=RIGHT, fill=Y)
 		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
@@ -1885,7 +1885,7 @@ class assign_task_page(Frame):
 		self.assigned_to_name.set(self.name)
 
 		assigned_to_list=OptionMenu(frame2,self.assigned_to_name, *name_list, command = lambda x: self.assign_to_user(self.assigned_to_name.get()))
-		assigned_to_list.config(width=35)
+		assigned_to_list.config(width=40)
 		assigned_to_list.pack(side=LEFT, padx=2, pady=5)
 		assigned_to_list.focus_set()
 
@@ -1893,7 +1893,7 @@ class assign_task_page(Frame):
 		frame11 = Frame(frameLeft)
 		frame11.pack()
 		
-		assigned_to_label=Label(frame11,text="Assigned To:", width=20, anchor=W)
+		assigned_to_label=Label(frame11,text="Assigned To:", width=23, anchor=W)
 		assigned_to_label.pack(side=LEFT, pady=5)
 
 		self.assigned_to_names_str = StringVar()
@@ -1933,7 +1933,7 @@ class assign_task_page(Frame):
 		frame5 = Frame(frameLeft)
 		frame5.pack()
 		
-		est_date_label=Label(frame5,text="Est. Date:", width=19, anchor=W)
+		est_date_label=Label(frame5,text="Est. Date:", width=24, anchor=W)
 		est_date_label.pack(side=LEFT, pady=5, padx=2)
 
 		day_label=Label(frame5,text="Day:", anchor=W)
@@ -1970,7 +1970,7 @@ class assign_task_page(Frame):
 		frame6 = Frame(frameLeft)
 		frame6.pack(side=LEFT, padx=5)
 		
-		deadline_label=Label(frame6,text="Deadline:", width=19, anchor=W)
+		deadline_label=Label(frame6,text="Deadline:", width=24, anchor=W)
 		deadline_label.pack(side=LEFT, pady=5, padx=2)
 
 		day_label=Label(frame6,text="Day:", anchor=W)
@@ -2000,7 +2000,7 @@ class assign_task_page(Frame):
 		self.deadline_year_name.set(datetime.datetime.now().strftime("%Y"))
 
 		deadline_year_list=OptionMenu(frame6,self.deadline_year_name, *[str(i) for i in range(2011, 2021)])
-		#year_list.config(width=5)
+		#deadline_year_list.config(width=5)
 		deadline_year_list.pack(side=LEFT, padx=2, pady=5)
 
 		frameRight = Frame(frameHolder)
@@ -2014,7 +2014,7 @@ class assign_task_page(Frame):
 		comments_label.pack(side=LEFT, padx=2, pady=5)
 
 		comments_scroll = Scrollbar(frame7)
-		self.comments_text = Text(frame7, height=4, width=43)
+		self.comments_text = Text(frame7, height=7, width=43)
 		comments_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 		self.comments_text.pack(side=LEFT, fill=Y)
 		comments_scroll.config(command=self.comments_text.yview)
@@ -2024,14 +2024,14 @@ class assign_task_page(Frame):
 		frame8 = Frame(frameRight)
 		frame8.pack()
 		
-		priority_label=Label(frame8,text="Priority:", width=20, anchor=W)
+		priority_label=Label(frame8,text="Priority:", width=19, anchor=W)
 		priority_label.pack(side=LEFT, pady=5, padx=2)
 
 		self.priority_level=StringVar()
 		self.priority_level.set("5")
 
 		priority_list=OptionMenu(frame8,self.priority_level, *[str(i) for i in range(1, 6)])
-		priority_list.config(width=35)
+		priority_list.config(width=41)
 		priority_list.pack(side=LEFT, padx=2, pady=5)
 
 		#Remarks
@@ -2042,7 +2042,7 @@ class assign_task_page(Frame):
 		remarks_status_label.pack(side=LEFT, padx=2, pady=5)
 
 		remarks_scroll = Scrollbar(frame9)
-		self.remarks_text = Text(frame9, height=2, width=43)
+		self.remarks_text = Text(frame9, height=6, width=43)
 		remarks_scroll.pack(side=RIGHT, fill=Y, padx = 5)
 		self.remarks_text.pack(side=LEFT, fill=Y)
 		remarks_scroll.config(command=self.remarks_text.yview)
@@ -2052,27 +2052,27 @@ class assign_task_page(Frame):
 		frame10 = Frame(frameRight)
 		frame10.pack()
 		
-		task_status_label=Label(frame10,text="Status:", width=20, anchor=W)
+		task_status_label=Label(frame10,text="Status:", width=19, anchor=W)
 		task_status_label.pack(side=LEFT, pady=5, padx=2)
 
 		self.task_status_level=StringVar()
 		self.task_status_level.set("discussion")
 
 		task_status_list=OptionMenu(frame10,self.task_status_level, *['discussion', 'in progress', 'incomplete', 'complete', 'delivered'])
-		task_status_list.config(width=35)
+		task_status_list.config(width=41)
 		task_status_list.pack(side=LEFT, padx=2, pady=5)
 
 		frameLast = Frame(frameRight)
-		frameLast.pack()
+		frameLast.pack(side=RIGHT)
 
 		assign_task_btn=Button(frameLast,text="Assign", bg="DeepSkyBlue4", fg = "white", command=self.assign_task, width=10)
-		assign_task_btn.pack(side=LEFT, padx=2, pady=5)
+		assign_task_btn.pack(side=LEFT, padx=10, pady=5)
 
 		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
-		back.pack(side=LEFT, padx=2, pady=5)
+		back.pack(side=LEFT, padx=10, pady=5)
 
 		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
-		exit.pack(side=LEFT, padx=2, pady=5)
+		exit.pack(side=LEFT, padx=10, pady=5)
 	
 	def assign_task(self):
 		if(self.task_text.get("1.0", "end-1c") == '' and len(self.assigned_to_users_list)==0):
