@@ -256,18 +256,15 @@ class user_dashboard(Frame):
 		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
 		canvas.pack(fill=X, padx=80, pady=10)
 
-		#for line2:
-		frame2 = Frame(self)
-		frame2.pack()
+		frameHolder = Frame(self)
+		frameHolder.pack()
 
-		update_status_btn=Button(frame2,text="Update Status",command=lambda: self.set_value(8), width = 16, height=2, bd=4, bg="cyan3")
-		update_status_btn.pack(side=LEFT, padx=2, pady=2)
+		#for user buttons:
+		frame2 = Frame(frameHolder)
+		frame2.pack(side=LEFT)
 
-		edit_status_btn=Button(frame2,text="Edit Status",command=lambda: self.set_value(9), width = 16, height=2, bd=4, bg="PaleGreen2")
-		edit_status_btn.pack(side=LEFT, padx=2, pady=2)
-
-		assign_task_btn=Button(frame2,text="Assign Task",command=lambda: self.set_value(13), width = 16, height=2, bd=4, bg="blue2")
-		assign_task_btn.pack(side=LEFT, padx=2, pady=2)
+		manage_status_btn=Button(frame2,text="Manage\nStatus",command=lambda: self.set_value(24), width = 16, height=3, bd=4, bg="cyan3")
+		manage_status_btn.pack(padx=2, pady=2)
 
 		self.create_task_table()
 		self.task_cur.execute("SELECT ids, a_by, task_list, description, deadline, priority, status FROM tasks WHERE a_to = ?", (self.name,))
@@ -278,95 +275,62 @@ class user_dashboard(Frame):
 			if(data2[i][6] != 'complete'):
 				data3.append(data2[i])
 
-		assigned_task_btn=Button(frame2,text="Assigned Task\n("+str(len(data3))+")",command=lambda: self.set_value(23), width = 16, height=2, bd=4, bg="PaleGreen2")
-		assigned_task_btn.pack(side=LEFT, padx=2, pady=2)
+		manage_task_btn=Button(frame2,text="Manage Tasks\nUnfinished ("+str(len(data3))+")",command=lambda: self.set_value(23), width = 16, height=3, bd=4, bg="PaleGreen2")
+		manage_task_btn.pack(padx=2, pady=2)
 
-		edit_task_btn=Button(frame2,text="Edit Task",command=lambda: self.set_value(15), width = 16, height=2, bd=4, bg="aquamarine2")
-		edit_task_btn.pack(side=LEFT, padx=2, pady=2)
-
-		edit_email_btn=Button(frame2,text="Edit User Email",command=lambda: self.set_value(4), width = 16, height=2, bd=4, bg="gold2")
-		edit_email_btn.pack(side=LEFT, padx=2, pady=2)
-
-		edit_pass_btn=Button(frame2,text="Edit User Password",command=lambda: self.set_value(5), width = 16, height=2, bd=4, bg="magenta3")
-		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
-
-		attns_btn=Button(frame2,text="Attendance",command=lambda: self.set_value(19), width = 16, height=2, bd=4, bg="LightSteelBlue3")
-		attns_btn.pack(side=LEFT, padx=2, pady=2)
-
-		if(self.admin == 1):
-			#for line3:
-			frame3 = Frame(self)
-			frame3.pack()
-
-			edit_user_admin_sts_btn=Button(frame3,text="Admin Privilege",command=lambda: self.set_value(3), width = 16, height=2, bd=4, bg="aquamarine2")
-			edit_user_admin_sts_btn.pack(side=LEFT, padx=2, pady=2)
-
-			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = 16, height=2, bd=4, bg="medium orchid")
-			all_task_btn.pack(side=LEFT, padx=2, pady=2)
-
-			add_user_btn=Button(frame3,text="Add User",command=lambda: self.set_value(2), width = 16, height=2, bd=4, bg="yellow")
-			add_user_btn.pack(side=LEFT, padx=2, pady=2)
-
-			delete_user_btn=Button(frame3,text="Delete User",command=lambda: self.set_value(6), width = 16, height=2, bd=4, bg="LightSteelBlue3")
-			delete_user_btn.pack(side=LEFT, padx=2, pady=2)
-
-			export_report_btn=Button(frame3,text="Export Report",command=lambda: self.set_value(22), width = 16, height=2, bd=4, bg="turquoise")
-			export_report_btn.pack(side=LEFT, padx=2, pady=2)
-
-			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=2, bd=4, bg="medium orchid")
-			backup_btn.pack(side=LEFT, padx=2, pady=2)
-
-		###########################################################
-		#Foods
-		dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
-		weeks   = datetime.datetime.now().strftime("%U")
-		months  = datetime.datetime.now().strftime("%b")
-		years   = datetime.datetime.now().strftime("%Y")
+		manage_profile_btn=Button(frame2,text="Manage\nProfile",command=lambda: self.set_value(25), width = 16, height=3, bd=4, bg="aquamarine2")
+		manage_profile_btn.pack(padx=2, pady=2)
 
 		self.create_food_table()
+		dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
 		self.food_cur.execute("SELECT value, name FROM foods WHERE name = ? and dates = ?", (self.name, dates))
 		foodData = self.food_cur.fetchall()
-		print(self.name, dates, foodData)
 
-		#for line4
-		frame4 = Frame(self)
-		frame4.pack()
+		if(len(foodData) > 0 and int(foodData[0][0]) == 1):
 
-		if(int(datetime.datetime.now().strftime("%H"))>=10 and len(foodData) > 0 and int(foodData[0][0]) == 1):
-
-			self.food_btn=Button(frame4,text="Food Order\n(Given)", bg="green3", state = DISABLED, fg = "white", width = 16, height=2, bd=4)
-			self.food_btn.pack(side=LEFT, padx=2, pady=2)
-
-		elif((int(datetime.datetime.now().strftime("%H"))>=10 and len(foodData) == 0) or ((int(datetime.datetime.now().strftime("%H"))>=10 and len(foodData) > 0 and int(foodData[0][0]) == 0))):
-
-			self.food_btn=Button(frame4,text="Food Order\n(Not Given)", bg="tomato", state = DISABLED, fg = "white", width = 16, height=2, bd=4)
-			self.food_btn.pack(side=LEFT, padx=2, pady=2)
-
-		elif(int(datetime.datetime.now().strftime("%H"))<10 and len(foodData) > 0 and int(foodData[0][0]) == 1):
-
-			self.food_btn=Button(frame4,text="Food Order\n(Given)", bg="green3", fg = "white", command = lambda : self.food_order(1, 0, dates, weeks, months, years), width = 16, height=2, bd=4)
-			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+			self.food_btn=Button(frame2,text="Attendance\n& Food", bg="green3", fg = "white", command = lambda : self.set_value(27), width = 16, height=3, bd=4)
+			self.food_btn.pack(padx=2, pady=2)
 			
-		elif(int(datetime.datetime.now().strftime("%H"))<10 and len(foodData) > 0 and int(foodData[0][0]) == 0):
+		elif(len(foodData) > 0 and int(foodData[0][0]) == 0):
 
-			self.food_btn=Button(frame4, text="Food Order\n(Not Given)", bg="tomato", fg = "white", command = lambda : self.food_order(1, 1, dates, weeks, months, years), width = 16, height=2, bd=4)
-			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+			self.food_btn=Button(frame2, text="Attendance\n& Food", bg="tomato", fg = "white", command = lambda : self.set_value(27), width = 16, height=3, bd=4)
+			self.food_btn.pack(padx=2, pady=2)
 
-		elif(int(datetime.datetime.now().strftime("%H"))<10 and len(foodData) == 0):
+		elif(len(foodData) == 0):
 
-			self.food_btn=Button(frame4, text="Food Order\n(Not Given)", bg="tomato", fg = "white", command = lambda : self.food_order(0, 1, dates, weeks, months, years), width = 16, height=2, bd=4)
-			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+			self.food_btn=Button(frame2, text="Attendance\n& Food", bg="tomato", fg = "white", command = lambda : self.set_value(27), width = 16, height=3, bd=4)
+			self.food_btn.pack(padx=2, pady=2)
+
 		else:
 			self.error_msg = "Error Happend!"
 			messagebox.showinfo("Error", self.error_msg)
 
-		###########################################################
+		if(self.admin == 1):
+			#for admin buttons:
+			frame3 = Frame(frameHolder)
+			frame3.pack(side=LEFT)
 
-		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=2, bd=4)
-		log_out.pack(side=LEFT, padx=2, pady=2)
+			manage_users_btn=Button(frame3,text="Manage\nUsers",command=lambda: self.set_value(26), width = 16, height=3, bd=4, bg="aquamarine2")
+			manage_users_btn.pack(padx=2, pady=2)
 
-		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=2, bd=4)
-		exit.pack(side=LEFT, padx=2, pady=2)
+			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = 16, height=3, bd=4, bg="medium orchid")
+			all_task_btn.pack(padx=2, pady=2)
+
+			export_report_btn=Button(frame3,text="Export\nReport",command=lambda: self.set_value(22), width = 16, height=3, bd=4, bg="turquoise")
+			export_report_btn.pack(padx=2, pady=2)
+
+			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=3, bd=4, bg="medium orchid")
+			backup_btn.pack(padx=2, pady=2)
+
+		#For logout and exit
+		frame4 = Frame(frameHolder)
+		frame4.pack(side=LEFT)
+
+		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=3, bd=4)
+		log_out.pack(padx=2, pady=2)
+
+		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=3, bd=4)
+		exit.pack(padx=2, pady=2)
 
 	def create_task_table(self):
 		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
