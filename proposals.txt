@@ -1,4 +1,5 @@
 1. export file as pdf
-2. add messagebox
+2. email report to a mailing address from the bottom of export report page 
 3. fix dropdownmenu width
 4. try mysql database
+5. add images to the button

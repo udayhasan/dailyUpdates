@@ -45,7 +45,6 @@ class login_page(Frame):
 				admin   = 0
 				self.login_cur.execute("SELECT password, admin_status FROM users WHERE name = ?", (name,))
 				check = self.login_cur.fetchall()
-				self.login_conn.close()
 				if(password == check[0][0]):
 					success = 1
 					self.screen = 1
@@ -178,37 +177,6 @@ class user_dashboard(Frame):
 	def create_food_table(self):
 		self.food_cur.execute("CREATE TABLE IF NOT EXISTS foods(name TEXT, value TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
 
-	def food_order(self, existing, order, dates, weeks, months, years):
-		if(existing == 0):
-			#order activate
-			self.food_btn.config(bg='green3')
-			self.create_food_table()
-			self.food_cur.execute("INSERT INTO foods(name, value, dates, weeks, months, years) VALUES (?, ?, ?, ?, ?, ?)", (self.name, str(1), dates, weeks, months, years))
-			self.food_conn.commit()
-			time.sleep(0.02)
-			self.screen = 1
-			self.quit()
-
-		elif(existing == 1 and order == 0):
-			#button red korbe
-			self.food_btn.config(bg='tomato')
-			self.create_food_table()
-			self.food_cur.execute("DELETE FROM foods WHERE name = ? and dates = ?", (self.name, dates))
-			self.food_conn.commit()
-			time.sleep(0.02)
-			self.screen = 1
-			self.quit()
-
-		elif(existing == 1 and order == 1):
-			#button green korbe
-			self.food_btn.config(bg='green3')
-			self.create_food_table()
-			self.food_cur.execute("UPDATE foods SET name = ?, value = ?, dates = ?, weeks = ?, months = ?, years = ? WHERE name = ? and dates = ?", (self.name, str(1), dates, weeks, months, years, self.name, dates))
-			self.food_conn.commit()
-			time.sleep(0.02)
-			self.screen = 1
-			self.quit()
-
 	def backup_def(self):
 		try:
 			self.create_user_table()
@@ -219,7 +187,6 @@ class user_dashboard(Frame):
 				self.to_email.append(mail[0])
 
 			print(self.to_email)
-			self.login_conn.close()
 
 			msg = MIMEMultipart()
 			msg['Subject'] = 'Backup-'+datetime.datetime.now().strftime("%d-%b-%Y")+"-"+datetime.datetime.now().strftime("%H:%M:%S")
@@ -256,6 +223,11 @@ class user_dashboard(Frame):
 		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
 		canvas.pack(fill=X, padx=80, pady=10)
 
+		if(self.admin==1):
+			dash_btn_width = 16
+		else:
+			dash_btn_width = 32
+
 		frameHolder = Frame(self)
 		frameHolder.pack()
 
@@ -263,7 +235,7 @@ class user_dashboard(Frame):
 		frame2 = Frame(frameHolder)
 		frame2.pack(side=LEFT)
 
-		manage_status_btn=Button(frame2,text="Manage\nStatus",command=lambda: self.set_value(24), width = 16, height=3, bd=4, bg="cyan3")
+		manage_status_btn=Button(frame2,text="Manage\nStatus",command=lambda: self.set_value(9), width = dash_btn_width, height=3, bd=4, bg="cyan3")
 		manage_status_btn.pack(padx=2, pady=2)
 
 		self.create_task_table()
@@ -275,10 +247,10 @@ class user_dashboard(Frame):
 			if(data2[i][6] != 'complete'):
 				data3.append(data2[i])
 
-		manage_task_btn=Button(frame2,text="Manage Tasks\nUnfinished ("+str(len(data3))+")",command=lambda: self.set_value(23), width = 16, height=3, bd=4, bg="PaleGreen2")
+		manage_task_btn=Button(frame2,text="Manage Tasks\nUnfinished ("+str(len(data3))+")",command=lambda: self.set_value(23), width = dash_btn_width, height=3, bd=4, bg="PaleGreen2")
 		manage_task_btn.pack(padx=2, pady=2)
 
-		manage_profile_btn=Button(frame2,text="Manage\nProfile",command=lambda: self.set_value(25), width = 16, height=3, bd=4, bg="aquamarine2")
+		manage_profile_btn=Button(frame2,text="Manage\nProfile",command=lambda: self.set_value(4), width = dash_btn_width, height=3, bd=4, bg="aquamarine2")
 		manage_profile_btn.pack(padx=2, pady=2)
 
 		self.create_food_table()
@@ -288,49 +260,50 @@ class user_dashboard(Frame):
 
 		if(len(foodData) > 0 and int(foodData[0][0]) == 1):
 
-			self.food_btn=Button(frame2,text="Attendance\n& Food", bg="green3", fg = "white", command = lambda : self.set_value(27), width = 16, height=3, bd=4)
+			self.food_btn=Button(frame2,text="Attendance\n& Food", bg="green3", fg = "white", command = lambda : self.set_value(24), width = dash_btn_width, height=3, bd=4)
 			self.food_btn.pack(padx=2, pady=2)
 			
 		elif(len(foodData) > 0 and int(foodData[0][0]) == 0):
 
-			self.food_btn=Button(frame2, text="Attendance\n& Food", bg="tomato", fg = "white", command = lambda : self.set_value(27), width = 16, height=3, bd=4)
+			self.food_btn=Button(frame2, text="Attendance\n& Food", bg="tomato", fg = "white", command = lambda : self.set_value(24), width = dash_btn_width, height=3, bd=4)
 			self.food_btn.pack(padx=2, pady=2)
 
 		elif(len(foodData) == 0):
 
-			self.food_btn=Button(frame2, text="Attendance\n& Food", bg="tomato", fg = "white", command = lambda : self.set_value(27), width = 16, height=3, bd=4)
+			self.food_btn=Button(frame2, text="Attendance\n& Food", bg="tomato", fg = "white", command = lambda : self.set_value(24), width = dash_btn_width, height=3, bd=4)
 			self.food_btn.pack(padx=2, pady=2)
 
 		else:
 			self.error_msg = "Error Happend!"
 			messagebox.showinfo("Error", self.error_msg)
 
-		if(self.admin == 1):
-			#for admin buttons:
-			frame3 = Frame(frameHolder)
-			frame3.pack(side=LEFT)
+		#for admin buttons:
+		frame3 = Frame(frameHolder)
+		frame3.pack(side=LEFT)
 
-			manage_users_btn=Button(frame3,text="Manage\nUsers",command=lambda: self.set_value(26), width = 16, height=3, bd=4, bg="aquamarine2")
+		if(self.admin == 1):
+			manage_users_btn=Button(frame3,text="Manage\nUsers",command=lambda: self.set_value(25), width = dash_btn_width, height=3, bd=4, bg="aquamarine2")
 			manage_users_btn.pack(padx=2, pady=2)
 
-			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = 16, height=3, bd=4, bg="medium orchid")
+			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = dash_btn_width, height=3, bd=4, bg="medium orchid")
 			all_task_btn.pack(padx=2, pady=2)
 
-			export_report_btn=Button(frame3,text="Export\nReport",command=lambda: self.set_value(22), width = 16, height=3, bd=4, bg="turquoise")
+			export_report_btn=Button(frame3,text="Export\nReport",command=lambda: self.set_value(22), width = dash_btn_width, height=3, bd=4, bg="turquoise")
 			export_report_btn.pack(padx=2, pady=2)
 
-			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = 16, height=3, bd=4, bg="medium orchid")
+			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = dash_btn_width, height=3, bd=4, bg="medium orchid")
 			backup_btn.pack(padx=2, pady=2)
 
-		#For logout and exit
-		frame4 = Frame(frameHolder)
-		frame4.pack(side=LEFT)
-
-		log_out=Button(frame4,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = 16, height=3, bd=4)
+		#for logout:
+		log_out=Button(frame2,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = dash_btn_width, height=3, bd=4)
 		log_out.pack(padx=2, pady=2)
 
-		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = 16, height=3, bd=4)
-		exit.pack(padx=2, pady=2)
+		if(self.admin==1):
+			exit=Button(frame3,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = dash_btn_width, height=3, bd=4)
+			exit.pack(padx=2, pady=2)
+		else:
+			exit=Button(frame2,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = dash_btn_width, height=3, bd=4)
+			exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_task_table(self):
 		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
@@ -443,7 +416,6 @@ class add_user_page(Frame):
 						self.login_cur.execute("INSERT INTO users(name, email, password, admin_status) VALUES (?, ?, ?, ?)", (self.add_name.get(), self.add_email.get(), self.add_pass.get(), str(self.admin_status.get())))
 						self.login_conn.commit()
 						time.sleep(0.02)
-						self.login_conn.close()
 						print("New User named %s is added to the database" %(self.add_name.get()))
 						self.screen = 2
 						self.quit()
@@ -457,99 +429,13 @@ class add_user_page(Frame):
 					messagebox.showinfo("Error", self.error_msg)
 
 	def go_prev(self):
-		self.screen = 1
+		self.login_conn.close()
+		self.screen = 25
 		self.quit()
 
 	def leave(self):
+		self.login_conn.close()
 		quit()
-
-"""class edit_user_name_page(Frame):
-	screen = 3
-	login_conn = None
-	login_cur  = None
-
-	error_msg  = " "
-
-	def __init__(self,master, name):
-		super(edit_user_name_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('./db/users.db')
-		self.login_cur  = self.login_conn.cursor()
-		self.name       = name
-		self.pack()
-		self.define_widgets()
-
-	def define_widgets(self):
-		frame1 = Frame(self)
-		frame1.pack()
-		edit_name_label=Label(frame1,text="::Edit Profile::")
-		edit_name_label.config(width=200, font=("Courier", 25))
-		edit_name_label.pack(pady=5)
-
-		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
-		canvas.pack(fill=X, padx=80, pady=10)
-
-		frame2 = Frame(self)
-		frame2.pack()
-		edit_name_cur_label=Label(frame2,text="Current User Name:", width=20, anchor=W)
-		edit_name_cur_label.pack(side=LEFT, padx=2, pady=2)
-
-		self.edit_name_cur=StringVar()
-		edit_name_cur_entry=Entry(frame2,textvariable=self.edit_name_cur, width=40)
-		self.edit_name_cur.set(self.name)
-		edit_name_cur_entry.pack(side=LEFT, padx=2, pady=2)
-		edit_name_cur_entry.focus_set()
-
-		frame3 = Frame(self)
-		frame3.pack()
-		edit_name_new_label=Label(frame3,text="New User Name:", width=20, anchor=W)
-		edit_name_new_label.pack(side=LEFT, padx=2, pady=2)
-
-		self.edit_name_new=StringVar()
-		edit_name_new_entry=Entry(frame3,textvariable=self.edit_name_new, width=40)
-		edit_name_new_entry.pack(side=LEFT, padx=2, pady=2)
-		edit_name_new_entry.focus_set()
-
-		frame4 = Frame(self)
-		frame4.pack()
-		edit_name_btn=Button(frame4,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_name, width=10)
-		edit_name_btn.pack(side=LEFT, padx=2, pady=2)
-
-		back=Button(frame4,text="< Prev", command=self.go_prev, width=10)
-		back.pack(side=LEFT, padx=2, pady=2)
-
-		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
-		exit.pack(side=LEFT, padx=2, pady=2)
-
-	def create_user_table(self):
-		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
-
-	def edit_user_name(self):
-		self.create_user_table()
-		if(self.edit_name_cur.get() == '' or self.edit_name_new.get() == ''):
-			self.error_msg = "Invalid input!"
-			messagebox.showinfo("Error", self.error_msg)
-		elif(self.edit_name_cur.get() == 'admin' or self.edit_name_new.get() == 'admin'):
-			self.error_msg = "You cannot change admin name!"
-			messagebox.showinfo("Error", self.error_msg)
-		else:
-			try:
-				self.login_cur.execute("UPDATE users SET name = ? WHERE name = ?", (self.edit_name_new.get(), self.edit_name_cur.get()))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				self.login_conn.close()
-				print("User name %s is replaced by %s" %(self.edit_name_cur.get(), self.edit_name_new.get()))
-				self.screen = 3
-				self.quit()
-			except Exception:
-				self.error_msg = "Invalid search name or replacing name!"
-				messagebox.showinfo("Error", self.error_msg)
-
-	def go_prev(self):
-		self.screen = 1
-		self.quit()
-
-	def leave(self):
-		quit()"""
 
 class edit_user_admin_sts_page(Frame):
 	screen = 3
@@ -667,21 +553,24 @@ class edit_user_admin_sts_page(Frame):
 
 	def go_prev(self):
 		self.login_conn.close()
-		self.screen = 1
+		self.screen = 25
 		self.quit()
 
 	def leave(self):
+		self.login_conn.close()
 		quit()
 
-class edit_user_email_page(Frame):
+class manage_profile_page(Frame):
 	screen = 4
+	name = None
 	login_conn = None
 	login_cur  = None
 
 	error_msg  = " "
 
-	def __init__(self,master):
-		super(edit_user_email_page,self).__init__(master)
+	def __init__(self,master, name):
+		super(manage_profile_page,self).__init__(master)
+		self.name = name
 		self.login_conn = sqlite3.connect('./db/users.db')
 		self.login_cur  = self.login_conn.cursor()
 		self.pack()
@@ -691,28 +580,50 @@ class edit_user_email_page(Frame):
 
 		frame1 = Frame(self)
 		frame1.pack()
-		edit_email_label=Label(frame1,text="::Edit Email Address::")
+		edit_email_label=Label(frame1,text="::Manage Profile::")
 		edit_email_label.config(width=200, font=("Courier", 25))
 		edit_email_label.pack(pady=5)
 
 		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
 		canvas.pack(fill=X, padx=80, pady=10)
 
+		self.create_user_table()
+		self.login_cur.execute("SELECT email FROM users WHERE name = ?", (self.name,))
+		data = self.login_cur.fetchall()
+
+		frameDetails = Frame(self)
+		frameDetails.pack()
+
+		user_name_label=Label(frameDetails,text="User Name:", width=20, anchor=W)
+		user_name_label.pack(side=LEFT, padx=2, pady=2)
+
+		user_name_entry=Label(frameDetails,text=self.name, width=40, anchor=W)
+		user_name_entry.pack(side=LEFT, padx=2, pady=2)
+
+		frameEmail = Frame(self)
+		frameEmail.pack()
+
+		user_email_label=Label(frameEmail,text="User Email:", width=20, anchor=W)
+		user_email_label.pack(side=LEFT, padx=2, pady=2)
+
+		self.edit_email_cur=StringVar()
+		self.edit_email_cur.set(data[0][0])
+		user_email_entry=Label(frameEmail,textvariable=self.edit_email_cur, width=40, anchor=W)
+		user_email_entry.pack(side=LEFT, padx=2, pady=2)
+
+		frameLine = Frame(self)
+		frameLine.pack()
+
+		canvas = Canvas(frameLine, height=2, width=650, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(pady=10)
+
 		frame2 = Frame(self)
 		frame2.pack()
-
-		edit_name_cur_label=Label(frame2,text="User Name:", width=20, anchor=W)
-		edit_name_cur_label.pack(side=LEFT, padx=2, pady=2)
-
-		self.edit_name_cur=StringVar()
-		edit_name_cur_entry=Entry(frame2,textvariable=self.edit_name_cur, width=40)
-		edit_name_cur_entry.pack(side=LEFT, padx=2, pady=2)
-		edit_name_cur_entry.focus_set()
 
 		frame3 = Frame(self)
 		frame3.pack()
 
-		edit_email_new_label=Label(frame3,text="New User Email:", width=20, anchor=W)
+		edit_email_new_label=Label(frame3,text="New Email:", width=20, anchor=W)
 		edit_email_new_label.pack(side=LEFT, padx=2, pady=2)
 
 		self.edit_email_new=StringVar()
@@ -722,13 +633,58 @@ class edit_user_email_page(Frame):
 		frame4 = Frame(self)
 		frame4.pack()
 
-		edit_email_btn=Button(frame4,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_email, width=10)
+		edit_email_btn=Button(frame4,text="Change Email", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_email, width=16)
 		edit_email_btn.pack(side=LEFT, padx=2, pady=2)
 
-		back=Button(frame4,text="< Prev", command=self.go_prev, width=10)
+		frame10 = Frame(self)
+		frame10.pack()
+
+		canvas = Canvas(frame10, height=2, width=650, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(pady=10)
+
+		frame5 = Frame(self)
+		frame5.pack()
+
+		edit_pass_cur_label=Label(frame5,text="Current Password:", width=20, anchor=W)
+		edit_pass_cur_label.pack(side=LEFT, padx=2, pady=2)
+
+		self.edit_pass_cur=StringVar()
+		edit_pass_cur_entry=Entry(frame5,textvariable=self.edit_pass_cur, width=40, show="*")
+		edit_pass_cur_entry.pack(side=LEFT, padx=2, pady=2)
+
+		frame6 = Frame(self)
+		frame6.pack()
+
+		edit_pass_new_label=Label(frame6,text="New Password:", width=20, anchor=W)
+		edit_pass_new_label.pack(side=LEFT, padx=2, pady=2)
+
+		self.edit_pass_new=StringVar()
+		edit_pass_new_entry=Entry(frame6,textvariable=self.edit_pass_new, width=40, show="*")
+		edit_pass_new_entry.pack(side=LEFT, padx=2, pady=2)
+
+		frame7 = Frame(self)
+		frame7.pack()
+
+		edit_pass_confirm_label=Label(frame7,text="Confirm Password:", width=20, anchor=W)
+		edit_pass_confirm_label.pack(side=LEFT, padx=2, pady=2)
+
+		self.edit_pass_confirm=StringVar()
+		edit_pass_confirm_entry=Entry(frame7,textvariable=self.edit_pass_confirm, width=40, show="*")
+		edit_pass_confirm_entry.pack(side=LEFT, padx=2, pady=2)
+
+		frame8 = Frame(self)
+		frame8.pack()
+
+		edit_pass_btn=Button(frame8,text="Change Password", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_password, width=16)
+		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
+
+		frame9=Frame(self)
+		frame9.pack(pady=15)
+
+		back=Button(frame9,text="< Prev", command=self.go_prev, width=6)
 		back.pack(side=LEFT, padx=2, pady=2)
 
-		exit=Button(frame4,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit=Button(frame9,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=6)
 		exit.pack(side=LEFT, padx=2, pady=2)
 
 	def create_user_table(self):
@@ -736,98 +692,34 @@ class edit_user_email_page(Frame):
 
 	def edit_user_email(self):
 		self.create_user_table()
-		if(self.edit_name_cur.get() == '' or self.edit_email_new.get() == ''):
+		if(self.edit_email_cur.get() == '' or self.edit_email_new.get() == ''):
 			self.error_msg = "Necessary field(s) cannot be empty!"
 			messagebox.showinfo("Error", self.error_msg)
 		else:
 			try:
-				self.login_cur.execute("UPDATE users SET email = ? WHERE name = ?", (self.edit_email_new.get(), self.edit_name_cur.get()))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				self.login_conn.close()
-				print("User email of %s is replaced by %s" %(self.edit_name_cur.get(), self.edit_email_new.get()))
+				self.create_user_table()
+				self.login_cur.execute("SELECT * FROM users WHERE name = ? and email = ?", (self.name,self.edit_email_cur.get()))
+				data = self.login_cur.fetchall()
+
+				if(len(data)==0):
+					self.error_msg = "Incorrect inputs!"
+					messagebox.showinfo("Error", self.error_msg)
+
+				else:
+					if(messagebox.askyesno("Warning", "Are you sure?")):
+						self.login_cur.execute("UPDATE users SET email = ? WHERE name = ? and email = ?", (self.edit_email_new.get(), self.name, self.edit_email_cur.get()))
+						self.login_conn.commit()
+						time.sleep(0.02)
+						self.login_conn.close()
+						print("User email of %s is replaced by %s" %(self.edit_email_cur.get(), self.edit_email_new.get()))
+						messagebox.showinfo("Success Message", "User email changed\nfrom: "+self.edit_email_cur.get()+"\nto: "+self.edit_email_new.get())
+					else:
+						print("Email is not changed!")
 				self.screen = 4
 				self.quit()
 			except Exception as e:
 				self.error_msg = "Error happened!\nError: "+str(e)
 				messagebox.showinfo("Error", self.error_msg)
-
-	def go_prev(self):
-		self.screen = 1
-		self.quit()
-
-	def leave(self):
-		quit()
-
-class edit_user_pass_page(Frame):
-	screen = 5
-	login_conn = None
-	login_cur  = None
-
-	error_msg  = " "
-
-	def __init__(self,master, name):
-		super(edit_user_pass_page,self).__init__(master)
-		self.login_conn = sqlite3.connect('./db/users.db')
-		self.login_cur  = self.login_conn.cursor()
-		self.name = name
-		self.pack()
-		self.define_widgets()
-
-	def define_widgets(self):
-		frame1 = Frame(self)
-		frame1.pack()
-		edit_pass_label=Label(frame1,text="::Edit User Password::")
-		edit_pass_label.config(width=200, font=("Courier", 25))
-		edit_pass_label.pack(pady=5)
-
-		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
-		canvas.pack(fill=X, padx=80, pady=10)
-
-		frame3 = Frame(self)
-		frame3.pack()
-
-		edit_pass_cur_label=Label(frame3,text="Current Password:", width=20, anchor=W)
-		edit_pass_cur_label.pack(side=LEFT, padx=2, pady=2)
-
-		self.edit_pass_cur=StringVar()
-		edit_pass_cur_entry=Entry(frame3,textvariable=self.edit_pass_cur, width=40, show="*")
-		edit_pass_cur_entry.pack(side=LEFT, padx=2, pady=2)
-
-		frame4 = Frame(self)
-		frame4.pack()
-
-		edit_pass_new_label=Label(frame4,text="New Password:", width=20, anchor=W)
-		edit_pass_new_label.pack(side=LEFT, padx=2, pady=2)
-
-		self.edit_pass_new=StringVar()
-		edit_pass_new_entry=Entry(frame4,textvariable=self.edit_pass_new, width=40, show="*")
-		edit_pass_new_entry.pack(side=LEFT, padx=2, pady=2)
-
-		frame2 = Frame(self)
-		frame2.pack()
-
-		edit_pass_confirm_label=Label(frame2,text="Confirm Password:", width=20, anchor=W)
-		edit_pass_confirm_label.pack(side=LEFT, padx=2, pady=2)
-
-		self.edit_pass_confirm=StringVar()
-		edit_pass_confirm_entry=Entry(frame2,textvariable=self.edit_pass_confirm, width=40, show="*")
-		edit_pass_confirm_entry.pack(side=LEFT, padx=2, pady=2)
-
-		frame5 = Frame(self)
-		frame5.pack()
-
-		edit_pass_btn=Button(frame5,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.edit_user_password, width=10)
-		edit_pass_btn.pack(side=LEFT, padx=2, pady=2)
-
-		back=Button(frame5,text="< Prev", command=self.go_prev, width=10)
-		back.pack(side=LEFT, padx=2, pady=2)
-
-		exit=Button(frame5,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
-		exit.pack(side=LEFT, padx=2, pady=2)
-
-	def create_user_table(self):
-		self.login_cur.execute("CREATE TABLE IF NOT EXISTS users(name TEXT, email TEXT, password TEXT)")
 
 	def edit_user_password(self):
 		self.create_user_table()
@@ -836,18 +728,32 @@ class edit_user_pass_page(Frame):
 			messagebox.showinfo("Error", self.error_msg)
 		elif(self.edit_pass_confirm.get() == self.edit_pass_new.get()):
 			try:
-				self.login_cur.execute("UPDATE users SET password = ? WHERE name = ? and password = ?", (self.edit_pass_new.get(), self.name, self.edit_pass_cur.get()))
-				self.login_conn.commit()
-				time.sleep(0.02)
-				self.login_conn.close()
-				print("Password for %s is changed successfully!" %(name))
+				self.create_user_table()
+				self.login_cur.execute("SELECT * FROM users WHERE name = ? and password = ?", (self.name, self.edit_pass_cur.get()))
+				data = self.login_cur.fetchall()
+
+				if(len(data)==0):
+					self.error_msg = "Incorrect inputs!"
+					messagebox.showinfo("Error", self.error_msg)
+
+				else:
+					if(messagebox.askyesno("Warning", "Are you sure?")):
+						self.login_cur.execute("UPDATE users SET password = ? WHERE name = ? and password = ?", (self.edit_pass_new.get(), self.name, self.edit_pass_cur.get()))
+						self.login_conn.commit()
+						time.sleep(0.02)
+						self.login_conn.close()
+						print("Password for %s is changed successfully!" %(name))
+						messagebox.showinfo("Success Message", "User password changed successfully!")
+					else:
+						print("Password is not changed!")
+				self.screen = 4
+				self.quit()
 			except Exception as e:
 				self.error_msg = "Error happened!\nError: "+str(e)
 				messagebox.showinfo("Error", self.error_msg)
 		else:
 			self.error_msg = "Your password is not confirmed correctly!"
 			messagebox.showinfo("Error", self.error_msg)
-
 
 	def go_prev(self):
 		self.screen = 1
@@ -988,7 +894,6 @@ class delete_user_page(Frame):
 							self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
 							self.login_conn.commit()
 							time.sleep(0.02)
-							self.login_conn.close()
 							print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
 							self.screen = 6
 							self.quit()
@@ -1000,7 +905,6 @@ class delete_user_page(Frame):
 							self.login_cur.execute("DELETE FROM users WHERE name = ?", (self.delete_user_name.get(),))
 							self.login_conn.commit()
 							time.sleep(0.02)
-							self.login_conn.close()
 							print("User named %s has been deleted successfully!" %(self.delete_user_name.get()))
 							self.screen = 6
 							self.quit()
@@ -1018,7 +922,7 @@ class delete_user_page(Frame):
 		self.quit()
 
 	def go_prev(self):
-		self.screen = 1
+		self.screen = 25
 		self.quit()
 
 	def leave(self):
@@ -1313,7 +1217,7 @@ class update_status_page(Frame):
 				messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
-		self.screen = 1
+		self.screen = 9
 		self.quit()
 
 	def leave(self):
@@ -1336,13 +1240,18 @@ class edit_status_page(Frame):
 		self.pack()
 		self.define_widgets()
 
+	def set_value(self, value):
+		self.screen = value
+		print(self.screen)
+		self.quit()
+
 	def create_status_table(self):
 		self.status_cur.execute("CREATE TABLE IF NOT EXISTS status(ids TEXT, dates TEXT, up_time TEXT, weeks TEXT, months TEXT, years TEXT, name TEXT, team TEXT,task_list TEXT, progress_status TEXT, meeting_status TEXT, project_status TEXT, remarks TEXT)")
 
 	def define_widgets(self):
 		frame1 = Frame(self)
 		frame1.pack()
-		edit_status_label=Label(frame1,text="::Edit Status::")
+		edit_status_label=Label(frame1,text="::Manage Status::")
 		edit_status_label.config(width=200, font=("Courier", 25))
 		edit_status_label.pack(pady=5)
 
@@ -1352,6 +1261,9 @@ class edit_status_page(Frame):
 		#ID
 		frame2 = Frame(self)
 		frame2.pack()
+
+		update_status_btn=Button(frame2,text="Update", bg="DeepSkyBlue4", fg = "white", command= lambda : self.set_value(8), width=15)
+		update_status_btn.pack(side=LEFT, padx=2, pady=2)
 
 		status_id_label=Label(frame2,text="Status ID:", width=20)
 		status_id_label.pack(side=LEFT, padx=2, pady=2)
@@ -1410,7 +1322,7 @@ class edit_status_page(Frame):
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=100, width=1100)
+		status_canvas = Canvas(frame5, height=350, width=1100)
 		status_scroll.pack(side=RIGHT, fill=Y)
 		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
@@ -1843,7 +1755,6 @@ class assign_task_page(Frame):
 
 		self.login_cur.execute("SELECT name FROM users")
 		name_list = self.login_cur.fetchall()
-		self.login_conn.close()
 
 		self.assigned_to_name=StringVar()
 		self.assigned_to_name.set(self.name)
@@ -2064,7 +1975,7 @@ class assign_task_page(Frame):
 				messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
-		self.screen = 1
+		self.screen = 23
 		self.quit()
 
 	def leave(self):
@@ -2512,7 +2423,7 @@ class edit_assign_task_page(Frame):
 	
 	def go_prev(self):
 		self.task_conn.close()
-		self.screen = 1
+		self.screen = 23
 		self.quit()
 
 	def leave(self):
@@ -2596,7 +2507,6 @@ class update_assign_task_page(Frame):
 
 		self.login_cur.execute("SELECT name FROM users")
 		name_list = self.login_cur.fetchall()
-		self.login_conn.close()
 
 		self.assigned_to_name=StringVar()
 		self.assigned_to_name.set(data[0][0])
@@ -2877,7 +2787,6 @@ class all_tasks_page(Frame):
 
 		self.login_cur.execute("SELECT name FROM users")
 		name_list = self.login_cur.fetchall()
-		self.login_conn.close()
 		name_list.append('All')
 
 		self.assigned_to_name=StringVar()
@@ -3080,7 +2989,7 @@ class export_status_report_page(Frame):
 		#for line1:
 		frame1 = Frame(self)
 		frame1.pack()
-		dash_board_label=Label(frame1,text="::Reports::")
+		dash_board_label=Label(frame1,text="::Status Report::")
 		dash_board_label.config(width=200, font=("Courier", 25))
 		dash_board_label.pack(pady=5)
 
@@ -3385,6 +3294,19 @@ class attendance_page(Frame):
 
 	def create_attns_table(self):
 		self.attns_cur.execute("CREATE TABLE IF NOT EXISTS attns(date TEXT, name TEXT, intime TEXT, outtime TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
+	def config_in_time(self):
+		dates = self.day_name.get()+"-"+self.month_name.get()+"-"+self.year_name.get()
+		self.create_attns_table()
+		self.attns_cur.execute("SELECT intime FROM attns WHERE name = ? and dates = ?", (self.name, dates))
+		intime = self.attns_cur.fetchall()
+		print(intime)
+
+		if(len(intime) == 0):
+			self.in_hour_name.set(datetime.datetime.now().strftime("%H"))
+			self.in_minute_name.set(datetime.datetime.now().strftime("%M"))
+		else:
+			self.in_hour_name.set(intime[0][0].split(":")[0])
+			self.in_minute_name.set(intime[0][0].split(":")[1])
 
 	def define_widgets(self):
 		frame1 = Frame(self)
@@ -3400,6 +3322,9 @@ class attendance_page(Frame):
 		frameHolder.pack()
 
 		#Date
+		self.in_hour_name=StringVar()
+		self.in_minute_name=StringVar()
+
 		frameDate = Frame(frameHolder)
 		frameDate.pack()
 		
@@ -3446,20 +3371,26 @@ class attendance_page(Frame):
 		in_hour_label=Label(frame5,text="Hour:", anchor=W)
 		in_hour_label.pack(side=LEFT, pady=5)
 
-		self.in_hour_name=StringVar()
-		self.in_hour_name.set(datetime.datetime.now().strftime("%H"))
-
 		in_hour_list=OptionMenu(frame5,self.in_hour_name, *[str(i) for i in range(1, 25)])
 		in_hour_list.pack(side=LEFT, padx=2, pady=5)
 
 		in_minute_label=Label(frame5,text="Minute:", anchor=W)
 		in_minute_label.pack(side=LEFT, pady=5)
 
-		self.in_minute_name=StringVar()
-		self.in_minute_name.set(datetime.datetime.now().strftime("%M"))
-
 		in_minute_list=OptionMenu(frame5,self.in_minute_name, *[str(i) for i in range(0, 61, 5)])
 		in_minute_list.pack(side=LEFT, padx=2, pady=5)
+
+		dates = self.day_name.get()+"-"+self.month_name.get()+"-"+self.year_name.get()
+		self.create_attns_table()
+		self.attns_cur.execute("SELECT intime FROM attns WHERE name = ? and dates = ?", (self.name, dates))
+		intime = self.attns_cur.fetchall()
+
+		if(len(intime) == 0):
+			self.in_hour_name.set(datetime.datetime.now().strftime("%H"))
+			self.in_minute_name.set(datetime.datetime.now().strftime("%M"))
+		else:
+			self.in_hour_name.set(intime[0][0].split(":")[0])
+			self.in_minute_name.set(intime[0][0].split(":")[1])
 
 		#Out time
 		frame5 = Frame(frameHolder)
@@ -3488,6 +3419,9 @@ class attendance_page(Frame):
 
 		frameLast = Frame(frameHolder)
 		frameLast.pack()
+
+		reload_btn=Button(frameLast,text="Reload", bg="DeepSkyBlue4", fg = "white", command=self.config_in_time, width=10)
+		reload_btn.pack(side=LEFT, padx=2, pady=5)
 
 		update_btn=Button(frameLast,text="Update", bg="DeepSkyBlue4", fg = "white", command=self.attendance_done, width=10)
 		update_btn.pack(side=LEFT, padx=2, pady=5)
@@ -3528,7 +3462,7 @@ class attendance_page(Frame):
 			messagebox.showinfo("Error", self.error_msg)
 	
 	def go_prev(self):
-		self.screen = 1
+		self.screen = 24
 		self.quit()
 
 	def leave(self):
@@ -3567,7 +3501,7 @@ class export_attendance_report_page(Frame):
 		#for line1:
 		frame1 = Frame(self)
 		frame1.pack()
-		dash_board_label=Label(frame1,text="::Attendance::")
+		dash_board_label=Label(frame1,text="::Attendance Report::")
 		dash_board_label.config(width=200, font=("Courier", 25))
 		dash_board_label.pack(pady=5)
 
@@ -4092,13 +4026,13 @@ class export_report_page(Frame):
 		frameButton = Frame(self)
 		frameButton.pack()
 
-		export_status_btn=Button(frameButton,text="Export\nStatus\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(18), width=10, height=3)
+		export_status_btn=Button(frameButton,text="Status\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(18), width=16, height=3, bd = 4)
 		export_status_btn.pack(side=LEFT, padx=2, pady=5)
 
-		export_attns_btn=Button(frameButton,text="Export\nAttendance\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(20), width=10, height=3)
+		export_attns_btn=Button(frameButton,text="Attendance\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(20), width=16, height=3, bd = 4)
 		export_attns_btn.pack(side=LEFT, padx=2, pady=5)
 
-		export_food_btn=Button(frameButton,text="Export\nFood\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(21), width=10, height=3)
+		export_food_btn=Button(frameButton,text="Food\nReport", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(21), width=16, height=3, bd = 4)
 		export_food_btn.pack(side=LEFT, padx=2, pady=5)
 
 		frameLast = Frame(self)
@@ -4139,17 +4073,39 @@ class assigned_task_page(Frame):
 		self.name = name
 		self.define_widgets()
 
+	def set_value(self, value):
+		self.screen = value
+		print(self.screen)
+		self.quit()
+
 	def define_widgets(self):
 		try:
 			#for line1:
 			frame1 = Frame(self)
 			frame1.pack()
-			dash_board_label=Label(frame1,text="::Assigned Tasks::")
+			dash_board_label=Label(frame1,text="::Manage Tasks::")
 			dash_board_label.config(width=200, font=("Courier", 25))
 			dash_board_label.pack(pady=5)
 
 			canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
 			canvas.pack(fill=X, padx=80, pady=10)
+
+			#for buttons:
+			frameTop = Frame(self)
+			frameTop.pack(pady=10)
+
+			assign_task_btn = Button(frameTop, bg = 'DeepSkyBlue4', fg="white", text="Assign\nTask", command=lambda : self.set_value(13), width=16, height = 3, bd = 4)
+			assign_task_btn.pack(side=LEFT, padx = 2, pady = 2)
+
+			edit_task_btn = Button(frameTop, bg = 'DeepSkyBlue4', fg="white", text="Edit\nTask", command=lambda : self.set_value(15), width=16, height = 3, bd = 4)
+			edit_task_btn.pack(side=LEFT, padx = 2, pady = 2)
+
+			#for Table name:
+			frameTable = Frame(self)
+			frameTable.pack(pady=10)
+
+			temp = Label(frameTable,text="~: Incomplete Tasks :~")
+			temp.pack()
 
 			#Table Head
 			frame_table_head = Frame(self)
@@ -4279,13 +4235,6 @@ class assigned_task_page(Frame):
 			self.error_msg = "Error happened!\nError: "+str(e)
 			messagebox.showinfo("Error", self.error_msg)
 
-	def go_prev(self):
-		self.screen = 1
-		self.quit()
-
-	def leave(self):
-		quit()
-
 	def create_task_table(self):
 		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
 
@@ -4295,6 +4244,195 @@ class assigned_task_page(Frame):
 		self.screen = 14
 		self.quit()
 		#print(id)
+
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()
+
+class attns_food_page(Frame):
+
+	screen = 24
+	name = None
+
+	error_msg  = " "
+
+	def __init__(self,master, name):
+		super(attns_food_page,self).__init__(master)
+		self.name = name
+		self.food_conn = sqlite3.connect("./db/foods.db")
+		self.food_cur  = self.food_conn.cursor()
+		self.pack()
+		self.define_widgets()
+
+	def create_food_table(self):
+		self.food_cur.execute("CREATE TABLE IF NOT EXISTS foods(name TEXT, value TEXT, dates TEXT, weeks TEXT, months TEXT, years TEXT)")
+
+	def food_order(self, existing, order, dates, weeks, months, years):
+		if(existing == 0):
+			#order activate
+			self.food_btn.config(bg='green3')
+			self.create_food_table()
+			self.food_cur.execute("INSERT INTO foods(name, value, dates, weeks, months, years) VALUES (?, ?, ?, ?, ?, ?)", (self.name, str(1), dates, weeks, months, years))
+			self.food_conn.commit()
+			time.sleep(0.02)
+			self.screen = 24
+			self.quit()
+
+		elif(existing == 1 and order == 0):
+			#button red korbe
+			self.food_btn.config(bg='tomato')
+			self.create_food_table()
+			self.food_cur.execute("DELETE FROM foods WHERE name = ? and dates = ?", (self.name, dates))
+			self.food_conn.commit()
+			time.sleep(0.02)
+			self.screen = 24
+			self.quit()
+
+		elif(existing == 1 and order == 1):
+			#button green korbe
+			self.food_btn.config(bg='green3')
+			self.create_food_table()
+			self.food_cur.execute("UPDATE foods SET name = ?, value = ?, dates = ?, weeks = ?, months = ?, years = ? WHERE name = ? and dates = ?", (self.name, str(1), dates, weeks, months, years, self.name, dates))
+			self.food_conn.commit()
+			time.sleep(0.02)
+			self.screen = 24
+			self.quit()
+
+	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Export Reports::")
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frameFood = Frame(self)
+		frameFood.pack()
+
+		attns_btn=Button(frameFood,text="Attendance", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(19), width=16, height=3, bd=4)
+		attns_btn.pack(side=LEFT, padx=2, pady=5)
+
+		###########################################################
+		#Foods
+		max_food_order_time = 10
+		dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
+		weeks   = datetime.datetime.now().strftime("%U")
+		months  = datetime.datetime.now().strftime("%b")
+		years   = datetime.datetime.now().strftime("%Y")
+
+		self.create_food_table()
+		self.food_cur.execute("SELECT value, name FROM foods WHERE name = ? and dates = ?", (self.name, dates))
+		foodData = self.food_cur.fetchall()
+		print(self.name, dates, foodData)
+
+		if(int(datetime.datetime.now().strftime("%H"))>=max_food_order_time and len(foodData) > 0 and int(foodData[0][0]) == 1):
+
+			self.food_btn=Button(frameFood,text="Food Order\n(Given)", bg="green3", state = DISABLED, fg = "white", width = 16, height=3, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+
+		elif((int(datetime.datetime.now().strftime("%H"))>=max_food_order_time and len(foodData) == 0) or ((int(datetime.datetime.now().strftime("%H"))>=max_food_order_time and len(foodData) > 0 and int(foodData[0][0]) == 0))):
+
+			self.food_btn=Button(frameFood,text="Food Order\n(Not Given)", bg="tomato", state = DISABLED, fg = "white", width = 16, height=3, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+
+		elif(int(datetime.datetime.now().strftime("%H"))<max_food_order_time and len(foodData) > 0 and int(foodData[0][0]) == 1):
+
+			self.food_btn=Button(frameFood,text="Food Order\n(Given)", bg="green3", fg = "white", command = lambda : self.food_order(1, 0, dates, weeks, months, years), width = 16, height=3, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+			
+		elif(int(datetime.datetime.now().strftime("%H"))<max_food_order_time and len(foodData) > 0 and int(foodData[0][0]) == 0):
+
+			self.food_btn=Button(frameFood, text="Food Order\n(Not Given)", bg="tomato", fg = "white", command = lambda : self.food_order(1, 1, dates, weeks, months, years), width = 16, height=3, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+
+		elif(int(datetime.datetime.now().strftime("%H"))<max_food_order_time and len(foodData) == 0):
+
+			self.food_btn=Button(frameFood, text="Food Order\n(Not Given)", bg="tomato", fg = "white", command = lambda : self.food_order(0, 1, dates, weeks, months, years), width = 16, height=3, bd=4)
+			self.food_btn.pack(side=LEFT, padx=2, pady=2)
+		else:
+			self.error_msg = "Error Happend!"
+			messagebox.showinfo("Error", self.error_msg)
+		###########################################################
+		
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+	def set_value(self, value):
+		self.screen = value
+		self.quit()
+
+	def go_prev(self):
+		self.screen = 1
+		self.quit()
+
+	def leave(self):
+		quit()
+
+class manage_users_page(Frame):
+
+	screen = 25
+
+	error_msg  = " "
+
+	def __init__(self,master):
+		super(manage_users_page,self).__init__(master)
+		self.pack()
+		self.define_widgets()
+
+	def define_widgets(self):
+		#for line1:
+		frame1 = Frame(self)
+		frame1.pack()
+		dash_board_label=Label(frame1,text="::Export Reports::")
+		dash_board_label.config(width=200, font=("Courier", 25))
+		dash_board_label.pack(pady=5)
+
+		canvas = Canvas(frame1, height=2, borderwidth=0, highlightthickness=0, bg="black")
+		canvas.pack(fill=X, padx=80, pady=10)
+
+		frameButton = Frame(self)
+		frameButton.pack()
+
+		add_user_btn=Button(frameButton,text="Add User", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(2), width=16, height=3, bd = 4)
+		add_user_btn.pack(side=LEFT, padx=2, pady=5)
+
+		delete_user_btn=Button(frameButton,text="Delete user", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(6), width=16, height=3, bd = 4)
+		delete_user_btn.pack(side=LEFT, padx=2, pady=5)
+
+		admin_privilege_btn=Button(frameButton,text="Admin Privilege", bg="DeepSkyBlue4", fg = "white", command = lambda : self.set_value(3), width=16, height=3, bd = 4)
+		admin_privilege_btn.pack(side=LEFT, padx=2, pady=5)
+
+		frameLast = Frame(self)
+		frameLast.pack()
+
+		back=Button(frameLast,text="< Prev", command=self.go_prev, width=10)
+		back.pack(side=LEFT, padx=2, pady=5)
+
+		exit=Button(frameLast,text="Exit", bg = "brown3", fg = "white", command=self.leave, width=10)
+		exit.pack(side=LEFT, padx=2, pady=5)
+
+		self.frameTable = Frame(self)
+		self.frameTable.pack()
+
+	def set_value(self, value):
+		self.screen = value
+		self.quit()
 
 	def go_prev(self):
 		self.screen = 1
@@ -4358,9 +4496,7 @@ while True:
 	elif screen==3:
 		window=edit_user_admin_sts_page(root, name)
 	elif screen==4:
-		window=edit_user_email_page(root)
-	elif screen==5:
-		window=edit_user_pass_page(root, name)
+		window=manage_profile_page(root, name)
 	elif screen==6:
 		window=delete_user_page(root, name)
 	elif screen==7:
@@ -4398,3 +4534,7 @@ while True:
 		window=assigned_task_page(root, name)
 		task_id = window.task_id
 		prev_screen = 23
+	elif screen==24:
+		window=attns_food_page(root, name)
+	elif screen==25:
+		window=manage_users_page(root)
