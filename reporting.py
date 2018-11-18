@@ -4592,7 +4592,7 @@ class attns_food_page(Frame):
 
 		###########################################################
 		#Foods
-		max_food_order_time = 10
+		max_food_order_time = 16
 		dates 	= datetime.datetime.now().strftime("%d-%b-%Y")
 		weeks   = datetime.datetime.now().strftime("%U")
 		months  = datetime.datetime.now().strftime("%b")
