@@ -2339,7 +2339,7 @@ class edit_assign_task_page(Frame):
 
 		#scroll canvas
 		list_scrollbar = Scrollbar(scroll_frame)
-		scroll_canvas = Canvas(scroll_frame, height=150, width=800)
+		scroll_canvas = Canvas(scroll_frame, height=150, width=814)
 		list_scrollbar.pack(side=RIGHT, fill=Y)
 		scroll_canvas.pack(side=LEFT)
 		
@@ -2895,7 +2895,7 @@ class all_tasks_page(Frame):
 
 		#scroll canvas
 		list_scrollbar = Scrollbar(scroll_frame)
-		scroll_canvas = Canvas(scroll_frame, height=400, width=890)
+		scroll_canvas = Canvas(scroll_frame, height=350, width=894)
 		scroll_canvas.pack(side=LEFT, expand=True, fill=Y)
 		list_scrollbar.pack(side=LEFT, fill=Y, padx = 5)
 		
@@ -3170,7 +3170,7 @@ class export_status_report_page(Frame):
 			year = str(self.year_name.get())
 			file_name += year
 
-		file_name += ".xlsx"
+		file_name += ".csv"
 
 		self.create_status_table()
 		self.status_cur.execute("SELECT dates, name, team, task_list, progress_status, meeting_status, project_status, remarks FROM status WHERE name GLOB ? and team GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, team, date, week, month, year))
@@ -3182,34 +3182,34 @@ class export_status_report_page(Frame):
 		frame4.pack()
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Date", width=10)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="User", width=10)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Team", width=10)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Task List", width=20)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Progress Status", width=20)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Meeting Status", width=20)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Project Status", width=20)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		temp = Label(frame4,relief=RIDGE, bg="light blue", text="Remarks", width=15)
-		temp.pack(side=LEFT, pady=2)
+		temp.pack(side=LEFT)
 
 		frame5 = Frame(self.frameTable)
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=250, width=1016)
+		status_canvas = Canvas(frame5, height=150, width=1016)
 		status_scroll.pack(side=RIGHT, fill=Y)
 		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
@@ -3256,11 +3256,50 @@ class export_status_report_page(Frame):
 			temp.configure(text=self.data[i][7], anchor="nw")
 			temp.pack(side=LEFT)
 
-		frameReport = Frame(self.frameTable)
-		frameReport.pack()
+		frameSpace = Frame(self.frameTable)
+		frameSpace.pack(pady=10)
 
-		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name), width=10)
-		export_btn.pack(pady=5)
+		frameTo = Frame(self.frameTable)
+		frameTo.pack()
+
+		mail_addr_label = Label(frameTo, text= "To: ", width=10, height=1, anchor='w')
+		mail_addr_label.pack(side=LEFT)
+
+		self.mail_to = StringVar()
+		mail_addr_entry = Entry(frameTo, textvariable= self.mail_to, width=70)
+		mail_addr_entry.pack(side=LEFT)
+
+		frameSub = Frame(self.frameTable)
+		frameSub.pack()
+
+		mail_sub_label = Label(frameSub, text= "Subject: ", width=10, height=1, anchor='w')
+		mail_sub_label.pack(side=LEFT)
+
+		self.mail_sub = StringVar()
+		mail_sub_entry = Entry(frameSub, textvariable= self.mail_sub, width=70)
+		mail_sub_entry.pack(side=LEFT)
+
+		frameBody=Frame(self.frameTable)
+		frameBody.pack()
+
+		mail_body_label = Label(frameBody, text= "Message: ", width=10, height=1, anchor='w')
+		mail_body_label.pack(side=LEFT)
+
+		mail_body_scroll = Scrollbar(frameBody)
+		self.mail_body_text = Text(frameBody, height=4, width=68)
+		mail_body_scroll.pack(side=RIGHT, fill=Y)
+		self.mail_body_text.pack(side=LEFT, fill=Y)
+		mail_body_scroll.config(command=self.mail_body_text.yview)
+		self.mail_body_text.config(yscrollcommand=mail_body_scroll.set)
+
+		frameGen = Frame(self.frameTable)
+		frameGen.pack()
+
+		mail_btn = Button(frameGen,text="Send", bg="DeepSkyBlue4", fg = "white", command = lambda : self.send_report(file_name, str(len(self.data)), self.mail_sub.get(), self.mail_to.get(), self.mail_body_text.get('1.0', 'end-1c')), width=10)
+		mail_btn.pack(side=LEFT, pady=5)
+
+		export_btn = Button(frameGen,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name, str(len(self.data))), width=10)
+		export_btn.pack(side=LEFT, pady=5)
 
 	def save_report(self, file_name):
 		if(messagebox.askyesno("Warning", "Are you sure?")):
@@ -3273,6 +3312,52 @@ class export_status_report_page(Frame):
 					print("Write to ",file_name," is successful!")
 					self.screen = 18
 					self.quit()
+			except Exception as e:
+				print(e)
+
+	def send_report(self, file_name, total, sub, you, body):
+		if(you == ''):
+			messagebox.showinfo("Error", "Mail address cannot be empty while sending an email!")
+		elif(messagebox.askyesno("Warning", "Are you sure?")):
+			try:
+				me = 'noreply.nslstatus@gmail.com'
+				password = 'a1234567890z'
+				with open(file_name, "w") as csv_file:
+					writer = csv.writer(csv_file, delimiter=',')
+					writer.writerow(['Date', 'User', 'Team', 'Task List', 'Progress Status', 'Meeting Status', 'Project Status', 'Remarks'])
+					for line in self.data:
+						writer.writerow(list(line))
+					print("Write to ",file_name," is successful!")
+
+				#Sending mail
+				msg = MIMEMultipart()
+				msg['Subject'] = sub
+				msg['From'] = me
+				msg['To'] = you
+				msg.attach(MIMEText(body, 'html'))
+
+				attachment = [file_name,]
+
+				for f in attachment:
+					with open(f, 'rb') as a_file:
+						basename = os.path.basename(f)
+						part = MIMEApplication(a_file.read(), Name=basename)
+					part['Content-Disposition'] = 'attachment; filename="%s"' % basename
+					msg.attach(part)
+
+				server  = smtplib.SMTP("smtp.gmail.com", 25)
+				server.ehlo()
+				server.starttls()
+				server.login(me, password)
+				server.sendmail(me, you, msg.as_string())
+				server.quit()
+				if(messagebox.askyesno("Warning", "Do you want to save this file?")):
+					messagebox.showinfo("Success", "Mail sent and file saved successfully!")
+				else:
+					os.system('rm '+file_name)
+					messagebox.showinfo("Success", "Mail sent successfully!")
+				self.screen = 20
+				self.quit()
 			except Exception as e:
 				print(e)
 
@@ -3660,7 +3745,7 @@ class export_attendance_report_page(Frame):
 			year = str(self.year_name.get())
 			file_name += year
 
-		file_name += ".xlsx"
+		file_name += ".csv"
 
 		self.create_attns_table()
 		self.attns_cur.execute("SELECT name, intime, outtime, dates FROM attns WHERE name GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, date, week, month, year))
@@ -3687,7 +3772,7 @@ class export_attendance_report_page(Frame):
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=250, width=518)
+		status_canvas = Canvas(frame5, height=150, width=518)
 		status_scroll.pack(side=RIGHT, fill=Y)
 		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
@@ -3718,11 +3803,50 @@ class export_attendance_report_page(Frame):
 			temp.configure(text=self.data[i][2], anchor="nw")
 			temp.pack(side=LEFT)
 
-		frameReport = Frame(self.frameTable)
-		frameReport.pack()
+		frameSpace = Frame(self.frameTable)
+		frameSpace.pack(pady=10)
 
-		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name), width=10)
-		export_btn.pack(pady=5)
+		frameTo = Frame(self.frameTable)
+		frameTo.pack()
+
+		mail_addr_label = Label(frameTo, text= "To: ", width=10, height=1, anchor='w')
+		mail_addr_label.pack(side=LEFT)
+
+		self.mail_to = StringVar()
+		mail_addr_entry = Entry(frameTo, textvariable= self.mail_to, width=55)
+		mail_addr_entry.pack(side=LEFT)
+
+		frameSub = Frame(self.frameTable)
+		frameSub.pack()
+
+		mail_sub_label = Label(frameSub, text= "Subject: ", width=10, height=1, anchor='w')
+		mail_sub_label.pack(side=LEFT)
+
+		self.mail_sub = StringVar()
+		mail_sub_entry = Entry(frameSub, textvariable= self.mail_sub, width=55)
+		mail_sub_entry.pack(side=LEFT)
+
+		frameBody=Frame(self.frameTable)
+		frameBody.pack()
+
+		mail_body_label = Label(frameBody, text= "Message: ", width=10, height=1, anchor='w')
+		mail_body_label.pack(side=LEFT)
+
+		mail_body_scroll = Scrollbar(frameBody)
+		self.mail_body_text = Text(frameBody, height=4, width=53)
+		mail_body_scroll.pack(side=RIGHT, fill=Y)
+		self.mail_body_text.pack(side=LEFT, fill=Y)
+		mail_body_scroll.config(command=self.mail_body_text.yview)
+		self.mail_body_text.config(yscrollcommand=mail_body_scroll.set)
+
+		frameGen = Frame(self.frameTable)
+		frameGen.pack()
+
+		mail_btn = Button(frameGen,text="Send", bg="DeepSkyBlue4", fg = "white", command = lambda : self.send_report(file_name, self.mail_sub.get(), self.mail_to.get(), self.mail_body_text.get('1.0', 'end-1c')), width=10)
+		mail_btn.pack(side=LEFT, pady=5)
+
+		export_btn = Button(frameGen,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name, str(len(self.data))), width=10)
+		export_btn.pack(side=LEFT, pady=5)
 
 	def save_report(self, file_name):
 		if(messagebox.askyesno("Warning", "Are you sure?")):
@@ -3733,6 +3857,52 @@ class export_attendance_report_page(Frame):
 					for line in self.data:
 						writer.writerow(list(line))
 					print("Write to ",file_name," is successful!")
+					self.screen = 20
+					self.quit()
+			except Exception as e:
+				print(e)
+
+	def send_report(self, file_name, sub, you, body):
+		if(you == ''):
+			messagebox.showinfo("Error", "Mail address cannot be empty while sending an email!")
+		elif(messagebox.askyesno("Warning", "Are you sure?")):
+			try:
+				me = 'noreply.nslstatus@gmail.com'
+				password = 'a1234567890z'
+				with open(file_name, "w") as csv_file:
+					writer = csv.writer(csv_file, delimiter=',')
+					writer.writerow(['Date', 'User', 'In time', 'Out Time'])
+					for line in self.data:
+						writer.writerow(list(line))
+					print("Write to ",file_name," is successful!")
+
+					#Sending mail
+					msg = MIMEMultipart()
+					msg['Subject'] = sub
+					msg['From'] = me
+					msg['To'] = you
+					msg.attach(MIMEText(body, 'html'))
+
+					attachment = [file_name,]
+
+					for f in attachment:
+						with open(f, 'rb') as a_file:
+							basename = os.path.basename(f)
+							part = MIMEApplication(a_file.read(), Name=basename)
+						part['Content-Disposition'] = 'attachment; filename="%s"' % basename
+						msg.attach(part)
+
+					server  = smtplib.SMTP("smtp.gmail.com", 25)
+					server.ehlo()
+					server.starttls()
+					server.login(me, password)
+					server.sendmail(me, you, msg.as_string())
+					server.quit()
+					if(messagebox.askyesno("Warning", "Do you want to save this file?")):
+						messagebox.showinfo("Success", "Mail sent and file saved successfully!")
+					else:
+						os.system('rm '+file_name)
+						messagebox.showinfo("Success", "Mail sent successfully!")
 					self.screen = 20
 					self.quit()
 			except Exception as e:
@@ -3915,7 +4085,7 @@ class export_food_report_page(Frame):
 			year = str(self.year_name.get())
 			file_name += year
 
-		file_name += ".xlsx"
+		file_name += ".csv"
 
 		self.create_food_table()
 		self.food_cur.execute("SELECT name, value, dates FROM foods WHERE name GLOB ? and dates GLOB ? and weeks GLOB ? and months GLOB ? and years GLOB ?", (name, date, week, month, year))
@@ -3975,13 +4145,16 @@ class export_food_report_page(Frame):
 		frameTotal = Frame(self.frameTable)
 		frameTotal.pack()
 
-		temp = Label(frameTotal, text= "Total: ", fg='red', width=10, height=1)
+		temp = Label(frameTotal, text= "Total: ", fg='blue', width=10, height=1)
 		temp.config(font=("Courier", 20))
 		temp.pack(side=LEFT)
 
 		temp = Label(frameTotal, text= str(len(self.data)), fg='red', width=10, height=1)
 		temp.config(font=("Courier", 20))
 		temp.pack(side=LEFT)
+
+		frameSpace = Frame(self.frameTable)
+		frameSpace.pack(pady=10)
 
 		frameTo = Frame(self.frameTable)
 		frameTo.pack()
@@ -4081,7 +4254,11 @@ class export_food_report_page(Frame):
 					server.login(me, password)
 					server.sendmail(me, you, msg.as_string())
 					server.quit()
-					messagebox.showinfo("Success", "Mail sent successfully!")
+					if(messagebox.askyesno("Warning", "Do you want to save this file?")):
+						messagebox.showinfo("Success", "Mail sent and file saved successfully!")
+					else:
+						os.system('rm '+file_name)
+						messagebox.showinfo("Success", "Mail sent successfully!")
 					self.screen = 20
 					self.quit()
 			except Exception as e:
