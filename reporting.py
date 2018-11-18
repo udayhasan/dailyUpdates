@@ -82,6 +82,7 @@ class login_page(Frame):
 		self.login_name=StringVar()
 		login_name_entry=Entry(frame2,textvariable=self.login_name)
 		login_name_entry.config(width=25)
+		login_name_entry.bind('<Return>', self.login_action_enter)
 		login_name_entry.pack(side=LEFT, pady=5)
 		login_name_entry.focus_set()
 
@@ -95,12 +96,14 @@ class login_page(Frame):
 		self.login_pass=StringVar()
 		login_pass_entry=Entry(frame3,textvariable=self.login_pass,show="*")
 		login_pass_entry.config(width=25)
+		login_pass_entry.bind('<Return>', self.login_action_enter)
 		login_pass_entry.pack(side=LEFT, pady=5)
 
 		#forline5:
 		frame5=Frame(self)
 		frame5.pack()
 		login_btn=Button(frame5,text="Login", bg="DeepSkyBlue4", fg = "white", command=self.login_action)
+		login_btn.bind('<Return>', self.login_action_enter)
 		login_btn.pack(side=LEFT, pady=5)
 
 		exit=Button(frame5,text="Exit", bg = "brown3", fg = "white", command=self.leave)
@@ -119,6 +122,17 @@ class login_page(Frame):
 		forgot_pass_label.pack(side=LEFT)
 
 	def login_action(self):
+		self.create_user_table()
+		success, self.admin = self.login(self.login_name.get(), self.login_pass.get())
+		
+		if(success ==1): self.screen = 1
+		else: self.screen = 0
+
+		print(self.screen)
+
+		self.quit()
+
+	def login_action_enter(self, *entry):
 		self.create_user_table()
 		success, self.admin = self.login(self.login_name.get(), self.login_pass.get())
 		
@@ -235,7 +249,7 @@ class user_dashboard(Frame):
 		frame2 = Frame(frameHolder)
 		frame2.pack(side=LEFT)
 
-		manage_status_btn=Button(frame2,text="Manage\nStatus",command=lambda: self.set_value(9), width = dash_btn_width, height=3, bd=4, bg="cyan3")
+		manage_status_btn=Button(frame2,text="Manage\nStatus",command=lambda: self.set_value(9), width = dash_btn_width, height=3, bd=4, bg="OliveDrab2")
 		manage_status_btn.pack(padx=2, pady=2)
 
 		self.create_task_table()
@@ -247,10 +261,10 @@ class user_dashboard(Frame):
 			if(data2[i][6] != 'complete'):
 				data3.append(data2[i])
 
-		manage_task_btn=Button(frame2,text="Manage Tasks\nUnfinished ("+str(len(data3))+")",command=lambda: self.set_value(23), width = dash_btn_width, height=3, bd=4, bg="PaleGreen2")
+		manage_task_btn=Button(frame2,text="Manage Tasks\nUnfinished ("+str(len(data3))+")",command=lambda: self.set_value(23), width = dash_btn_width, height=3, bd=4, bg="chartreuse2")
 		manage_task_btn.pack(padx=2, pady=2)
 
-		manage_profile_btn=Button(frame2,text="Manage\nProfile",command=lambda: self.set_value(4), width = dash_btn_width, height=3, bd=4, bg="aquamarine2")
+		manage_profile_btn=Button(frame2,text="Manage\nProfile",command=lambda: self.set_value(4), width = dash_btn_width, height=3, bd=4, bg="green2")
 		manage_profile_btn.pack(padx=2, pady=2)
 
 		self.create_food_table()
@@ -282,28 +296,28 @@ class user_dashboard(Frame):
 		frame3.pack(side=LEFT)
 
 		if(self.admin == 1):
-			manage_users_btn=Button(frame3,text="Manage\nUsers",command=lambda: self.set_value(25), width = dash_btn_width, height=3, bd=4, bg="aquamarine2")
+			manage_users_btn=Button(frame3,text="Manage\nUsers",command=lambda: self.set_value(25), width = dash_btn_width, height=3, bd=4, bg="peach puff")
 			manage_users_btn.pack(padx=2, pady=2)
 
-			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = dash_btn_width, height=3, bd=4, bg="medium orchid")
+			all_task_btn=Button(frame3,text="All Tasks",command=lambda: self.set_value(17), width = dash_btn_width, height=3, bd=4, bg="salmon")
 			all_task_btn.pack(padx=2, pady=2)
 
-			export_report_btn=Button(frame3,text="Export\nReport",command=lambda: self.set_value(22), width = dash_btn_width, height=3, bd=4, bg="turquoise")
+			export_report_btn=Button(frame3,text="Export\nReport",command=lambda: self.set_value(22), width = dash_btn_width, height=3, bd=4, bg="firebrick2")
 			export_report_btn.pack(padx=2, pady=2)
 
-			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = dash_btn_width, height=3, bd=4, bg="medium orchid")
+			backup_btn=Button(frame3,text="Backup",command=self.backup_def, width = dash_btn_width, height=3, bd=4, bg="red3")
 			backup_btn.pack(padx=2, pady=2)
 
 		#for logout:
-		log_out=Button(frame2,text="Log Out",command=self.set_logout, bg="DeepSkyBlue4", fg = "white", width = dash_btn_width, height=3, bd=4)
+		log_out=Button(frame2,text="Log Out",command=self.set_logout, bg="green4", fg = "white", width = dash_btn_width, height=3, bd=4)
 		log_out.pack(padx=2, pady=2)
 
 		if(self.admin==1):
-			exit=Button(frame3,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = dash_btn_width, height=3, bd=4)
+			exit=Button(frame3,text="Exit", bg = "red4", fg = "white", command=self.leave, width = dash_btn_width, height=3, bd=4)
 			exit.pack(padx=2, pady=2)
 		else:
-			exit=Button(frame2,text="Exit", bg = "brown3", fg = "white", command=self.leave, width = dash_btn_width, height=3, bd=4)
-			exit.pack(side=LEFT, padx=2, pady=2)
+			exit=Button(frame2,text="Exit", bg = "red4", fg = "white", command=self.leave, width = dash_btn_width, height=3, bd=4)
+			exit.pack(padx=2, pady=2)
 
 	def create_task_table(self):
 		self.task_cur.execute("CREATE TABLE IF NOT EXISTS tasks(ids TEXT, dates TEXT, up_time TEXT, a_by TEXT, a_to TEXT, task_list TEXT, description TEXT, est_date TEXT, deadline TEXT, comments TEXT, priority TEXT, remarks TEXT, status TEXT)")
@@ -1319,10 +1333,10 @@ class edit_status_page(Frame):
 		temp.pack(side=LEFT, pady=2)
 
 		frame5 = Frame(self)
-		frame5.pack()
+		frame5.pack(pady=5)
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=350, width=1100)
+		status_canvas = Canvas(frame5, height=100, width=1100)
 		status_scroll.pack(side=RIGHT, fill=Y)
 		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
@@ -3931,7 +3945,7 @@ class export_food_report_page(Frame):
 		frame5.pack()
 
 		status_scroll = Scrollbar(frame5)
-		status_canvas = Canvas(frame5, height=250, width=436)
+		status_canvas = Canvas(frame5, height=150, width=436)
 		status_scroll.pack(side=RIGHT, fill=Y)
 		status_canvas.pack(side=LEFT)
 		status_scroll.config(command=status_canvas.yview)
@@ -3969,11 +3983,47 @@ class export_food_report_page(Frame):
 		temp.config(font=("Courier", 20))
 		temp.pack(side=LEFT)
 
-		frameReport = Frame(self.frameTable)
-		frameReport.pack()
+		frameTo = Frame(self.frameTable)
+		frameTo.pack()
 
-		export_btn = Button(self.frameTable,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name, str(len(self.data))), width=10)
-		export_btn.pack(pady=5)
+		mail_addr_label = Label(frameTo, text= "To: ", width=10, height=1, anchor='w')
+		mail_addr_label.pack(side=LEFT)
+
+		self.mail_to = StringVar()
+		mail_addr_entry = Entry(frameTo, textvariable= self.mail_to, width=45)
+		mail_addr_entry.pack(side=LEFT)
+
+		frameSub = Frame(self.frameTable)
+		frameSub.pack()
+
+		mail_sub_label = Label(frameSub, text= "Subject: ", width=10, height=1, anchor='w')
+		mail_sub_label.pack(side=LEFT)
+
+		self.mail_sub = StringVar()
+		mail_sub_entry = Entry(frameSub, textvariable= self.mail_sub, width=45)
+		mail_sub_entry.pack(side=LEFT)
+
+		frameBody=Frame(self.frameTable)
+		frameBody.pack()
+
+		mail_body_label = Label(frameBody, text= "Message: ", width=10, height=1, anchor='w')
+		mail_body_label.pack(side=LEFT)
+
+		mail_body_scroll = Scrollbar(frameBody)
+		self.mail_body_text = Text(frameBody, height=4, width=43)
+		mail_body_scroll.pack(side=RIGHT, fill=Y)
+		self.mail_body_text.pack(side=LEFT, fill=Y)
+		mail_body_scroll.config(command=self.mail_body_text.yview)
+		self.mail_body_text.config(yscrollcommand=mail_body_scroll.set)
+
+		frameGen = Frame(self.frameTable)
+		frameGen.pack()
+
+		mail_btn = Button(frameGen,text="Send", bg="DeepSkyBlue4", fg = "white", command = lambda : self.send_report(file_name, str(len(self.data)), self.mail_sub.get(), self.mail_to.get(), self.mail_body_text.get('1.0', 'end-1c')), width=10)
+		mail_btn.pack(side=LEFT, pady=5)
+
+		export_btn = Button(frameGen,text="Export", bg="DeepSkyBlue4", fg = "white", command = lambda : self.save_report(file_name, str(len(self.data))), width=10)
+		export_btn.pack(side=LEFT, pady=5)
 
 	def save_report(self, file_name, total):
 		if(messagebox.askyesno("Warning", "Are you sure?")):
@@ -3987,6 +4037,51 @@ class export_food_report_page(Frame):
 					writer.writerow(['\n'])
 					writer.writerow(['', 'Total', total])
 					print("Write to ",file_name," is successful!")
+					self.screen = 20
+					self.quit()
+			except Exception as e:
+				print(e)
+
+	def send_report(self, file_name, total, sub, you, body):
+		if(you == ''):
+			messagebox.showinfo("Error", "Mail address cannot be empty while sending an email!")
+		elif(messagebox.askyesno("Warning", "Are you sure?")):
+			try:
+				me = 'noreply.nslstatus@gmail.com'
+				password = 'a1234567890z'
+				with open(file_name, "w") as csv_file:
+					writer = csv.writer(csv_file, delimiter=',')
+					writer.writerow(['Serial', 'Date', 'User'])
+					i = 1
+					for line in self.data:
+						writer.writerow([str(i), line[2], line[0]])
+					writer.writerow(['\n'])
+					writer.writerow(['', 'Total', total])
+					print("Write to ",file_name," is successful!")
+
+					#Sending mail
+					msg = MIMEMultipart()
+					msg['Subject'] = sub
+					msg['From'] = me
+					msg['To'] = you
+					msg.attach(MIMEText(body, 'html'))
+
+					attachment = [file_name,]
+
+					for f in attachment:
+						with open(f, 'rb') as a_file:
+							basename = os.path.basename(f)
+							part = MIMEApplication(a_file.read(), Name=basename)
+						part['Content-Disposition'] = 'attachment; filename="%s"' % basename
+						msg.attach(part)
+
+					server  = smtplib.SMTP("smtp.gmail.com", 25)
+					server.ehlo()
+					server.starttls()
+					server.login(me, password)
+					server.sendmail(me, you, msg.as_string())
+					server.quit()
+					messagebox.showinfo("Success", "Mail sent successfully!")
 					self.screen = 20
 					self.quit()
 			except Exception as e:
